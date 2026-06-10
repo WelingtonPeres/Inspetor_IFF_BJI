@@ -1,6 +1,8 @@
 import pytest
 
-from core.model.relatorio import Relatorio, FolhaDeGabarito, FolhaDeResposta
+from core.model.relatorio import Relatorio
+from core.model.folha_de_gabarito import FolhaDeGabarito
+from core.model.folha_de_resposta import FolhaDeResposta
 from core.model.anexo import AnexoImagem, AnexoVideo
 
 @pytest.fixture
@@ -10,7 +12,7 @@ def gabarito_simples():
         riscos=["FISICO"], 
         fatores_inseguranca=["CONDICAO_INSEGURA"], 
         decisao_otima="INTERDITAR", 
-        decisao_subotima="ADVERTIR"
+        decisao_boa="ADVERTIR"
     )
 
 @pytest.fixture
@@ -44,7 +46,7 @@ def test_instanciar_relatorio_caminho_feliz(gabarito_simples):
         atividade="Aula Prática",
         local="Bloco B",
         texto_descricao="Teste de criação",
-        lista_envolvidos=["Professor"],
+        envolvidos=["Professor"],
         cursos=["Engenharia"],
         dificuldade=3,
         gabarito=gabarito_simples
@@ -68,7 +70,7 @@ def test_relatorio_bloqueia_dificuldade_abaixo_do_minimo(gabarito_simples):
             atividade="Teste", 
             local="Teste", 
             texto_descricao="Teste", 
-            lista_envolvidos=[], 
+            envolvidos=[], 
             cursos=[], 
             dificuldade=0,
             gabarito=gabarito_simples
@@ -84,7 +86,7 @@ def test_relatorio_bloqueia_dificuldade_acima_do_maximo(gabarito_simples):
             atividade="Teste", 
             local="Teste", 
             texto_descricao="Teste", 
-            lista_envolvidos=[], 
+            envolvidos=[], 
             cursos=[], 
             dificuldade=6,
             gabarito=gabarito_simples
@@ -98,7 +100,7 @@ def test_relatorio_bloqueia_riscos_invalidos():
             riscos=["RISCO_DESCONOCIDO"],
             fatores_inseguranca=["CONDICAO_INSEGURA"],
             decisao_otima="INTERDITAR",
-            decisao_subotima="ADVERTIR"
+            decisao_boa="ADVERTIR"
         )
         
 def test_relatorio_corrige_riscos_mal_formados():
@@ -108,7 +110,7 @@ def test_relatorio_corrige_riscos_mal_formados():
         riscos=["FíSICO", "químico"], # Enviando dados sujos
         fatores_inseguranca=["CONDICAO_INSEGURA"],
         decisao_otima="INTERDITAR",
-        decisao_subotima="ADVERTIR"
+        decisao_boa="ADVERTIR"
     )
     
     assert gabarito.riscos == ["FISICO", "QUIMICO"]
@@ -133,7 +135,7 @@ def test_relatorio_extrai_dto_com_anexos_corretamente(gabarito_simples, anexo_im
         atividade="...", 
         local="...", 
         texto_descricao="...", 
-        lista_envolvidos=["Aluno"], 
+        envolvidos=["Aluno"], 
         cursos=[], 
         dificuldade=2, 
         gabarito=gabarito_simples
@@ -169,7 +171,7 @@ def test_relatorio_contem_folha_gabarito(gabarito_simples):
         atividade="...", 
         local="...", 
         texto_descricao="...", 
-        lista_envolvidos=["Aluno"], 
+        envolvidos=["Aluno"], 
         cursos=[], 
         dificuldade=2, 
         gabarito=gabarito_simples
