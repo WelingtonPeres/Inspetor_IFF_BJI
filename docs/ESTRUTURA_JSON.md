@@ -35,8 +35,8 @@ O modelo estrutural genérico abaixo define o esqueleto que **todos** os cenári
     "riscos": ["string"],
     "fatores_inseguranca": ["string"],
     "decisao_administrativa": {
-      "acao_otima": "string",
-      "acao_subotima": "string"
+      "decisao_otima": "string",
+      "decisao_boa": "string"
     },
     "curso": ["string"]
   },
@@ -100,15 +100,15 @@ A tabela a seguir descreve cada atributo, seu tipo, propósito e restrições:
 
 | Chave | Tipo | Obrigatório | Descrição | Valores Aceitos |
 |-------|------|-------------|-----------|-----------------|
-| **acao_otima** | `string` | Sim | Ação mais apropriada a ser tomada diante do risco identificado. | `ADVERTIR`, `INTERDITAR`, `IGNORAR` |
-| **acao_subotima** | `string` | Sim | Ação alternativa (menos apropriada) que também é válida. | `ADVERTIR`, `INTERDITAR`, `IGNORAR` |
+| **decisao_otima** | `string` | Sim | Ação mais apropriada a ser tomada diante do risco identificado. | `ADVERTIR`, `INTERDITAR`, `IGNORAR` |
+| **decisao_boa** | `string` | Sim | Ação alternativa (menos apropriada) que também é válida. | `ADVERTIR`, `INTERDITAR`, `IGNORAR` |
 
 **Explicação das Ações:**
 - **ADVERTIR:** Orientar e notificar sobre o risco, exigindo conformidade com as normas;
 - **INTERDITAR:** Suspender imediatamente a atividade até que o risco seja eliminado;
 - **IGNORAR:** Considerar o risco como aceitável ou negligenciável em contexto específico.
 
-**Restrição Crítica:** `acao_otima` e `acao_subotima` **nunca podem conter o mesmo valor** no mesmo cenário. Esta distinção garante a distribuição correta de pontos na rubrica de avaliação (25% para ação ótima, 12,5% para ação subótima).
+**Restrição Crítica:** `decisao_otima` e `decisao_boa` **nunca podem conter o mesmo valor** no mesmo cenário. Esta distinção garante a distribuição correta de pontos na rubrica de avaliação (25% para ação ótima, 12,5% para ação subótima).
 
 ### Seção de Cursos
 
@@ -172,8 +172,8 @@ O cenário a seguir ilustra a implementação correta de uma inspeção em ambie
       "CONDICAO_INSEGURA"
     ],
     "decisao_administrativa": {
-      "acao_otima": "INTERDITAR",
-      "acao_subotima": "ADVERTIR"
+      "decisao_otima": "INTERDITAR",
+      "decisao_boa": "ADVERTIR"
     },
     "curso": [
       "T_QUIMICA",
@@ -244,21 +244,21 @@ O campo `caminho_arquivo` não é verificado automaticamente pelo sistema. Erros
 
 ### 5.4 Consistência Lógica das Decisões Administrativas
 
-A distinção entre `acao_otima` e `acao_subotima` é **fundamental** para o algoritmo de pontuação:
+A distinção entre `decisao_otima` e `decisao_boa` é **fundamental** para o algoritmo de pontuação:
 
 ❌ **Erro crítico:**
 ```json
 "decisao_administrativa": {
-  "acao_otima": "INTERDITAR",
-  "acao_subotima": "INTERDITAR"
+  "decisao_otima": "INTERDITAR",
+  "decisao_boa": "INTERDITAR"
 }
 ```
 
 ✅ **Correto:**
 ```json
 "decisao_administrativa": {
-  "acao_otima": "INTERDITAR",
-  "acao_subotima": "ADVERTIR"
+  "decisao_otima": "INTERDITAR",
+  "decisao_boa": "ADVERTIR"
 }
 ```
 
@@ -271,7 +271,7 @@ Antes de incluir um novo cenário na aplicação principal:
 1. **Valide o JSON:** Use um validador JSON online ou um linter local;
 2. **Verifique os Enums:** Confirme que todos os valores enumerados (riscos, fatores, ações) estão exatamente como especificado;
 3. **Teste os Caminhos:** Garanta que todos os arquivos em `anexos` existem e são acessíveis;
-4. **Revise a Lógica:** Confirme que `acao_otima ≠ acao_subotima`;
+4. **Revise a Lógica:** Confirme que `decisao_otima ≠ decisao_boa`;
 5. **Teste na Aplicação:** Carregue o cenário na aplicação e valide que a interface exibe corretamente todos os dados e mídia.
 
 ### 5.6 Versionamento e Manutenção
