@@ -141,7 +141,7 @@ A tabela a seguir descreve cada atributo, seu tipo, propósito e restrições:
 | Chave | Tipo | Obrigatório | Descrição | Valores Aceitos / Restrições |
 |-------|------|-------------|-----------|-------------------------------|
 | **id_anexo** | `int` | Sim | Identificador único do anexo dentro do cenário. | Número inteiro positivo. Deve ser único dentro do array `anexos`. |
-| **tipo** | `string` | Sim | Classificação do tipo de mídia. | `IMAGEM`, `VIDEO` |
+| **tipo** | `string` | Sim | Classificação do tipo de mídia. | `IMAGEM`, `VIDEO`, `AUDIO` |
 | **caminho_arquivo** | `string` | Sim | Caminho relativo do arquivo de mídia a partir da raiz da aplicação. | Caminho válido no formato `pasta/subpasta/arquivo.extensao`. |
 
 ---

@@ -3,6 +3,7 @@ from pathlib import Path
 import json
 
 import random
+from jsonschema import ValidationError, validate
 
 from ..dtos.dados_cenario import DadosCenarioDTO, DadosAnexoDTO
 
@@ -23,7 +24,112 @@ class RepositorioJSON:
         "CT_ALIMENTOS",
         "E_COMPUTACAO",
     ]
-    
+
+    JSON_SCHEMA = {
+        "type": "array",
+        "items": {
+            "type": "object",
+            "required": [
+                "id_cenario",
+                "titulo",
+                "dificuldade",
+                "relatorio",
+                "anexos"
+            ],
+            "additionalProperties": False,
+            "properties": {
+                "id_cenario": {"type": "integer"},
+                "titulo": {"type": "string"},
+                "dificuldade": {"type": "integer", "minimum": 1, "maximum": 5},
+                "relatorio": {
+                    "type": "object",
+                    "required": [
+                        "atividade",
+                        "local",
+                        "envolvidos",
+                        "texto_descricao",
+                        "riscos",
+                        "fatores_inseguranca",
+                        "decisao_administrativa",
+                        "curso"
+                    ],
+                    "additionalProperties": False,
+                    "properties": {
+                        "atividade": {"type": "string"},
+                        "local": {"type": "string"},
+                        "envolvidos": {
+                            "type": "array",
+                            "minItems": 1,
+                            "items": {"type": "string"}
+                        },
+                        "texto_descricao": {"type": "string"},
+                        "riscos": {
+                            "type": "array",
+                            "minItems": 1,
+                            "items": {
+                                "type": "string",
+                                "enum": ["FISICO", "QUIMICO", "BIOLOGICO", "ERGONOMICO", "ACIDENTE"]
+                            }
+                        },
+                        "fatores_inseguranca": {
+                            "type": "array",
+                            "minItems": 1,
+                            "items": {
+                                "type": "string",
+                                "enum": ["ATO_INSEGURO", "CONDICAO_INSEGURA"]
+                            }
+                        },
+                        "decisao_administrativa": {
+                            "type": "object",
+                            "required": ["decisao_otima", "decisao_boa"],
+                            "additionalProperties": False,
+                            "properties": {
+                                "decisao_otima": {
+                                    "type": "string",
+                                    "enum": ["ADVERTIR", "INTERDITAR", "IGNORAR"]
+                                },
+                                "decisao_boa": {
+                                    "type": "string",
+                                    "enum": ["ADVERTIR", "INTERDITAR", "IGNORAR"]
+                                }
+                            }
+                        },
+                        "curso": {
+                            "type": "array",
+                            "minItems": 1,
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "DEFAULT",
+                                    "T_QUIMICA",
+                                    "T_INFORMATICA",
+                                    "T_AGROPECUARIA",
+                                    "T_ALIMENTOS",
+                                    "T_MEIO_AMBIENTE",
+                                    "T_ZOOTECNIA",
+                                    "CT_ALIMENTOS",
+                                    "E_COMPUTACAO"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "anexos": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": ["id_anexo", "tipo", "caminho_arquivo"],
+                        "additionalProperties": False,
+                        "properties": {
+                            "id_anexo": {"type": "integer"},
+                            "tipo": {"type": "string", "enum": ["IMAGEM", "VIDEO", "AUDIO"]},
+                            "caminho_arquivo": {"type": "string"}
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     def __init__(self, diretorio_base: str, curso_selecionado: str, quantidade_gerada: int):
         """
@@ -55,14 +161,16 @@ class RepositorioJSON:
             try:
                 with open(caminho_arquivo, 'r', encoding='utf-8') as arquivo:
                     dados_brutos = json.load(arquivo)
-                    
+
                 if len(dados_brutos) == 0:
                     raise ValueError(f"[Erro - Json] O arquivo {caminho_arquivo.name} foi lido, mas está vazio (sem cenários).")
-                    
+
+                self.__validar_esquema_basico(dados_brutos)
+
             except json.JSONDecodeError as erro_sintaxe:
                 raise ValueError(f"[Erro - Json] O arquivo {caminho_arquivo.name} está corrompido ou mal formatado. Detalhes: {erro_sintaxe}")
-
-            self.__validar_esquema_basico(dados_brutos)
+            except ValidationError as erro_validacao:
+                self.__traduzir_erro_validacao(caminho_arquivo.name, erro_validacao)
             
             for cenario_dict in dados_brutos:
                 
@@ -150,71 +258,33 @@ class RepositorioJSON:
         """
         if not isinstance(dados, list):
             raise TypeError("[Erro - Estrutura JSON] O arquivo JSON deve conter uma Lista [] de cenários na raiz.")
-        
-        # Futuramente, podemos implementar uma validação mais robusta, usando bibliotecas como jsonschema, para garantir que a estrutura do JSON esteja de acordo com um esquema pré-definido. 
-        # Por enquanto, essa validação básica já ajuda a garantir que o formato geral do arquivo seja o esperado.
-        chaves_raiz = ["id_cenario", 
-                       "titulo", 
-                       "dificuldade", 
-                       "relatorio", 
-                       "anexos"]
-        
-        chaves_relatorio = ["atividade", 
-                            "local", 
-                            "envolvidos", 
-                            "texto_descricao", 
-                            "riscos", 
-                            "fatores_inseguranca", 
-                            "decisao_administrativa", 
-                            "curso"]
-        
-        chaves_decisao_administrativa = ["decisao_otima", "decisao_boa"]
-        
-        chaves_anexo = ["id_anexo", 
-                        "tipo", 
-                        "caminho_arquivo"]
-        
-        
-        # Loop de validação para cada cenário, verificando se as chaves esperadas estão presentes e se os tipos de dados são corretos.
-        for index, cenario_dict in enumerate(dados):
-            if not isinstance(cenario_dict, dict):
-                raise TypeError(f"[Erro - Estrutura JSON] O item na posição {index} da lista de cenários deve ser um dicionário.")
-            
-            for chave in chaves_raiz:
-                if chave not in cenario_dict:
-                    raise KeyError(f"[Erro - Estrutura JSON] O cenário na posição {index} está sem a chave raiz '{chave}'.")
 
-            # Validação do Sub-bloco 'relatorio'
-            relatorio_dict = cenario_dict["relatorio"]
-            if not isinstance(relatorio_dict, dict):
-                raise TypeError(f"[Erro - Estrutura JSON] O 'relatorio' do cenário {index} deve ser um objeto/dicionário.")
-                
-            for chave in chaves_relatorio:
-                if chave not in relatorio_dict:
-                    raise KeyError(f"[Erro - Estrutura JSON] O 'relatorio' do cenário {index} está sem a chave vital '{chave}'.")
-                
-            # Validação do Sub-bloco 'decisao_administrativa' dentro do 'relatorio'
-            decisao_administrativa_dict = relatorio_dict["decisao_administrativa"]
-            if not isinstance(decisao_administrativa_dict, dict):
-                raise TypeError(f"[Erro - Estrutura JSON] O 'decisao_administrativa' do cenário {index} deve ser um objeto/dicionário.")
-                
-            for chave in chaves_decisao_administrativa:
-                if chave not in decisao_administrativa_dict:
-                    raise KeyError(f"[Erro - Estrutura JSON] O 'decisao_administrativa' do cenário {index} está sem a chave vital '{chave}'.")
+        validate(instance=dados, schema=self.JSON_SCHEMA)
+        return
 
-            # Validação da Lógica de Anexos
-            anexos_list = cenario_dict["anexos"]
-            if not isinstance(anexos_list, list):
-                raise TypeError(f"[Erro - Estrutura JSON] A chave 'anexos' do cenário {index} deve ser uma lista, mesmo que vazia [].")
+    def __traduzir_erro_validacao(self, nome_arquivo: str, erro_validacao: ValidationError):
+        """
+        Traduz erros de schema para as exceções que o código chamador espera.
+        """
+        mensagem = (
+            f"[Erro - Esquema JSON] O arquivo {nome_arquivo} não está conforme o esquema. "
+            f"Detalhes: {erro_validacao.message}"
+        )
 
-            # Só inspeciona os anexos se a lista não estiver vazia
-            if len(anexos_list) > 0:
-                for i_anexo, anexo_dict in enumerate(anexos_list):
-                    if not isinstance(anexo_dict, dict):
-                        raise TypeError(f"[Erro - Estrutura JSON] O anexo {i_anexo} do cenário {index} não é um objeto válido.")
-                        
-                    for chave in chaves_anexo:
-                        if chave not in anexo_dict:
-                            raise KeyError(f"[Erro - Estrutura JSON] O anexo {i_anexo} (cenário {index}) está sem a chave vital '{chave}'.")
+        if erro_validacao.validator == "required":
+            raise KeyError(mensagem)
+
+        if erro_validacao.validator == "type":
+            if "anexos" in list(erro_validacao.absolute_path):
+                raise TypeError(
+                    f"[Erro - Esquema JSON] O arquivo {nome_arquivo} não está conforme o esquema. "
+                    f"Detalhes: a chave 'anexos' deve ser uma lista."
+                )
+            raise TypeError(mensagem)
+
+        if erro_validacao.validator == "additionalProperties":
+            raise KeyError(mensagem)
+
+        raise ValueError(mensagem)
             
             
