@@ -27,7 +27,7 @@ $$T_d = \frac{\text{Riscos Corretos Marcados}}{\text{Total de Riscos no Gabarito
 
 * **Taxa de Precisão ($T_p$):** Nível de assertividade das marcações, penalizando o jogador por assinalar riscos inexistentes.
 
-$$T_p = \frac{\text{Riscos Corretos Marcados}}{\text{Total de Caixas Marcadas}}$$
+$$T_p = \frac{\text{Riscos Corretos Marcados}}{\text{Total de Riscos Marcados}}$$
 
 
 **Tratamento de Exceção (Cenário Seguro):**

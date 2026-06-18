@@ -81,7 +81,7 @@ class TesteSuite1CaminhoFeliz:
         assert resultado.qnt_riscos_marcados == 3
         assert resultado.estado_ato is True
         assert resultado.estado_condicao is True
-        assert resultado.decisao_jogador == "OTIMA"
+        assert resultado.status_decisao_jogador == "OTIMA"
         assert resultado.tempo_resposta_segundos == 45.5
 
     def test_diagnostico_cenario_seguro_perfeito(self, diagnostico_servico, gabarito_sem_fatores):
@@ -388,5 +388,5 @@ class TesteSuite5EdgeCases:
         assert resultado.qnt_riscos_corretos_marcados == 0
         assert resultado.estado_ato is True
         assert resultado.estado_condicao is True
-        assert resultado.decisao_jogador == "OTIMA"
+        assert resultado.status_decisao_jogador == "OTIMA"
         assert resultado.tempo_resposta_segundos == 0.0
