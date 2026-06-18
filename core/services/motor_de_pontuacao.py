@@ -23,7 +23,6 @@ class MotorDePontuacao:
     BONUS_FATOR = 250
     BONUS_MIDIA_IMAGEM = 100
     BONUS_MIDIA_VIDEO = 300
-    BONUS_MIDIA_AUDIO = 50
     BONUS_CONTEXTO = 100
     
     TEMPO_IDEAL_SEGUNDOS = 60
@@ -54,7 +53,6 @@ class MotorDePontuacao:
             raise AttributeError("[Erro - Relatorio] Lista de Relatorios Vazio")
         
         for relatorio in lista_relatorios:
-            
             try:
                 v_max = self.VALOR_BASE_PARTICIPACAO
                 
@@ -70,16 +68,14 @@ class MotorDePontuacao:
                         v_max += self.BONUS_MIDIA_IMAGEM
                     elif anexo.get_tipo_midia() == "VIDEO":
                         v_max += self.BONUS_MIDIA_VIDEO
-                    elif anexo.get_tipo_midia() == "AUDIO":
-                        v_max += self.BONUS_MIDIA_AUDIO
                         
                 envolvidos = len(relatorio.envolvidos)
                 v_max += envolvidos * self.BONUS_CONTEXTO
                 
                 v_max_total += (v_max * relatorio.dificuldade)
+            except (AttributeError, TypeError):
+                print(f"[Erro - MotorDePontuação] v_max de {relatorio.id_cenario} não foi acrescentado")
                 
-            except (AttributeError, TypeError) as e:
-                print(f"[Erro - Motor] Relatório ignorado devido a dados corrompidos ou ausentes: {e}") 
                 continue
             
         return v_max_total
@@ -139,7 +135,7 @@ class MotorDePontuacao:
             
             return p_riscos_base
         
-        if riscos_corretos_marcados == 0:
+        if riscos_corretos_marcados == 0 or riscos_marcados == 0:
             return 0.0
                 
         taxa_descoberta = riscos_corretos_marcados / riscos_no_gabarito
@@ -190,10 +186,9 @@ class MotorDePontuacao:
         alpha = self.__taxa_decaimento
         L_min = self.__limite_minimo_retencao
         
-        
         if t <= T_ideal:
             return 1.0
         elif t <= 1.5 * T_ideal:
-            return max(1.0 - alpha * (t - T_ideal), L_min)
+            return 1.0 - alpha * (t - T_ideal)
         else:
             return L_min
