@@ -81,7 +81,7 @@ class TesteSuite1CaminhoFeliz:
         assert resultado.qnt_riscos_marcados == 3
         assert resultado.estado_ato is True
         assert resultado.estado_condicao is True
-        assert resultado.decisao_jogador == "OTIMA"
+        assert resultado.status_decisao_jogador == "OTIMA"
         assert resultado.tempo_resposta_segundos == 45.5
 
     def test_diagnostico_cenario_seguro_perfeito(self, diagnostico_servico, gabarito_sem_fatores):
@@ -104,7 +104,7 @@ class TesteSuite1CaminhoFeliz:
         assert resultado.qnt_riscos_marcados == 0
         assert resultado.estado_ato is True  
         assert resultado.estado_condicao is True  
-        assert resultado.decisao_jogador == "OTIMA"
+        assert resultado.status_decisao_jogador == "OTIMA"
 
 
 class TesteSuite2MatematicaDosRiscos:
@@ -284,7 +284,7 @@ class TesteSuite4DecisaoAdministrativa:
         
         resultado = diagnostico_servico.gerar_diagnostico_pontuacao(gabarito_simples, resposta)
         
-        assert resultado.decisao_jogador == "OTIMA"
+        assert resultado.status_decisao_jogador == "OTIMA"
 
     def test_decisao_mapeia_como_boa(self, diagnostico_servico, gabarito_simples):
         """
@@ -300,7 +300,7 @@ class TesteSuite4DecisaoAdministrativa:
         
         resultado = diagnostico_servico.gerar_diagnostico_pontuacao(gabarito_simples, resposta)
         
-        assert resultado.decisao_jogador == "BOA"
+        assert resultado.status_decisao_jogador == "BOA"
 
     def test_decisao_mapeia_como_incorreta_acao_nao_mapeada(self, diagnostico_servico, gabarito_simples):
         """
@@ -319,7 +319,7 @@ class TesteSuite4DecisaoAdministrativa:
         
         resultado = diagnostico_servico.gerar_diagnostico_pontuacao(gabarito_simples, resposta)
         
-        assert resultado.decisao_jogador == "INCORRETA"
+        assert resultado.status_decisao_jogador == "INCORRETA"
 
     def test_decisao_incorreta_em_branco(self, diagnostico_servico, gabarito_simples):
         """
@@ -337,7 +337,7 @@ class TesteSuite4DecisaoAdministrativa:
         
         resultado = diagnostico_servico.gerar_diagnostico_pontuacao(gabarito_simples, resposta)
         
-        assert resultado.decisao_jogador == "INCORRETA"
+        assert resultado.status_decisao_jogador == "INCORRETA"
 
 
 class TesteSuite5EdgeCases:
@@ -388,5 +388,5 @@ class TesteSuite5EdgeCases:
         assert resultado.qnt_riscos_corretos_marcados == 0
         assert resultado.estado_ato is True
         assert resultado.estado_condicao is True
-        assert resultado.decisao_jogador == "OTIMA"
+        assert resultado.status_decisao_jogador == "OTIMA"
         assert resultado.tempo_resposta_segundos == 0.0

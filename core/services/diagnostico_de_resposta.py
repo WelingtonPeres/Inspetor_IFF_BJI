@@ -50,7 +50,7 @@ class DiagnosticoDeResposta:
             qnt_riscos_corretos_marcados=qnt_riscos_corretos_marcados, 
             estado_ato=estado_ato,
             estado_condicao=estado_condicao,
-            decisao_jogador=decisao_jogador,
+            status_decisao_jogador=decisao_jogador,
             tempo_resposta_segundos=respostas.tempo_gasto_segundos
         )
         
