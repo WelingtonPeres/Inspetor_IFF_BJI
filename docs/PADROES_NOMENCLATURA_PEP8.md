@@ -29,7 +29,7 @@ class Relatorio:
 class FolhaDeInspecao:
     pass
 
-class AnalisadorDeDiagnostico:
+class DiagnosticoDeResposta:
     pass
 
 class MotorDePontuacao:
@@ -172,23 +172,23 @@ self._folha_gabarito     # Uso interno apenas
 ```python
 class Relatorio:
     def __init__(self, id_cenario, anexos):
-        self._id_cenario = id_cenario
-        self._anexos = anexos
-        self._folha_gabarito = None
-        self._folha_resposta = None
+        self.__id_cenario = id_cenario
+        self.__anexos = anexos
+        self.__folha_gabarito = None
+        self.__folha_resposta = None
     
     # Acesso controlado via property
     @property
     def id_cenario(self) -> int:
-        return self._id_cenario
+        return self.__id_cenario
     
     @property
     def anexos(self) -> List[Anexo]:
-        return self._anexos
+        return self.__anexos
     
     def adicionar_anexo(self, anexo: Anexo):
         """Método para modificar a lista protegida."""
-        self._anexos.append(anexo)
+        self.__anexos.append(anexo)
 ```
 
 ### Padrão: Atributo "Privado" (Name Mangling) (__snake_case)
@@ -223,7 +223,7 @@ class MotorDePontuacao:
     PESO_RISCOS = 0.60
     PESO_FATORES = 0.15
     PESO_DECISAO_OTIMA = 0.25
-    PESO_DECISAO_SUBOTIMA = 0.125
+    PESO_DECISAO_BOA = 0.125
     
     # Valores de pontuação
     VALOR_BASE_PARTICIPACAO = 1000
@@ -234,7 +234,7 @@ class MotorDePontuacao:
     BONUS_CONTEXTO = 100
     
     # Configurações de tempo
-    TEMPO_IDEAL_SEGUNDOS = 120
+    TEMPO_IDEAL_SEGUNDOS = 60
     TAXA_DECAIMENTO_ALFA = 0.01
     LIMITE_MINIMO_RETENCAO = 0.20
     LIMIAR_VITORIA_TURNO = 0.60

@@ -254,7 +254,7 @@ class TestMetaDadosAusentes:
     def test_lista_vazia_lanca_excecao(self, motor):
         """Lista vazia deve lançar AttributeError — não é permitido turno sem relatórios."""
         
-        with pytest.raises(AttributeError, match="Lista de Relatorios Vazio"):
+        with pytest.raises(ValueError, match="Lista de Relatorios Vazio"):
             motor.calcular_meta_turno([])
 
     def test_lista_com_um_relatorio(self, motor, relatorio_tipico, v_max_por_relatorio):
@@ -311,8 +311,8 @@ class TestMetaDadosAusentes:
             atividade="X",
             local="Y",
             texto_descricao="",
-            envolvidos=[],
-            cursos=[],
+            envolvidos=["A"],
+            cursos=["ST"],
             dificuldade=1,
             gabarito=None
         )
@@ -329,8 +329,8 @@ class TestMetaDadosAusentes:
             atividade="X",
             local="Y",
             texto_descricao="",
-            envolvidos=[],
-            cursos=[], 
+            envolvidos=["A"],
+            cursos=["ST"], 
             dificuldade=1,
             gabarito=None
         )
@@ -505,3 +505,24 @@ class TestConstantes:
         """LIMIAR_VITORIA_TURNO deve estar entre 0 e 1 (percentual)."""
         
         assert 0.0 < MotorDePontuacao.LIMIAR_VITORIA_TURNO < 1.0
+
+
+class TestVMaxNegativo:
+    """
+    T7: Testa se v_max negativo é tratado sem quebrar o motor.
+    """
+
+    def test_v_max_negativo(self, motor, dto_inspetor_perfeito):
+        """v_max=-100 não deve crashar; o resultado propaga o valor negativo."""
+        nota = motor.calcular_pontuacao_relatorio(-100, dto_inspetor_perfeito)
+        assert isinstance(nota, (int, float))
+
+
+class TestCondicaoVitoriaExatamenteNoLimiar:
+    """
+    T8: Testa condição de vitória exatamente no limiar de 60%.
+    """
+
+    def test_condicao_vitoria_exatamente_no_limiar(self, motor):
+        """600/1000 = 60% → deve retornar True."""
+        assert motor.conferir_condicao_vitoria(600.0, 1000.0) is True

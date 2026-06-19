@@ -88,8 +88,8 @@ def test_fabrica_deve_ignorar_cenario_com_regras_invalidas():
         atividade="Teste", 
         local="Teste", 
         texto_descricao="",
-        envolvidos=[], 
-        cursos=[], 
+        envolvidos=["Teste"], 
+        cursos=["Teste"], 
         riscos=["QUIMICO"], 
         fatores_inseguranca=[],
         decisao_otima="IGNORAR", 
@@ -241,6 +241,25 @@ def test_fabrica_deve_rejeitar_cenario_com_decisoes_invalidas_no_gabarito(dto_ce
     assert len(pilha_resultado) == 0
 
 
+def test_fabrica_deve_rejeitar_cenario_com_decisoes_iguais(dto_cenario_perfeito):
+    """
+    Valida que decisão ótima e decisão boa iguais são rejeitadas,
+    conforme a Restrição Crítica documentada na ESTRUTURA_JSON.md §5.4.
+    """
+    dto_decisoes_iguais = replace(
+        dto_cenario_perfeito,
+        id_cenario=8,
+        titulo="Cenário com Decisões Iguais",
+        decisao_otima="INTERDITAR",
+        decisao_boa="INTERDITAR"
+    )
+
+    lista_bruta = [dto_decisoes_iguais]
+    pilha_resultado = FabricaDeRelatorios.construir_pilha(lista_bruta)
+
+    assert len(pilha_resultado) == 0
+
+
 def test_fabrica_deve_capturar_erro_inesperado_na_construcao_de_relatorio(dto_cenario_perfeito):
     """
     Valida que exceções inesperadas durante a construção do Relatório
@@ -325,3 +344,10 @@ def test_fabrica_deve_capturar_valor_error_durante_construcao_de_anexos(dto_cena
         
         # Mas como o AnexoImagem falhou, os anexos não foram adicionados
         assert relatorio.possui_anexos() is False
+
+
+def test_fabrica_lista_vazia():
+    """
+    T9: Lista vazia de DTOs deve retornar pilha vazia (garantia contra regressão).
+    """
+    assert FabricaDeRelatorios.construir_pilha([]) == []

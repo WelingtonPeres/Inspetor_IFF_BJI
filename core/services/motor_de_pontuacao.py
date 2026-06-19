@@ -1,7 +1,10 @@
+import logging
 from typing import List, Dict, Any
 
 from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
 from core.model.relatorio import Relatorio
+
+logger = logging.getLogger(__name__)
 
 class MotorDePontuacao:
     """
@@ -50,33 +53,32 @@ class MotorDePontuacao:
         v_max_total = 0.0
         
         if not lista_relatorios:
-            raise AttributeError("[Erro - Relatorio] Lista de Relatorios Vazio")
+            raise ValueError("[Erro - Relatorio] Lista de Relatorios Vazio")
         
         for relatorio in lista_relatorios:
-            try:
-                v_max = self.VALOR_BASE_PARTICIPACAO
-                
-                risco = len(relatorio.folha_gabarito.riscos)
-                v_max += risco * self.BONUS_RISCO
-                
-                fator = len(relatorio.folha_gabarito.fatores_inseguranca)
-                v_max += fator * self.BONUS_FATOR
+            if relatorio.folha_gabarito is None:
+                logger.warning("Relatório %s sem gabarito — ignorado", relatorio.id_cenario)
+                continue # Sai do For
 
-                anexos = relatorio.obter_anexos()
-                for anexo in anexos:
-                    if anexo.get_tipo_midia() == "IMAGEM":
-                        v_max += self.BONUS_MIDIA_IMAGEM
-                    elif anexo.get_tipo_midia() == "VIDEO":
-                        v_max += self.BONUS_MIDIA_VIDEO
-                        
-                envolvidos = len(relatorio.envolvidos)
-                v_max += envolvidos * self.BONUS_CONTEXTO
-                
-                v_max_total += (v_max * relatorio.dificuldade)
-            except (AttributeError, TypeError):
-                print(f"[Erro - MotorDePontuação] v_max de {relatorio.id_cenario} não foi acrescentado")
-                
-                continue
+            v_max = self.VALOR_BASE_PARTICIPACAO
+            
+            risco = len(relatorio.folha_gabarito.riscos)
+            v_max += risco * self.BONUS_RISCO
+            
+            fator = len(relatorio.folha_gabarito.fatores_inseguranca)
+            v_max += fator * self.BONUS_FATOR
+
+            anexos = relatorio.obter_anexos()
+            for anexo in anexos:
+                if anexo.get_tipo_midia() == "IMAGEM":
+                    v_max += self.BONUS_MIDIA_IMAGEM
+                elif anexo.get_tipo_midia() == "VIDEO":
+                    v_max += self.BONUS_MIDIA_VIDEO
+                    
+            envolvidos = len(relatorio.envolvidos)
+            v_max += envolvidos * self.BONUS_CONTEXTO
+            
+            v_max_total += (v_max * relatorio.dificuldade)
             
         return v_max_total
 

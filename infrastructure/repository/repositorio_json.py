@@ -1,3 +1,4 @@
+import logging
 from typing import List, Dict, Any
 from pathlib import Path
 import json
@@ -6,6 +7,8 @@ import random
 from jsonschema import ValidationError, validate
 
 from ..dtos.dados_cenario import DadosCenarioDTO, DadosAnexoDTO
+
+logger = logging.getLogger(__name__)
 
 class RepositorioJSON:
     """
@@ -158,6 +161,8 @@ class RepositorioJSON:
         # O método glob('*.json') cria um iterador leve que busca todos os arquivos da pasta
         for caminho_arquivo in self.__diretorio_base.glob('*.json'):
             
+            dados_brutos = None
+            
             try:
                 with open(caminho_arquivo, 'r', encoding='utf-8') as arquivo:
                     dados_brutos = json.load(arquivo)
@@ -172,42 +177,49 @@ class RepositorioJSON:
             except ValidationError as erro_validacao:
                 self.__traduzir_erro_validacao(caminho_arquivo.name, erro_validacao)
             
+            if dados_brutos is None:
+                continue
+            
             for cenario_dict in dados_brutos:
                 
-                relatorio_do_cenario: Dict = cenario_dict["relatorio"]
-                cursos_do_cenario: List[str] = relatorio_do_cenario["curso"]
-                
-                if self.curso_selecionado in cursos_do_cenario or self.curso_selecionado == "DEFAULT":
+                try:
+                    relatorio_do_cenario: Dict = cenario_dict["relatorio"]
+                    cursos_do_cenario: List[str] = relatorio_do_cenario["curso"]
                     
-                    anexos_dto: List[DadosAnexoDTO] = []
-                    
-                    for anexo_dict in cenario_dict["anexos"]:
+                    if self.curso_selecionado in cursos_do_cenario or self.curso_selecionado == "DEFAULT":
                         
-                        anexo_dto = DadosAnexoDTO(
-                            id_anexo=anexo_dict["id_anexo"],
-                            tipo=anexo_dict["tipo"],
-                            caminho_arquivo=anexo_dict["caminho_arquivo"]
+                        anexos_dto: List[DadosAnexoDTO] = []
+                        
+                        for anexo_dict in cenario_dict["anexos"]:
+                            
+                            anexo_dto = DadosAnexoDTO(
+                                id_anexo=anexo_dict["id_anexo"],
+                                tipo=anexo_dict["tipo"],
+                                caminho_arquivo=anexo_dict["caminho_arquivo"]
+                            )
+                            
+                            anexos_dto.append(anexo_dto)
+                            
+                        dto = DadosCenarioDTO(
+                            id_cenario=cenario_dict["id_cenario"],
+                            titulo=cenario_dict["titulo"],
+                            dificuldade=cenario_dict["dificuldade"],
+                            atividade=relatorio_do_cenario["atividade"],
+                            local=relatorio_do_cenario["local"],
+                            texto_descricao=relatorio_do_cenario["texto_descricao"],
+                            envolvidos=relatorio_do_cenario["envolvidos"],
+                            cursos=relatorio_do_cenario["curso"],
+                            riscos=relatorio_do_cenario["riscos"],
+                            fatores_inseguranca=relatorio_do_cenario["fatores_inseguranca"],
+                            decisao_otima=relatorio_do_cenario["decisao_administrativa"]["decisao_otima"],
+                            decisao_boa=relatorio_do_cenario["decisao_administrativa"]["decisao_boa"],
+                            anexos=anexos_dto
                         )
                         
-                        anexos_dto.append(anexo_dto)
-                        
-                    dto = DadosCenarioDTO(
-                        id_cenario=cenario_dict["id_cenario"],
-                        titulo=cenario_dict["titulo"],
-                        dificuldade=cenario_dict["dificuldade"],
-                        atividade=relatorio_do_cenario["atividade"],
-                        local=relatorio_do_cenario["local"],
-                        texto_descricao=relatorio_do_cenario["texto_descricao"],
-                        envolvidos=relatorio_do_cenario["envolvidos"],
-                        cursos=relatorio_do_cenario["curso"],
-                        riscos=relatorio_do_cenario["riscos"],
-                        fatores_inseguranca=relatorio_do_cenario["fatores_inseguranca"],
-                        decisao_otima=relatorio_do_cenario["decisao_administrativa"]["decisao_otima"],
-                        decisao_boa=relatorio_do_cenario["decisao_administrativa"]["decisao_boa"],
-                        anexos=anexos_dto
-                    )
-                    
-                    cenarios_compativeis_dto.append(dto)
+                        cenarios_compativeis_dto.append(dto)
+                except KeyError:
+                    logger.warning("Cenário com chave ausente no arquivo %s — ignorando", caminho_arquivo.name)
+                    continue
                     
 
         if not cenarios_compativeis_dto:

@@ -20,6 +20,15 @@ class Relatorio:
                  dificuldade: int, 
                  gabarito: FolhaDeGabarito):
         
+        if id_cenario < 1:
+            raise ValueError(f"[Erro] id_cenario deve ser positivo: {id_cenario}")
+        if not titulo:
+            raise ValueError("[Erro] titulo não pode ser vazio")
+        if not envolvidos:
+            raise ValueError("[Erro] envolvidos não pode ser vazio")
+        if not cursos:
+            raise ValueError("[Erro] cursos não pode ser vazio")
+
         self.__id_cenario = id_cenario
         self.__titulo = titulo
         self.__atividade = atividade

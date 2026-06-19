@@ -1,6 +1,9 @@
+import logging
 from typing import List, Dict, Any
 
 from core.model.relatorio import Relatorio
+
+logger = logging.getLogger(__name__)
 from core.model.folha_de_gabarito import FolhaDeGabarito
 from core.model.anexo import Anexo, AnexoImagem, AnexoVideo, AnexoAudio
 from infrastructure.dtos.dados_cenario import DadosCenarioDTO, DadosAnexoDTO
@@ -66,11 +69,11 @@ class FabricaDeRelatorios:
             )
             
         except ValueError as e:
-            print(f"[Erro] Falha ao construir relatório para o cenário '{dado_bruto.titulo}': {e}")
+            logger.error("Falha ao construir relatório para o cenário '%s': %s", dado_bruto.titulo, e)
             return None
             
         except Exception as e:
-            print(f"[Erro] Erro inesperado ao construir relatório para o cenário '{dado_bruto.titulo}': {e}")
+            logger.error("Erro inesperado ao construir relatório para o cenário '%s': %s", dado_bruto.titulo, e)
             return None
         
         try:
@@ -83,7 +86,7 @@ class FabricaDeRelatorios:
                         relatorio.adicionar_anexo(anexo)
 
         except Exception as e:
-            print(f"[Erro] Erro inesperado ao construir anexos para o cenário '{dado_bruto.titulo}': {e}")
+            logger.error("Erro inesperado ao construir anexos para o cenário '%s': %s", dado_bruto.titulo, e)
         
         return relatorio 
 
@@ -127,10 +130,10 @@ class FabricaDeRelatorios:
                     )
                     anexos_construidos.append(anexo)
                 else:
-                    print(f"[Aviso] Tipo de anexo desconhecido '{dado_anexo.tipo}' para o arquivo '{dado_anexo.caminho_arquivo}'. Anexo ignorado.")
+                    logger.warning("Tipo de anexo desconhecido '%s' para o arquivo '%s'. Anexo ignorado.", dado_anexo.tipo, dado_anexo.caminho_arquivo)
         
         except ValueError as e:
-            print(f"[Erro] Falha ao construir anexo: {e}")
+            logger.error("Falha ao construir anexo: %s", e)
             return anexos_construidos
 
         return anexos_construidos

@@ -3,7 +3,7 @@ import pytest
 from core.model.relatorio import Relatorio
 from core.model.folha_de_gabarito import FolhaDeGabarito
 from core.model.folha_de_resposta import FolhaDeResposta
-from core.model.anexo import AnexoImagem, AnexoVideo
+from core.model.anexo import AnexoImagem, AnexoVideo, AnexoAudio
 
 @pytest.fixture
 def gabarito_simples():
@@ -34,6 +34,11 @@ def anexo_img():
 def anexo_vid():
     """Fixture: Fornece uma instância pronta de AnexoVideo."""
     return AnexoVideo(id_anexo=102, caminho_arquivo="/assets/video_maquina.mp4")
+
+@pytest.fixture
+def anexo_audio():
+    """Fixture: Fornece uma instância pronta de AnexoAudio."""
+    return AnexoAudio(id_anexo=103, caminho_arquivo="/assets/audio_depoimento.wav")
 
 # Testes de Unidade para a Entidade Relatório com foco em Instanciação, Validação de Atributos e Polimorfismo dos Anexos
 
@@ -70,8 +75,8 @@ def test_relatorio_bloqueia_dificuldade_abaixo_do_minimo(gabarito_simples):
             atividade="Teste", 
             local="Teste", 
             texto_descricao="Teste", 
-            envolvidos=[], 
-            cursos=[], 
+            envolvidos=["Teste"], 
+            cursos=["Teste"], 
             dificuldade=0,
             gabarito=gabarito_simples
         )
@@ -86,8 +91,8 @@ def test_relatorio_bloqueia_dificuldade_acima_do_maximo(gabarito_simples):
             atividade="Teste", 
             local="Teste", 
             texto_descricao="Teste", 
-            envolvidos=[], 
-            cursos=[], 
+            envolvidos=["Teste"], 
+            cursos=["Teste"], 
             dificuldade=6,
             gabarito=gabarito_simples
         )
@@ -117,6 +122,43 @@ def test_relatorio_corrige_riscos_mal_formados():
 
 # Testes de Unidade para a Entidade Anexo e sua integração com o Relatório
 
+def test_anexo_audio_get_tipo_midia(anexo_audio):
+    """
+    T4: Garante que AnexoAudio retorna o tipo de mídia AUDIO.
+    """
+    assert anexo_audio.get_tipo_midia() == "AUDIO"
+
+
+def test_folha_de_gabarito_rejeita_decisoes_iguais():
+    """
+    T5: Valida que decisão ótima e decisão boa iguais são rejeitadas.
+    Restrição Crítica documentada na ESTRUTURA_JSON.md §5.4.
+    """
+    with pytest.raises(ValueError, match="não podem ser iguais"):
+        FolhaDeGabarito(
+            riscos=["FISICO"],
+            fatores_inseguranca=["CONDICAO_INSEGURA"],
+            decisao_otima="INTERDITAR",
+            decisao_boa="INTERDITAR"
+        )
+
+
+def test_folha_inspecao_listas_vazias():
+    """
+    T6: FolhaDeInspecao deve aceitar listas vazias de riscos e fatores.
+    """
+    gabarito = FolhaDeGabarito(
+        riscos=[],
+        fatores_inseguranca=[],
+        decisao_otima="IGNORAR",
+        decisao_boa="ADVERTIR"
+    )
+    assert gabarito.riscos == []
+    assert gabarito.fatores_inseguranca == []
+    assert gabarito.contar_riscos() == 0
+    assert gabarito.contar_fatores() == 0
+
+
 def test_anexos_revelam_tipo_de_midia_correto(anexo_img, anexo_vid):
     """Garante que as subclasses respondem corretamente ao polimorfismo."""
     
@@ -136,7 +178,7 @@ def test_relatorio_extrai_dto_com_anexos_corretamente(gabarito_simples, anexo_im
         local="...", 
         texto_descricao="...", 
         envolvidos=["Aluno"], 
-        cursos=[], 
+        cursos=["Teste"], 
         dificuldade=2, 
         gabarito=gabarito_simples
     )
@@ -172,7 +214,7 @@ def test_relatorio_contem_folha_gabarito(gabarito_simples):
         local="...", 
         texto_descricao="...", 
         envolvidos=["Aluno"], 
-        cursos=[], 
+        cursos=["Teste"], 
         dificuldade=2, 
         gabarito=gabarito_simples
     )
@@ -195,4 +237,78 @@ def test_relatorio_contem_folha_gabarito(gabarito_simples):
     assert relatorio.folha_resposta_jogador.fatores_inseguranca == ["CONDICAO_INSEGURA"]
     assert relatorio.folha_resposta_jogador.decisao_tomada == "INTERDITAR"
     assert relatorio.folha_resposta_jogador.tempo_gasto_segundos == 150
+
+
+def test_relatorio_sem_resposta_lanca_excecao(gabarito_simples):
+    """
+    T1: Acessar folha_resposta_jogador sem anexar resposta deve lançar ValueError.
+    """
+    relatorio = Relatorio(
+        id_cenario=1,
+        titulo="Teste",
+        atividade="Teste",
+        local="Teste",
+        texto_descricao="Teste",
+        envolvidos=["Aluno"],
+        cursos=["Teste"],
+        dificuldade=2,
+        gabarito=gabarito_simples
+    )
+    with pytest.raises(ValueError, match="não foi anexada"):
+        _ = relatorio.folha_resposta_jogador
+
+
+def test_extrair_apresentacao_sem_anexos(gabarito_simples):
+    """
+    T2: Relatório sem anexos deve retornar lista vazia em extrair_apresentacao_relatorio.
+    """
+    relatorio = Relatorio(
+        id_cenario=1,
+        titulo="Teste",
+        atividade="Teste",
+        local="Teste",
+        texto_descricao="Teste",
+        envolvidos=["Aluno"],
+        cursos=["Teste"],
+        dificuldade=2,
+        gabarito=gabarito_simples
+    )
+    dados = relatorio.extrair_apresentacao_relatorio()
+    assert dados["anexos"] == []
+
+
+def test_relatorio_bloqueia_id_cenario_zero(gabarito_simples):
+    """
+    T3a: id_cenario=0 deve ser rejeitado com ValueError.
+    """
+    with pytest.raises(ValueError, match="id_cenario deve ser positivo"):
+        Relatorio(
+            id_cenario=0,
+            titulo="Teste",
+            atividade="Teste",
+            local="Teste",
+            texto_descricao="Teste",
+            envolvidos=["Aluno"],
+            cursos=["Teste"],
+            dificuldade=2,
+            gabarito=gabarito_simples
+        )
+
+
+def test_relatorio_bloqueia_id_cenario_negativo(gabarito_simples):
+    """
+    T3b: id_cenario=-1 deve ser rejeitado com ValueError.
+    """
+    with pytest.raises(ValueError, match="id_cenario deve ser positivo"):
+        Relatorio(
+            id_cenario=-1,
+            titulo="Teste",
+            atividade="Teste",
+            local="Teste",
+            texto_descricao="Teste",
+            envolvidos=["Aluno"],
+            cursos=["Teste"],
+            dificuldade=2,
+            gabarito=gabarito_simples
+        )
     
