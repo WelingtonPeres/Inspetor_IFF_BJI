@@ -390,3 +390,63 @@ class TesteSuite5EdgeCases:
         assert resultado.estado_condicao is True
         assert resultado.status_decisao_jogador == "OTIMA"
         assert resultado.tempo_resposta_segundos == 0.0
+
+
+class TesteSuite6FixturesNaoUtilizadas:
+    """
+    Testes para fixtures existentes mas sem cobertura.
+    """
+
+    def test_diagnostico_apenas_ato(self, diagnostico_servico, gabarito_apenas_ato):
+        """
+        Gabarito com apenas ATO_INSEGURO, sem CONDICAO_INSEGURA.
+        Jogador acerta Ato e não marca Condição → estado_ato True,
+        estado_condicao True (condição ausente no gabarito, não marcada = correto).
+        """
+        resposta = FolhaDeResposta(
+            riscos=["FISICO"],
+            fatores_inseguranca=["ATO_INSEGURO"],
+            decisao_tomada="ADVERTIR",
+            tempo_gasto_segundos=30.0
+        )
+        resultado = diagnostico_servico.gerar_diagnostico_pontuacao(gabarito_apenas_ato, resposta)
+        assert resultado.estado_ato is True
+        assert resultado.estado_condicao is True
+
+    def test_diagnostico_apenas_condicao(self, diagnostico_servico, gabarito_apenas_condicao):
+        """
+        Gabarito com apenas CONDICAO_INSEGURA, sem ATO_INSEGURO.
+        Jogador acerta Condição e não marca Ato → ambos True.
+        """
+        resposta = FolhaDeResposta(
+            riscos=["ERGONOMICO"],
+            fatores_inseguranca=["CONDICAO_INSEGURA"],
+            decisao_tomada="INTERDITAR",
+            tempo_gasto_segundos=40.0
+        )
+        resultado = diagnostico_servico.gerar_diagnostico_pontuacao(gabarito_apenas_condicao, resposta)
+        assert resultado.estado_ato is True
+        assert resultado.estado_condicao is True
+
+
+class TesteSuite7DiagnosticoNone:
+    """
+    T12: Garantir que gerar_diagnostico_pontuacao levanta ValueError
+    quando recebe None em qualquer parâmetro.
+    """
+
+    def test_diagnostico_gabarito_none(self, diagnostico_servico):
+        """gabarito=None deve levantar ValueError."""
+        resposta = FolhaDeResposta(
+            riscos=["FISICO"],
+            fatores_inseguranca=["ATO_INSEGURO"],
+            decisao_tomada="INTERDITAR",
+            tempo_gasto_segundos=30.0
+        )
+        with pytest.raises(ValueError, match="DiagnosticoDeResposta"):
+            diagnostico_servico.gerar_diagnostico_pontuacao(None, resposta)
+
+    def test_diagnostico_respostas_none(self, diagnostico_servico, gabarito_simples):
+        """respostas=None deve levantar ValueError."""
+        with pytest.raises(ValueError, match="DiagnosticoDeResposta"):
+            diagnostico_servico.gerar_diagnostico_pontuacao(gabarito_simples, None)

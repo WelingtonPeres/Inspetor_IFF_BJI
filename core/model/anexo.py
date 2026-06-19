@@ -7,6 +7,13 @@ class Anexo(ABC):
     """
     
     def __init__(self, id_anexo: int, caminho_arquivo: str):
+        
+        if id_anexo < 0:
+            raise ValueError(f"[Erro] id_anexo não pode ser negativo: {id_anexo}")
+        
+        if not caminho_arquivo:
+            raise ValueError("[Erro] caminho_arquivo não pode ser vazio")
+        
         self.__id_anexo = id_anexo
         self.__caminho_arquivo = caminho_arquivo
 
@@ -25,7 +32,6 @@ class Anexo(ABC):
         """
         Útil para a UI saber qual player de mídia abrir
         """
-        pass
 
     def extrair_dados(self) -> dict:
         """

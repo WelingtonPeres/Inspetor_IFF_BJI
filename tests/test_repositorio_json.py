@@ -4,6 +4,7 @@ Suite completa de testes para RepositorioJSON.
 
 import pytest
 import json
+import shutil
 import tempfile
 from pathlib import Path
 from typing import List, Dict, Any
@@ -36,7 +37,7 @@ def dir_temporario_vazio():
         yield tmpdir
 
 
-class TesteSuite1Inicializacao:
+class TesteInicializacao:
     """
     Testes de Inicialização e Infraestrutura
     
@@ -118,7 +119,7 @@ class TesteSuite1Inicializacao:
                 quantidade_gerada=-5
             )
 
-class TesteSuite2Esquema:
+class TesteEsquema:
     """
     Testes de Esquema e Estrutura Estrita 
     
@@ -126,7 +127,7 @@ class TesteSuite2Esquema:
     testando a composição desde a raiz até às ramificações mais profundas.
     """
 
-    def test_tipagem_raiz_invalida(self):
+    def test_tipagem_raiz_invalida(self, diretorio_dados_teste_invalido):
         """
         Tipagem da Raiz
         
@@ -136,12 +137,10 @@ class TesteSuite2Esquema:
         Rejeição com `TypeError`.
         """
         with tempfile.TemporaryDirectory() as tmpdir:
-            arquivo = Path(tmpdir) / "raiz_objeto.json"
-            
-            # Escreve um objeto em vez de lista
-            with open(arquivo, "w", encoding="utf-8") as f:
-                json.dump({"id_cenario": 1}, f)
-            
+            shutil.copy2(
+                Path(diretorio_dados_teste_invalido) / "teste_invalido_nao_lista.json",
+                Path(tmpdir) / "teste_invalido_nao_lista.json"
+            )
             repo = RepositorioJSON(
                 diretorio_base=tmpdir,
                 curso_selecionado="DEFAULT",
@@ -151,40 +150,20 @@ class TesteSuite2Esquema:
             with pytest.raises(TypeError, match="Lista"):
                 repo.extrair_dados()
 
-    def test_ausencia_chave_primaria(self):
+    def test_ausencia_chave_primaria(self, diretorio_dados_teste_invalido):
         """
         Ausência de Chave Primária
         
         Fornecer um cenário sem uma chave obrigatória na raiz 
+        (dificuldade ausente).
         
         Rejeição com `KeyError`.
         """
         with tempfile.TemporaryDirectory() as tmpdir:
-            arquivo = Path(tmpdir) / "chave_faltando.json"
-            dados = [
-                {
-                    # Falta "titulo"
-                    "id_cenario": 1,
-                    "dificuldade": 2,
-                    "relatorio": {
-                        "atividade": "Teste",
-                        "local": "Lab",
-                        "envolvidos": ["Pessoa"],
-                        "texto_descricao": "Desc",
-                        "riscos": ["FISICO"],
-                        "fatores_inseguranca": ["ATO_INSEGURO"],
-                        "decisao_administrativa": {
-                            "decisao_otima": "INTERDITAR",
-                            "decisao_boa": "ADVERTIR"
-                        },
-                        "curso": ["DEFAULT"]
-                    },
-                    "anexos": []
-                }
-            ]
-            with open(arquivo, "w", encoding="utf-8") as f:
-                json.dump(dados, f, ensure_ascii=False)
-            
+            shutil.copy2(
+                Path(diretorio_dados_teste_invalido) / "teste_invalido_chave_raiz_faltando_1.json",
+                Path(tmpdir) / "teste_invalido_chave_raiz_faltando_1.json"
+            )
             repo = RepositorioJSON(
                 diretorio_base=tmpdir,
                 curso_selecionado="DEFAULT",
@@ -194,41 +173,20 @@ class TesteSuite2Esquema:
             with pytest.raises(KeyError):
                 repo.extrair_dados()
 
-    def test_ausencia_em_subbloco_relatorio(self):
+    def test_ausencia_em_subbloco_relatorio(self, diretorio_dados_teste_invalido):
         """
         Ausência em Sub-bloco 
         
         Fornecer o bloco `"relatorio"`, mas omitir uma chave vital 
-        lá de dentro (ex: falta a chave `"riscos"`).
+        lá de dentro (ex: falta a chave `"fatores_inseguranca"`).
         
         Rejeição com `KeyError`.
         """
         with tempfile.TemporaryDirectory() as tmpdir:
-            arquivo = Path(tmpdir) / "relatorio_incompleto.json"
-            dados = [
-                {
-                    "id_cenario": 1,
-                    "titulo": "Teste",
-                    "dificuldade": 2,
-                    "relatorio": {
-                        "atividade": "Teste",
-                        "local": "Lab",
-                        "envolvidos": ["Pessoa"],
-                        "texto_descricao": "Desc",
-                        # Falta "riscos"
-                        "fatores_inseguranca": ["ATO_INSEGURO"],
-                        "decisao_administrativa": {
-                            "decisao_otima": "INTERDITAR",
-                            "decisao_boa": "ADVERTIR"
-                        },
-                        "curso": ["DEFAULT"]
-                    },
-                    "anexos": []
-                }
-            ]
-            with open(arquivo, "w", encoding="utf-8") as f:
-                json.dump(dados, f, ensure_ascii=False)
-            
+            shutil.copy2(
+                Path(diretorio_dados_teste_invalido) / "teste_invalido_relatorio_chave_faltando_1.json",
+                Path(tmpdir) / "teste_invalido_relatorio_chave_faltando_1.json"
+            )
             repo = RepositorioJSON(
                 diretorio_base=tmpdir,
                 curso_selecionado="DEFAULT",
@@ -238,40 +196,19 @@ class TesteSuite2Esquema:
             with pytest.raises(KeyError):
                 repo.extrair_dados()
 
-    def test_validacao_profunda_decisao_administrativa(self):
+    def test_validacao_profunda_decisao_administrativa(self, diretorio_dados_teste_invalido):
         """
         Validação Profunda (Composição Nível 2)
         
-        No bloco `"decisao_administrativa"`, omitir a chave `"decisao_otima"`.
+        No bloco `"decisao_administrativa"`, omitir a chave `"decisao_boa"`.
         
         Rejeição com `KeyError` (Garante que a alfândega desce a todos os níveis).
         """
         with tempfile.TemporaryDirectory() as tmpdir:
-            arquivo = Path(tmpdir) / "decisao_incompleta.json"
-            dados = [
-                {
-                    "id_cenario": 1,
-                    "titulo": "Teste",
-                    "dificuldade": 2,
-                    "relatorio": {
-                        "atividade": "Teste",
-                        "local": "Lab",
-                        "envolvidos": ["Pessoa"],
-                        "texto_descricao": "Desc",
-                        "riscos": ["FISICO"],
-                        "fatores_inseguranca": ["ATO_INSEGURO"],
-                        "decisao_administrativa": {
-                            # Falta "decisao_otima"
-                            "decisao_boa": "ADVERTIR"
-                        },
-                        "curso": ["DEFAULT"]
-                    },
-                    "anexos": []
-                }
-            ]
-            with open(arquivo, "w", encoding="utf-8") as f:
-                json.dump(dados, f, ensure_ascii=False)
-            
+            shutil.copy2(
+                Path(diretorio_dados_teste_invalido) / "teste_invalido_decisao_chave_faltando.json",
+                Path(tmpdir) / "teste_invalido_decisao_chave_faltando.json"
+            )
             repo = RepositorioJSON(
                 diretorio_base=tmpdir,
                 curso_selecionado="DEFAULT",
@@ -297,47 +234,20 @@ class TesteSuite2Esquema:
             )
             repo.extrair_dados()
 
-    def test_anexo_incompleto_chave_faltando(self):
+    def test_anexo_incompleto_chave_faltando(self, diretorio_dados_teste_invalido):
         """
         Anexo Incompleto
         
         Fornecer um item na lista de anexos, mas sem a chave 
-        `"caminho_arquivo"`.
+        `"id_anexo"`.
         
         Rejeição com `KeyError`.
         """
         with tempfile.TemporaryDirectory() as tmpdir:
-            arquivo = Path(tmpdir) / "anexo_incompleto.json"
-            dados = [
-                {
-                    "id_cenario": 1,
-                    "titulo": "Teste",
-                    "dificuldade": 2,
-                    "relatorio": {
-                        "atividade": "Teste",
-                        "local": "Lab",
-                        "envolvidos": ["Pessoa"],
-                        "texto_descricao": "Desc",
-                        "riscos": ["FISICO"],
-                        "fatores_inseguranca": ["ATO_INSEGURO"],
-                        "decisao_administrativa": {
-                            "decisao_otima": "INTERDITAR",
-                            "decisao_boa": "ADVERTIR"
-                        },
-                        "curso": ["DEFAULT"]
-                    },
-                    "anexos": [
-                        {
-                            "id_anexo": 1,
-                            "tipo": "IMAGEM"
-                            # Falta "caminho_arquivo"
-                        }
-                    ]
-                }
-            ]
-            with open(arquivo, "w", encoding="utf-8") as f:
-                json.dump(dados, f, ensure_ascii=False)
-            
+            shutil.copy2(
+                Path(diretorio_dados_teste_invalido) / "teste_invalido_anexo_chave_faltando.json",
+                Path(tmpdir) / "teste_invalido_anexo_chave_faltando.json"
+            )
             repo = RepositorioJSON(
                 diretorio_base=tmpdir,
                 curso_selecionado="DEFAULT",
@@ -369,7 +279,7 @@ class TesteSuite2Esquema:
         # Todos devem ter anexos como lista (vazia ou com itens)
         assert all(isinstance(dto.anexos, list) for dto in resultado)
 
-class TesteSuite3Extracao:
+class TesteExtracao:
     """
     Testes de Lógica de Extração e Filtragem
     
@@ -377,30 +287,25 @@ class TesteSuite3Extracao:
     funcionamento do "Pool and Sample" (Sorteio e Limitação).
     """
 
-    def test_resiliencia_ficheiro_vazio(self, diretorio_dados_teste_valido):
+    def test_resiliencia_ficheiro_vazio(self, diretorio_dados_teste_invalido):
         """
-        Resiliência a Ficheiro Vazio
+        Resiliência a Lista Vazia
         
-        O sistema deve processar múltiplos arquivos, extraindo dados 
-        válidos mesmo que haja arquivo vazio ou inválido.
-        
-        O sistema deve ignorar arquivos vazios/inválidos 
-        e extrair dados dos arquivos válidos, ou rejeitar se nenhum dado 
-        compatível for encontrado.
+        Fornecer um arquivo com lista vazia `[]` deve lançar ValueError.
         """
-        repo = RepositorioJSON(
-            diretorio_base=diretorio_dados_teste_valido,
-            curso_selecionado="DEFAULT",
-            quantidade_gerada=1
-        )
-        
-        # Pode extrair com sucesso ou lançar erro se nenhum dado compatível
-        try:
-            resultado = repo.extrair_dados()
-            assert isinstance(resultado, list)
-        except (ValueError, TypeError, KeyError):
-            # Comportamento aceitável com arquivos corrompidos
-            pass
+        with tempfile.TemporaryDirectory() as tmpdir:
+            shutil.copy2(
+                Path(diretorio_dados_teste_invalido) / "teste_invalido_lista_vazia.json",
+                Path(tmpdir) / "teste_invalido_lista_vazia.json"
+            )
+            repo = RepositorioJSON(
+                diretorio_base=tmpdir,
+                curso_selecionado="DEFAULT",
+                quantidade_gerada=1
+            )
+            
+            with pytest.raises(ValueError, match="vazio"):
+                repo.extrair_dados()
 
     def test_filtragem_restrita(self, diretorio_dados_teste_valido):
         """
@@ -504,4 +409,115 @@ class TesteSuite3Extracao:
                 quantidade_gerada=5
             )
             repo.extrair_dados()
+
+
+class TesteResiliencia:
+    """
+    Testes de Resiliência a Dados Corrompidos
+
+    Garantir que o repositório trata gracefulmente arquivos com
+    JSON inválido e erros de esquema não mapeados.
+    """
+
+    def test_arquivo_sintaxe_corrompida(self, diretorio_dados_teste_invalido):
+        """
+        T10: Arquivo com sintaxe JSON corrompida deve lançar ValueError.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            shutil.copy2(
+                Path(diretorio_dados_teste_invalido) / "teste_invalido_sintaxe_json.json",
+                Path(tmpdir) / "teste_invalido_sintaxe_json.json"
+            )
+            repo = RepositorioJSON(
+                diretorio_base=tmpdir,
+                curso_selecionado="DEFAULT",
+                quantidade_gerada=1
+            )
+
+            with pytest.raises(ValueError, match="corrompido"):
+                repo.extrair_dados()
+
+    def test_validacao_chave_extra_additional_properties(self):
+        """
+        T11a: Chave não permitida pelo esquema (additionalProperties) deve
+        lançar KeyError (traduzido por __traduzir_erro_validacao).
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            arquivo = Path(tmpdir) / "chave_extra.json"
+            dados = [
+                {
+                    "id_cenario": 1,
+                    "titulo": "Teste",
+                    "dificuldade": 2,
+                    "relatorio": {
+                        "atividade": "Teste",
+                        "local": "Lab",
+                        "envolvidos": ["Pessoa"],
+                        "texto_descricao": "Desc",
+                        "riscos": ["FISICO"],
+                        "fatores_inseguranca": ["ATO_INSEGURO"],
+                        "decisao_administrativa": {
+                            "decisao_otima": "INTERDITAR",
+                            "decisao_boa": "ADVERTIR"
+                        },
+                        "curso": ["DEFAULT"]
+                    },
+                    "anexos": [],
+                    "chave_extra": "nao_permitida"
+                }
+            ]
+            with open(arquivo, "w", encoding="utf-8") as f:
+                json.dump(dados, f, ensure_ascii=False)
+
+            repo = RepositorioJSON(
+                diretorio_base=tmpdir,
+                curso_selecionado="DEFAULT",
+                quantidade_gerada=1
+            )
+
+            with pytest.raises(KeyError, match="additionalProperties|chave_extra"):
+                repo.extrair_dados()
+
+    def test_validacao_erro_nao_mapeado_fallback(self):
+        """
+        T11b: Erro de validação não mapeado por __traduzir_erro_validacao
+        deve cair no fallback e lançar ValueError.
+
+        Um enum inválido (ex: decisao_otima="INEXISTENTE") aciona o
+        validador 'enum', que não tem if explícito em __traduzir_erro_validacao.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            arquivo = Path(tmpdir) / "enum_invalido.json"
+            dados = [
+                {
+                    "id_cenario": 1,
+                    "titulo": "Teste",
+                    "dificuldade": 2,
+                    "relatorio": {
+                        "atividade": "Teste",
+                        "local": "Lab",
+                        "envolvidos": ["Pessoa"],
+                        "texto_descricao": "Desc",
+                        "riscos": ["FISICO"],
+                        "fatores_inseguranca": ["ATO_INSEGURO"],
+                        "decisao_administrativa": {
+                            "decisao_otima": "INEXISTENTE",
+                            "decisao_boa": "ADVERTIR"
+                        },
+                        "curso": ["DEFAULT"]
+                    },
+                    "anexos": []
+                }
+            ]
+            with open(arquivo, "w", encoding="utf-8") as f:
+                json.dump(dados, f, ensure_ascii=False)
+
+            repo = RepositorioJSON(
+                diretorio_base=tmpdir,
+                curso_selecionado="DEFAULT",
+                quantidade_gerada=1
+            )
+
+            with pytest.raises(ValueError, match="Esquema JSON|INEXISTENTE"):
+                repo.extrair_dados()
 
