@@ -63,7 +63,7 @@ class FabricaDeRelatorios:
                 local=dado_bruto.local,
                 texto_descricao=dado_bruto.texto_descricao,
                 envolvidos=dado_bruto.envolvidos,
-                cursos=dado_bruto.cursos,
+                cursos=dado_bruto.curso,
                 dificuldade=dado_bruto.dificuldade,
                 gabarito=folha_gabarito
             )

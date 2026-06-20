@@ -160,9 +160,7 @@ class RepositorioJSON:
 
         # O método glob('*.json') cria um iterador leve que busca todos os arquivos da pasta
         for caminho_arquivo in self.__diretorio_base.glob('*.json'):
-            
-            dados_brutos = None
-            
+
             try:
                 with open(caminho_arquivo, 'r', encoding='utf-8') as arquivo:
                     dados_brutos = json.load(arquivo)
@@ -176,9 +174,6 @@ class RepositorioJSON:
                 raise ValueError(f"[Erro - Json] O arquivo {caminho_arquivo.name} está corrompido ou mal formatado. Detalhes: {erro_sintaxe}")
             except ValidationError as erro_validacao:
                 self.__traduzir_erro_validacao(caminho_arquivo.name, erro_validacao)
-            
-            if dados_brutos is None:
-                continue
             
             for cenario_dict in dados_brutos:
                 
@@ -208,7 +203,7 @@ class RepositorioJSON:
                             local=relatorio_do_cenario["local"],
                             texto_descricao=relatorio_do_cenario["texto_descricao"],
                             envolvidos=relatorio_do_cenario["envolvidos"],
-                            cursos=relatorio_do_cenario["curso"],
+                            curso=relatorio_do_cenario["curso"],
                             riscos=relatorio_do_cenario["riscos"],
                             fatores_inseguranca=relatorio_do_cenario["fatores_inseguranca"],
                             decisao_otima=relatorio_do_cenario["decisao_administrativa"]["decisao_otima"],
