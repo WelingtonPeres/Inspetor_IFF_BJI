@@ -40,6 +40,38 @@ class MotorDePontuacao:
         self.__limite_minimo_retencao = self.LIMITE_MINIMO_RETENCAO
 
 
+    def calcular_vmax_relatorio(self, relatorio: Relatorio) -> float:
+        """
+        Calcula o Vmax individual de um relatório (base * dificuldade).
+        
+        Args:
+            relatorio: Entidade Relatorio para calcular o Vmax.
+        Returns:
+            Valor float representando o Vmax daquele relatório específico.
+        """
+        if relatorio.folha_gabarito is None:
+            logger.warning("Relatório %s sem gabarito — Vmax tratado como 0", relatorio.id_cenario)
+            return 0.0
+
+        v_max = self.VALOR_BASE_PARTICIPACAO
+
+        risco = len(relatorio.folha_gabarito.riscos)
+        v_max += risco * self.BONUS_RISCO
+
+        fator = len(relatorio.folha_gabarito.fatores_inseguranca)
+        v_max += fator * self.BONUS_FATOR
+
+        for anexo in relatorio.obter_anexos():
+            if anexo.get_tipo_midia() == "IMAGEM":
+                v_max += self.BONUS_MIDIA_IMAGEM
+            elif anexo.get_tipo_midia() == "VIDEO":
+                v_max += self.BONUS_MIDIA_VIDEO
+
+        envolvidos = len(relatorio.envolvidos)
+        v_max += envolvidos * self.BONUS_CONTEXTO
+
+        return v_max * relatorio.dificuldade
+
     def calcular_meta_turno(self, lista_relatorios: List[Relatorio]) -> float:
         """
         Varre a pilha de relatórios do dia para calcular o Vmax total (A pontuação 
@@ -50,36 +82,13 @@ class MotorDePontuacao:
         Returns:
             Valor float representando 100% da nota do expediente.
         """
-        v_max_total = 0.0
-        
         if not lista_relatorios:
             raise ValueError("[Erro - Relatorio] Lista de Relatorios Vazio")
         
+        v_max_total = 0.0
         for relatorio in lista_relatorios:
-            if relatorio.folha_gabarito is None:
-                logger.warning("Relatório %s sem gabarito — ignorado", relatorio.id_cenario)
-                continue # Sai do For
+            v_max_total += self.calcular_vmax_relatorio(relatorio)
 
-            v_max = self.VALOR_BASE_PARTICIPACAO
-            
-            risco = len(relatorio.folha_gabarito.riscos)
-            v_max += risco * self.BONUS_RISCO
-            
-            fator = len(relatorio.folha_gabarito.fatores_inseguranca)
-            v_max += fator * self.BONUS_FATOR
-
-            anexos = relatorio.obter_anexos()
-            for anexo in anexos:
-                if anexo.get_tipo_midia() == "IMAGEM":
-                    v_max += self.BONUS_MIDIA_IMAGEM
-                elif anexo.get_tipo_midia() == "VIDEO":
-                    v_max += self.BONUS_MIDIA_VIDEO
-                    
-            envolvidos = len(relatorio.envolvidos)
-            v_max += envolvidos * self.BONUS_CONTEXTO
-            
-            v_max_total += (v_max * relatorio.dificuldade)
-            
         return v_max_total
 
     def calcular_pontuacao_relatorio(self, v_max: float, dados_pontuacao: DiagnosticoPontuacaoDTO) -> float:
