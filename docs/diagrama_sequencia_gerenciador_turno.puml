@@ -1,0 +1,304 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam sequenceMessageAlign center
+skinparam ParticipantPadding 20
+skinparam BoxPadding 10
+
+title Diagrama de Sequencia - GerenciadorDeTurno
+caption da criacao ate a verificacao de vitoria
+
+== 1. INSTANCIACAO ==
+
+actor "Jogador / Sistema" as Jogador
+
+create "g: GerenciadorDeTurno" as GT
+Jogador -> GT : __init__(perfil: str)
+activate GT
+
+GT -> GT : armazena __perfil_atual
+GT -> GT : __pilha_relatorios = []
+GT -> GT : __pontuacao_acumulada_turno = 0.0
+GT -> GT : __v_max_turno = 0.0
+
+create "motor: MotorDePontuacao" as MP
+GT -> MP : __init__()
+activate MP
+MP --> GT : instancia
+deactivate MP
+
+Jogador <-- GT : GerenciadorDeTurno instanciado
+
+== 2. INICIAR TURNO ==
+
+Jogador -> GT : iniciar_turno()
+activate GT
+
+create "repo: RepositorioJSON" as RJ
+GT -> RJ : __init__(DIRETORIO_BASE, perfil, QUANTIDADE_GERACAO)
+activate RJ
+
+RJ -> RJ : __verificar_diretorio_existe()
+RJ -> RJ : __verificar_curso_valido()
+RJ -> RJ : __verificar_quantidade_gerada_valida()
+RJ --> GT : instancia validada
+deactivate RJ
+
+GT -> RJ : extrair_dados()
+activate RJ
+
+loop para cada *.json no diretorio
+  RJ -> SistemaArquivos : open arquivo.json
+  SistemaArquivos --> RJ : raw JSON
+
+  RJ -> RJ : json.load(arquivo)
+  RJ -> RJ : __validar_esquema_basico(dados)
+  RJ -> RJ : validate(instance, schema=JSON_SCHEMA)
+
+  loop para cada cenario_dict
+    RJ -> RJ : filtra por curso_selecionado
+
+    create "DadosAnexoDTO" as DA
+    RJ -> DA : __init__(id, tipo, caminho)
+    activate DA
+    DA --> RJ : anexo_dto
+    deactivate DA
+
+    create "dto: DadosCenarioDTO" as DC
+    RJ -> DC : __init__(id, titulo, dificuldade,\n  atividade, local, descricao,\n  envolvidos, cursos, riscos,\n  fatores, decisao_otima,\n  decisao_boa, anexos)
+    activate DC
+    DC --> RJ : cenario_dto
+    deactivate DC
+
+    RJ -> RJ : append na lista
+  end
+end
+
+RJ -> RJ : random.shuffle(lista)
+RJ -> RJ : slicing por quantidade_real
+RJ --> GT : List[DadosCenarioDTO]
+deactivate RJ
+
+create "fab: FabricaDeRelatorios" as FAB
+GT -> FAB : construir_pilha(dados_dto) [static]
+activate FAB
+
+loop para cada DadosCenarioDTO
+  FAB -> FAB : __instanciar_relatorio_unico(dado_bruto)
+
+  create "gabarito: FolhaDeGabarito" as FG
+  FAB -> FG : __init__(riscos, fatores,\n  decisao_otima, decisao_boa)
+  activate FG
+
+  FG -> "FolhaDeInspecao" as FHI : __init__(riscos, fatores)
+  activate FHI
+  FHI -> FHI : unidecode().upper()
+  FHI -> FHI : valida LISTA_RISCOS_VALIDOS
+  FHI -> FHI : valida FATORES_INSEGURANCA_VALIDOS
+  FHI --> FG : atributos validados
+  deactivate FHI
+
+  FG -> FG : valida LISTA_DECISOES_VALIDAS
+  FG -> FG : valida decisao_otima != decisao_boa
+  FG --> FAB : FolhaDeGabarito
+  deactivate FG
+
+  create "r: Relatorio" as REL
+  FAB -> REL : __init__(id_cenario, titulo,\n  atividade, local, texto_descricao,\n  envolvidos, cursos, dificuldade,\n  gabarito)
+  activate REL
+  REL -> REL : valida id_cenario > 0
+  REL -> REL : valida titulo nao vazio
+  REL -> REL : valida envolvidos nao vazio
+  REL -> REL : valida dificuldade entre 1-5
+  REL --> FAB : Relatorio
+  deactivate REL
+
+  alt dado_bruto.anexos nao eh None
+    FAB -> FAB : __extrair_instanciar_anexos(anexos)
+
+    loop para cada DadosAnexoDTO
+      alt tipo == "IMAGEM"
+        create "AnexoImagem" as AI
+        FAB -> AI : __init__(id, caminho)
+        activate AI
+        AI -> "Anexo" : __init__(id, caminho)
+        AI --> FAB : AnexoImagem
+        deactivate AI
+      else tipo == "VIDEO"
+        create "AnexoVideo" as AV
+        FAB -> AV : __init__(id, caminho)
+        activate AV
+        AV --> FAB : AnexoVideo
+        deactivate AV
+      else tipo == "AUDIO"
+        create "AnexoAudio" as AA
+        FAB -> AA : __init__(id, caminho)
+        activate AA
+        AA --> FAB : AnexoAudio
+        deactivate AA
+      else
+        FAB -> FAB : logger.warning(tipo desconhecido)
+      end
+
+      REL -> REL : adicionar_anexo(anexo)
+    end
+  end
+
+  FAB --> GT : Relatorio (ou None se invalido)
+  alt relatorio nao eh None
+    GT -> GT : append na __pilha_relatorios
+  end
+end
+
+destroy FAB
+
+GT -> MP : calcular_meta_turno(__pilha_relatorios)
+activate MP
+
+loop para cada relatorio na pilha
+  MP -> MP : calcular_vmax_relatorio(relatorio)
+  MP -> REL : folha_gabarito
+  MP -> REL : obter_anexos()
+  REL --> MP : anexos
+  MP -> MP : Vmax = BASE(1000)
+  MP -> MP : + riscos*250 + fatores*250
+  MP -> MP : + imagem*100 + video*300
+  MP -> MP : + envolvidos*100
+  MP -> MP : Vmax *= dificuldade
+end
+
+MP --> GT : __v_max_turno (soma total)
+deactivate MP
+
+GT --> Jogador : return True
+deactivate GT
+
+== 3. OBTER RELATORIO DA PILHA ==
+
+Jogador -> GT : obter_relatorio_da_pilha()
+activate GT
+
+GT -> GT : __pilha_relatorios.pop()
+GT --> Jogador : Relatorio
+deactivate GT
+
+== 4. EXTRAIR APRESENTACAO (UI) ==
+
+Jogador -> REL : extrair_apresentacao_relatorio()
+activate REL
+
+loop para cada anexo em __anexos
+  REL -> REL : anexo.extrair_dados()
+end
+
+REL --> Jogador : dict de apresentacao
+deactivate REL
+
+== 5. ANEXAR RESPOSTA DO JOGADOR ==
+
+Jogador -> REL : anexar_resposta_jogador(resposta: FolhaDeResposta)
+activate REL
+
+REL -> REL : __folha_resposta = resposta
+REL --> Jogador : resposta armazenada
+deactivate REL
+
+== 6. AVALIAR RESPOSTAS ==
+
+Jogador -> GT : avaliar_respostas_jogador(relatorio_com_respostas)
+activate GT
+
+GT -> REL : folha_resposta_jogador
+activate REL
+REL --> GT : FolhaDeResposta
+deactivate REL
+
+GT -> REL : folha_gabarito
+REL --> GT : FolhaDeGabarito
+
+create "diag: DiagnosticoDeResposta" as DR
+GT -> DR : __init__()
+activate DR
+DR --> GT : instancia
+deactivate DR
+
+GT -> DR : gerar_diagnostico_pontuacao(gabarito, folha_respostas)
+activate DR
+
+DR -> DR : set_riscos = interseccao(respostas & gabarito)
+DR -> DR : estado_ato = (resposta == gabarito)
+DR -> DR : estado_condicao = (resposta == gabarito)
+DR -> DR : mapeia decisao_jogador(OTIMA / BOA / INCORRETA)
+
+create "dto: DiagnosticoPontuacaoDTO" as DP
+DR -> DP : __init__(qnt_riscos_marcados,\n  qnt_riscos_gabarito,\n  qnt_riscos_corretos,\n  estado_ato, estado_condicao,\n  status_decisao, tempo_resposta)
+DR --> GT : DiagnosticoPontuacaoDTO (frozen)
+deactivate DP
+deactivate DR
+
+GT -> MP : calcular_vmax_relatorio(relatorio)
+activate MP
+MP --> GT : v_max_individual
+deactivate MP
+
+GT -> MP : calcular_pontuacao_relatorio(v_max, dados_pontuacao)
+activate MP
+
+MP -> MP : _calcular_pontuacao_riscos(v_max,\n  qnt_riscos_corretos,\n  qnt_riscos_gabarito,\n  qnt_riscos_marcados)
+note right
+  P_risco = (Vmax * 0.60) * Td * Tp
+  Td = corretos / gabarito
+  Tp = corretos / marcados
+end note
+
+MP -> MP : _calcular_pontuacao_inseguranca(v_max,\n  acertou_ato, acertou_condicao)
+note right
+  P_inseg = (Vmax * 0.15)
+  * (ato + condicao) / 2
+end note
+
+MP -> MP : _calcular_pontuacao_decisao(v_max,\n  status_decisao)
+note right
+  OTIMA = Vmax * 0.25
+  BOA   = Vmax * 0.125
+  else  = 0
+end note
+
+MP -> MP : _calcular_fator_tempo(tempo)
+note right
+  t <= 60s = 1.0
+  60 < t <= 90 = 1 - a(t-60)
+  t > 90 = 0.20
+end note
+
+MP -> MP : nota = (riscos + fatores + decisao) * tempo
+MP --> GT : pontuacao_final
+deactivate MP
+
+GT -> GT : __pontuacao_acumulada_turno += pontuacao_final
+GT --> Jogador : pontuacao_final (float)
+deactivate GT
+
+== 7. VERIFICAR VITORIA ==
+
+Jogador -> GT : verificar_vitoria_do_turno()
+activate GT
+
+alt __pilha_relatorios nao esta vazia
+  GT --> Jogador : raise ValueError("[Erro - Turno]...")
+else
+  GT -> MP : conferir_condicao_vitoria(\n  __pontuacao_acumulada_turno,\n  __v_max_turno)
+  activate MP
+  MP -> MP : pontuacao >= v_max * 0.60 ?
+  MP --> GT : bool
+  deactivate MP
+
+  alt true
+    GT --> Jogador : True (Vitoria!)
+  else false
+    GT --> Jogador : False (Derrota)
+  end
+end
+deactivate GT
+
+@enduml

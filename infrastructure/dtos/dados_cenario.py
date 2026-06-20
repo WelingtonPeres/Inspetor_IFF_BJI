@@ -18,7 +18,7 @@ class DadosCenarioDTO:
     local: str
     texto_descricao: str
     envolvidos: List[str]
-    cursos: List[str]
+    curso: List[str]
     riscos: List[str]
     fatores_inseguranca: List[str]
     decisao_otima: str

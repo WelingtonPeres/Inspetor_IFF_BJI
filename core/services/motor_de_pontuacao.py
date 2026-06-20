@@ -26,6 +26,7 @@ class MotorDePontuacao:
     BONUS_FATOR = 250
     BONUS_MIDIA_IMAGEM = 100
     BONUS_MIDIA_VIDEO = 300
+    BONUS_MIDIA_AUDIO = 200
     BONUS_CONTEXTO = 100
     
     TEMPO_IDEAL_SEGUNDOS = 60
@@ -66,6 +67,8 @@ class MotorDePontuacao:
                 v_max += self.BONUS_MIDIA_IMAGEM
             elif anexo.get_tipo_midia() == "VIDEO":
                 v_max += self.BONUS_MIDIA_VIDEO
+            elif anexo.get_tipo_midia() == "AUDIO":
+                v_max += self.BONUS_MIDIA_AUDIO
 
         envolvidos = len(relatorio.envolvidos)
         v_max += envolvidos * self.BONUS_CONTEXTO

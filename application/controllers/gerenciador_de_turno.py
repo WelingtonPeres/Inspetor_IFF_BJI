@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import List, Optional
 
 from config.constants import DIRETORIO_BASE, QUANTIDADE_GERACAO
 from core.model.relatorio import Relatorio
@@ -20,20 +20,31 @@ class GerenciadorDeTurno:
     """
 
     def __init__(self, perfil: str):
+        """Guarda o perfil do jogador e inicializa o estado do turno."""
 
         self.__perfil_atual = perfil
-        self.__pilha_relatorios: List[Relatorio] = []
         
-        self.__pontuacao_acumulada_turno: float = 0.0
-        self.__v_max_turno: float = 0.0 
-        
+        self.__pilha_relatorios: List[Relatorio] = []   
         self.__motor_pontuacao = MotorDePontuacao()
+        self.__diagnostico_resposta = DiagnosticoDeResposta()
         
+        self.__pontuacao_acumulada_turno = 0.0
+        self.__v_max_turno = 0.0
+        self.__turno_iniciado = False
+        self.__relatorio_atual = None
+
     def iniciar_turno(self):
         """
         Inicia o Turno para preparar Relatorios e configuração Inicial
         """
-        
+
+        if self.__turno_iniciado:
+            raise Exception("[Erro - Turno] Turno não pode ser iniciado mais de uma vez")
+
+        self.__pontuacao_acumulada_turno = 0.0
+        self.__v_max_turno = 0.0
+        self.__relatorio_atual = None
+
         repositorio = RepositorioJSON(
             diretorio_base=DIRETORIO_BASE,
             curso_selecionado=self.__perfil_atual,
@@ -47,48 +58,78 @@ class GerenciadorDeTurno:
             raise RuntimeError(f"[Erro - Turno] Nenhum relatório foi construído para o curso '{self.__perfil_atual}'.")
 
         self.__v_max_turno = self.__motor_pontuacao.calcular_meta_turno(self.__pilha_relatorios)
-        
-        return True 
-
-    def obter_dados_de_finalizacao_turno(self):
-        pass
+        self.__turno_iniciado = True
+        return True
 
     def qnt_relatorios(self):
+        """Retorna quantos relatorios ainda restam na pilha."""
+
+        if not self.__turno_iniciado:
+            raise Exception("[Erro - Turno] Turno ainda não iniciado")
+
         return len(self.__pilha_relatorios)
 
     def obter_relatorio_da_pilha(self):
-        return self.__pilha_relatorios.pop()
+        """Remove e retorna o proximo relatorio da pilha (LIFO)."""
 
-    def avaliar_respostas_jogador(self, relatorio_com_respostas: Relatorio) -> float:
-        
-        try:
-            folha_respostas = relatorio_com_respostas.folha_resposta_jogador
-        except ValueError:
-            raise ValueError(
-                "[Erro - Turno] O relatório não possui resposta anexada. "
-                "Chame relatorio.anexar_resposta_jogador() antes de avaliar."
-            )
-        
-        diagnostico_de_resposta = DiagnosticoDeResposta()
-        
-        dados_pontuacao = diagnostico_de_resposta.gerar_diagnostico_pontuacao(
-            gabarito=relatorio_com_respostas.folha_gabarito,
+        if not self.__turno_iniciado:
+            raise Exception("[Erro - Turno] Turno ainda não iniciado")
+        if self.__relatorio_atual is not None:
+            raise RuntimeError("[Erro - Turno] Relatório anterior ainda não foi avaliado")
+
+        self.__relatorio_atual = self.__pilha_relatorios.pop()
+        return self.__relatorio_atual
+
+    def avaliar_respostas_jogador(self,
+                                  riscos_marcados: List[str],
+                                  fatores_marcados: List[str],
+                                  decisao: str,
+                                  tempo_segundos: int) -> float:
+        """Calcula a pontuacao do relatorio respondido e acumula no turno."""
+
+        if not self.__turno_iniciado:
+            raise Exception("[Erro - Turno] Turno ainda não iniciado")
+        if self.__relatorio_atual is None:
+            raise RuntimeError("[Erro - Turno] Nenhum relatório foi obtido da pilha")
+
+        folha_respostas = self.__processar_submissao_jogador(riscos_marcados, fatores_marcados, decisao, tempo_segundos)
+        self.__relatorio_atual.anexar_resposta_jogador(folha_respostas)
+
+        dados_pontuacao = self.__diagnostico_resposta.gerar_diagnostico_pontuacao(
+            gabarito=self.__relatorio_atual.folha_gabarito,
             respostas=folha_respostas,
         )
-        
-        v_max = self.__motor_pontuacao.calcular_vmax_relatorio(relatorio_com_respostas)
+
+        v_max = self.__motor_pontuacao.calcular_vmax_relatorio(self.__relatorio_atual)
         pontuacao_final = self.__motor_pontuacao.calcular_pontuacao_relatorio(v_max, dados_pontuacao)
-        
+
         self.__pontuacao_acumulada_turno += pontuacao_final
-        
+        self.__relatorio_atual = None
+
         return pontuacao_final
-    
+
+    def __processar_submissao_jogador(self,
+                                      riscos_marcados: List[str],
+                                      fatores_marcados: List[str],
+                                      decisao: str,
+                                      tempo_segundos: int) -> FolhaDeResposta:
+        """Cria e retorna a FolhaDeResposta com os dados do jogador."""
+
+        return FolhaDeResposta(
+            riscos=riscos_marcados,
+            fatores_inseguranca=fatores_marcados,
+            decisao_tomada=decisao,
+            tempo_gasto_segundos=tempo_segundos,
+        )
+
     def verificar_vitoria_do_turno(self) -> bool:
-        
+        """Retorna True se a pontuacao acumulada atingir o limiar de vitoria."""
+
+        if not self.__turno_iniciado:
+            raise Exception("[Erro - Turno] Turno ainda não iniciado")
+        if self.__relatorio_atual is not None:
+            raise RuntimeError("[Erro - Turno] Relatório pendente de avaliação")
         if len(self.__pilha_relatorios) != 0:
-            raise ValueError("[Erro - Turno] Lista de Relatorios Ainda tem elementos")
-        
-        if self.__motor_pontuacao.conferir_condicao_vitoria(self.__pontuacao_acumulada_turno, self.__v_max_turno):
-            return True
-        
-        return False
+            raise ValueError("[Erro - Turno] Lista de Relatorios ainda tem elementos")
+
+        return self.__motor_pontuacao.conferir_condicao_vitoria(self.__pontuacao_acumulada_turno, self.__v_max_turno)

@@ -328,7 +328,7 @@ class TesteExtracao:
         
         # Validar que todos contêm T_QUIMICA
         for dto in resultado:
-            assert "T_QUIMICA" in dto.cursos
+            assert "T_QUIMICA" in dto.curso
 
     def test_filtragem_default_global(self, diretorio_dados_teste_valido):
         """
@@ -351,8 +351,8 @@ class TesteExtracao:
         assert len(resultado) >= 1  # Deve retornar pelo menos um cenário
         # DEFAULT retorna todos, então podem ser cursos variados
         for dto in resultado:
-            assert isinstance(dto.cursos, list)
-            assert len(dto.cursos) > 0
+            assert isinstance(dto.curso, list)
+            assert len(dto.curso) > 0
 
     def test_corte_slicing_superior(self, diretorio_dados_teste_valido):
         """

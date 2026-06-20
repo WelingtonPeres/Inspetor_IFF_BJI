@@ -6,9 +6,7 @@ from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
 from core.services.motor_de_pontuacao import MotorDePontuacao
 
 
-# =============================================================================
 # Fixtures
-# =============================================================================
 
 @pytest.fixture
 def motor():
@@ -345,11 +343,11 @@ class TestResilienciaAnexos:
     """
 
     def test_relatorio_com_tipo_midia_desconhecido_ignorado(self, motor, gabarito_tipico, v_max_por_relatorio):
-        """Anexo com tipo de mídia não mapeado (ex: AUDIO) não deve quebrar nem adicionar bônus."""
+        """Anexo com tipo de mídia não mapeado (ex: DOCUMENTO) não deve quebrar nem adicionar bônus."""
         
         relatorio = Relatorio(
             id_cenario=10, 
-            titulo="Áudio", 
+            titulo="Documento", 
             atividade="A", 
             local="L",
             texto_descricao="", 
@@ -358,10 +356,14 @@ class TestResilienciaAnexos:
             dificuldade=1, 
             gabarito=gabarito_tipico
         )
-        
-        from core.model.anexo import AnexoAudio
-        
-        relatorio.adicionar_anexo(AnexoAudio(3, "audio.mp3"))
+
+        from core.model.anexo import Anexo
+
+        class AnexoDocumento(Anexo):
+            def get_tipo_midia(self) -> str:
+                return "DOCUMENTO"
+
+        relatorio.adicionar_anexo(AnexoDocumento(3, "doc.pdf"))
         resultado = motor.calcular_meta_turno([relatorio])
         v_max_sem_midia = 1000 + 2 * 250 + 1 * 250 + 1 * 100
         

@@ -9,12 +9,9 @@ from config.constants import DIRETORIO_BASE, QUANTIDADE_GERACAO
 from application.controllers.gerenciador_de_turno import GerenciadorDeTurno
 from core.model.relatorio import Relatorio
 from core.model.folha_de_gabarito import FolhaDeGabarito
-from core.model.folha_de_resposta import FolhaDeResposta
 
 
-# =============================================================================
 # Fixtures
-# =============================================================================
 
 @pytest.fixture
 def relatorio_fake():
@@ -37,22 +34,7 @@ def relatorio_fake():
     )
 
 
-@pytest.fixture
-def relatorio_com_resposta(relatorio_fake):
-    """Relatório com a resposta do jogador já anexada."""
-    respostas = FolhaDeResposta(
-        riscos=["FISICO"],
-        fatores_inseguranca=["ATO_INSEGURO"],
-        decisao_tomada="ADVERTIR",
-        tempo_gasto_segundos=45,
-    )
-    relatorio_fake.anexar_resposta_jogador(respostas)
-    return relatorio_fake
-
-
-# =============================================================================
 # Testes de Inicialização
-# =============================================================================
 
 class TestInicializacao:
     """
@@ -80,12 +62,39 @@ class TestInicializacao:
         foi carregada — deve estar vazia.
         """
         g = GerenciadorDeTurno("DEFAULT")
-        assert g.qnt_relatorios() == 0
+        assert g._GerenciadorDeTurno__pilha_relatorios == []
+
+    def test_turno_nao_iniciado_bloqueia_qnt(self):
+        """
+        Turno não iniciado bloqueia qnt_relatorios.
+
+        Chamar qnt_relatorios() antes de iniciar_turno() deve lançar
+        exceção.
+        """
+        g = GerenciadorDeTurno("DEFAULT")
+        with pytest.raises(Exception, match="Turno ainda n"):
+            g.qnt_relatorios()
+
+    def test_turno_nao_iniciado_bloqueia_obter(self):
+        """obter_relatorio_da_pilha() antes de iniciar_turno() lança exceção."""
+        g = GerenciadorDeTurno("DEFAULT")
+        with pytest.raises(Exception, match="Turno ainda n"):
+            g.obter_relatorio_da_pilha()
+
+    def test_turno_nao_iniciado_bloqueia_avaliar(self):
+        """avaliar_respostas_jogador() antes de iniciar_turno() lança exceção."""
+        g = GerenciadorDeTurno("DEFAULT")
+        with pytest.raises(Exception, match="Turno ainda n"):
+            g.avaliar_respostas_jogador(["FISICO"], ["ATO_INSEGURO"], "ADVERTIR", 45)
+
+    def test_turno_nao_iniciado_bloqueia_vitoria(self):
+        """verificar_vitoria_do_turno() antes de iniciar_turno() lança exceção."""
+        g = GerenciadorDeTurno("DEFAULT")
+        with pytest.raises(Exception, match="Turno ainda n"):
+            g.verificar_vitoria_do_turno()
 
 
-# =============================================================================
 # Testes de Inicialização do Turno (iniciar_turno)
-# =============================================================================
 
 class TestIniciarTurno:
     """
@@ -218,10 +227,35 @@ class TestIniciarTurno:
         with pytest.raises(ValueError, match="corrompido"):
             g.iniciar_turno()
 
+    @patch("application.controllers.gerenciador_de_turno.MotorDePontuacao")
+    @patch("application.controllers.gerenciador_de_turno.FabricaDeRelatorios")
+    @patch("application.controllers.gerenciador_de_turno.RepositorioJSON")
+    def test_iniciar_turno_duas_vezes_lanca_excecao(
+        self, mock_repo_cls, mock_fabrica_cls, mock_motor_cls, relatorio_fake
+    ):
+        """
+        Iniciar turno duas vezes lança exceção.
 
-# =============================================================================
+        Chamar iniciar_turno() duas vezes deve lançar Exception.
+        """
+        mock_repo = MagicMock()
+        mock_repo.extrair_dados.return_value = ["dto"]
+        mock_repo_cls.return_value = mock_repo
+
+        mock_fabrica_cls.construir_pilha.return_value = [relatorio_fake]
+
+        mock_motor = MagicMock()
+        mock_motor.calcular_meta_turno.return_value = 1000.0
+        mock_motor_cls.return_value = mock_motor
+
+        g = GerenciadorDeTurno("DEFAULT")
+        g.iniciar_turno()
+
+        with pytest.raises(Exception, match="não pode ser iniciado"):
+            g.iniciar_turno()
+
+
 # Testes de Controle da Pilha
-# =============================================================================
 
 class TestManipulacaoDePilha:
     """
@@ -239,6 +273,7 @@ class TestManipulacaoDePilha:
         qnt_relatorios() deve retornar 2.
         """
         g = GerenciadorDeTurno("DEFAULT")
+        g._GerenciadorDeTurno__turno_iniciado = True
         g._GerenciadorDeTurno__pilha_relatorios = [relatorio_fake, relatorio_fake]
 
         assert g.qnt_relatorios() == 2
@@ -268,6 +303,7 @@ class TestManipulacaoDePilha:
         )
 
         g = GerenciadorDeTurno("DEFAULT")
+        g._GerenciadorDeTurno__turno_iniciado = True
         g._GerenciadorDeTurno__pilha_relatorios = [relatorio_fake, relatorio_b]
 
         resultado = g.obter_relatorio_da_pilha()
@@ -275,10 +311,24 @@ class TestManipulacaoDePilha:
         assert resultado.id_cenario == 2
         assert g.qnt_relatorios() == 1
 
+    def test_obter_relatorio_sem_avaliar_anterior_bloqueia(self, relatorio_fake):
+        """
+        Obter relatório sem avaliar o anterior bloqueia.
 
-# =============================================================================
+        Após obter um relatório, uma segunda chamada sem avaliá-lo
+        deve lançar RuntimeError.
+        """
+        g = GerenciadorDeTurno("DEFAULT")
+        g._GerenciadorDeTurno__turno_iniciado = True
+        g._GerenciadorDeTurno__pilha_relatorios = [relatorio_fake, relatorio_fake]
+
+        g.obter_relatorio_da_pilha()
+
+        with pytest.raises(RuntimeError, match="ainda não foi avaliado"):
+            g.obter_relatorio_da_pilha()
+
+
 # Testes de Avaliação e Pontuação
-# =============================================================================
 
 class TestAvaliacaoDeRespostas:
     """
@@ -288,21 +338,18 @@ class TestAvaliacaoDeRespostas:
     contra relatório sem resposta anexada e o acúmulo correto da pontuação.
     """
 
-    def test_avaliar_respostas_sem_folha_anexada_lanca_excecao(
-        self, relatorio_fake
-    ):
+    def test_avaliar_respostas_sem_obter_pilha_lanca_excecao(self):
         """
-        Relatório sem Resposta Lança Exceção
+        Avaliar sem obter relatório da pilha lança exceção.
 
-        Passar um Relatorio que ainda não teve a resposta anexada.
-        O sistema deve lançar ValueError com a tag [Erro - Turno].
+        Chamar avaliar_respostas_jogador() sem antes chamar
+        obter_relatorio_da_pilha() deve lançar RuntimeError.
         """
         g = GerenciadorDeTurno("DEFAULT")
+        g._GerenciadorDeTurno__turno_iniciado = True
 
-        with pytest.raises(
-            ValueError, match="n\u00e3o possui resposta anexada"
-        ):
-            g.avaliar_respostas_jogador(relatorio_fake)
+        with pytest.raises(RuntimeError, match="Nenhum relatório foi obtido"):
+            g.avaliar_respostas_jogador(["FISICO"], ["ATO_INSEGURO"], "ADVERTIR", 45)
 
     @patch("application.controllers.gerenciador_de_turno.MotorDePontuacao.calcular_pontuacao_relatorio")
     @patch("application.controllers.gerenciador_de_turno.MotorDePontuacao.calcular_vmax_relatorio")
@@ -312,7 +359,7 @@ class TestAvaliacaoDeRespostas:
         mock_diagnostico_cls,
         mock_calc_vmax,
         mock_calc_pontuacao,
-        relatorio_com_resposta,
+        relatorio_fake,
     ):
         """
         Acumula Pontuação com Sucesso
@@ -329,16 +376,60 @@ class TestAvaliacaoDeRespostas:
         mock_calc_pontuacao.return_value = 1500.0
 
         g = GerenciadorDeTurno("DEFAULT")
-        pontuacao = g.avaliar_respostas_jogador(relatorio_com_resposta)
+        g._GerenciadorDeTurno__turno_iniciado = True
+        g._GerenciadorDeTurno__relatorio_atual = relatorio_fake
+
+        pontuacao = g.avaliar_respostas_jogador(
+            riscos_marcados=["FISICO"],
+            fatores_marcados=["ATO_INSEGURO"],
+            decisao="ADVERTIR",
+            tempo_segundos=45,
+        )
 
         assert pontuacao == 1500.0
         assert g._GerenciadorDeTurno__pontuacao_acumulada_turno == 1500.0
+        assert g._GerenciadorDeTurno__relatorio_atual is None
         mock_diagnostico.gerar_diagnostico_pontuacao.assert_called_once()
 
+    @patch("application.controllers.gerenciador_de_turno.MotorDePontuacao.calcular_pontuacao_relatorio")
+    @patch("application.controllers.gerenciador_de_turno.MotorDePontuacao.calcular_vmax_relatorio")
+    @patch("application.controllers.gerenciador_de_turno.DiagnosticoDeResposta")
+    def test_avaliar_libera_relatorio_atual_para_proximo_pop(
+        self,
+        mock_diagnostico_cls,
+        mock_calc_vmax,
+        mock_calc_pontuacao,
+        relatorio_fake,
+    ):
+        """
+        Avaliar libera relatorio_atual para o próximo pop.
 
-# =============================================================================
+        Após avaliar com sucesso, o relatorio_atual deve ser None,
+        permitindo obter o próximo relatório da pilha.
+        """
+        mock_diagnostico = MagicMock()
+        mock_diagnostico.gerar_diagnostico_pontuacao.return_value = "diagnostico_fake"
+        mock_diagnostico_cls.return_value = mock_diagnostico
+        mock_calc_vmax.return_value = 5000.0
+        mock_calc_pontuacao.return_value = 1500.0
+
+        g = GerenciadorDeTurno("DEFAULT")
+        g._GerenciadorDeTurno__turno_iniciado = True
+        g._GerenciadorDeTurno__pilha_relatorios = [relatorio_fake, relatorio_fake]
+        g._GerenciadorDeTurno__relatorio_atual = relatorio_fake
+
+        g.avaliar_respostas_jogador(
+            riscos_marcados=["FISICO"],
+            fatores_marcados=["ATO_INSEGURO"],
+            decisao="ADVERTIR",
+            tempo_segundos=45,
+        )
+
+        prox = g.obter_relatorio_da_pilha()
+        assert prox is relatorio_fake
+
+
 # Testes de Encerramento do Turno
-# =============================================================================
 
 class TestVerificarVitoria:
     """
@@ -347,6 +438,22 @@ class TestVerificarVitoria:
     Garantir que a vitória só pode ser verificada com a pilha vazia e
     que o resultado reflete corretamente o limiar de aprovação.
     """
+
+    def test_verificar_vitoria_com_relatorio_pendente_lanca_excecao(
+        self, relatorio_fake
+    ):
+        """
+        Relatório pendente lança exceção.
+
+        Chamar verificar_vitoria_do_turno() com relatorio_atual ainda
+        pendente deve lançar RuntimeError.
+        """
+        g = GerenciadorDeTurno("DEFAULT")
+        g._GerenciadorDeTurno__turno_iniciado = True
+        g._GerenciadorDeTurno__relatorio_atual = relatorio_fake
+
+        with pytest.raises(RuntimeError, match="pendente de avaliação"):
+            g.verificar_vitoria_do_turno()
 
     def test_verificar_vitoria_com_pilha_nao_vazia_lanca_excecao(
         self, relatorio_fake
@@ -358,6 +465,7 @@ class TestVerificarVitoria:
         relatórios deve lançar ValueError com a tag [Erro - Turno].
         """
         g = GerenciadorDeTurno("DEFAULT")
+        g._GerenciadorDeTurno__turno_iniciado = True
         g._GerenciadorDeTurno__pilha_relatorios = [relatorio_fake]
 
         with pytest.raises(ValueError, match="\\[Erro - Turno\\]"):
@@ -376,6 +484,7 @@ class TestVerificarVitoria:
         mock_conferir.return_value = True
 
         g = GerenciadorDeTurno("DEFAULT")
+        g._GerenciadorDeTurno__turno_iniciado = True
         g._GerenciadorDeTurno__pilha_relatorios = []
         g._GerenciadorDeTurno__pontuacao_acumulada_turno = 8000.0
         g._GerenciadorDeTurno__v_max_turno = 10000.0
@@ -396,6 +505,7 @@ class TestVerificarVitoria:
         mock_conferir.return_value = False
 
         g = GerenciadorDeTurno("DEFAULT")
+        g._GerenciadorDeTurno__turno_iniciado = True
         g._GerenciadorDeTurno__pilha_relatorios = []
         g._GerenciadorDeTurno__pontuacao_acumulada_turno = 3000.0
         g._GerenciadorDeTurno__v_max_turno = 10000.0
