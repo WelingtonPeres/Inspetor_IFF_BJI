@@ -20,11 +20,12 @@ class GameManager:
 
     def __init__(self, view):
         """
-        Injeta a View (interface burra) e inicializa o estado da campanha.
+        Injeta a View e inicializa o estado da campanha.
         A View deve expor métodos como:
           - inicializar()
           - fechar()
           - exibir_menu()
+          - exibir_selecao_perfil()
           - trocar_para_tela_inspecao()
           - exibir_tela_diagnostico(resultado_dto)
           - renderizar_relatorio(dados_relatorio)
@@ -32,7 +33,7 @@ class GameManager:
           - exibir_popup_erro(mensagem)
         """
 
-        self.__view = view # view vai vir aqui
+        self.__view = view
         
         self.__estado_atual: str = self.ESTADO_MENU
         self.__gerenciador_turno = None
@@ -67,6 +68,25 @@ class GameManager:
         self.__pontuacao_global = 0.0
         self.__estado_atual = self.ESTADO_MENU
         # TODO: view.exibir_menu()
+
+    def on_iniciar_solicitado(self) -> None:
+        """
+        Recebe o sinal ``btn_iniciar_clicado`` da ``ViewMenuInicial``.
+        Instrui a View a exibir a tela de seleção de perfil.
+        """
+        # TODO: view.exibir_selecao_perfil()
+        pass
+
+    def iniciar_expediente(self, perfil: str) -> None:
+        """
+        Recebe o perfil escolhido via sinal ``perfil_confirmado(str)``
+        da ``ViewSelecaoPerfil``. Valida o estado e delega para
+        ``__iniciar_campanha()``.
+        """
+        if self.__estado_atual != self.ESTADO_MENU:
+            raise RuntimeError("[Erro - GameManager] Expediente so pode ser iniciado pelo menu.")
+
+        self.__iniciar_campanha(perfil)
 
     def requisitar_dados_relatorio_atual(self) -> Dict[str, Any]:
         """
@@ -136,8 +156,6 @@ class GameManager:
         #           self.__view.trocar_para_tela_inspecao()
         #           self.__view.renderizar_relatorio(self.requisitar_dados_relatorio_atual())
         pass
-
-    # ── Privados (orquestração interna) ────────────────────────────
 
     def __iniciar_campanha(self, perfil: str) -> None:
         """
