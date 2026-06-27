@@ -17,4 +17,5 @@ class DiagnosticoPontuacaoDTO:
     estado_condicao: bool
     
     status_decisao_jogador: str
-    tempo_resposta_segundos: float 
+    tempo_resposta_segundos: float
+    pontuacao_final: float = 0.0 

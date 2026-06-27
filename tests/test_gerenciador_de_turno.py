@@ -7,11 +7,27 @@ from unittest.mock import patch, MagicMock
 
 from config.constants import DIRETORIO_BASE, QUANTIDADE_GERACAO
 from application.controllers.gerenciador_de_turno import GerenciadorDeTurno
+from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
 from core.model.relatorio import Relatorio
 from core.model.folha_de_gabarito import FolhaDeGabarito
 
 
 # Fixtures
+
+@pytest.fixture
+def diagnostico_fake():
+    """DiagnosticoPontuacaoDTO fake para usar como retorno do mock."""
+    return DiagnosticoPontuacaoDTO(
+        qnt_riscos_marcados=1,
+        qnt_riscos_gabarito=1,
+        qnt_riscos_corretos_marcados=1,
+        estado_ato=True,
+        estado_condicao=True,
+        status_decisao_jogador="OTIMA",
+        tempo_resposta_segundos=45.0,
+        pontuacao_final=1500.0,
+    )
+
 
 @pytest.fixture
 def relatorio_fake():
@@ -360,16 +376,18 @@ class TestAvaliacaoDeRespostas:
         mock_calc_vmax,
         mock_calc_pontuacao,
         relatorio_fake,
+        diagnostico_fake,
     ):
         """
         Acumula Pontuação com Sucesso
 
-        Mockar o DiagnosticoDeResposta e o MotorDePontuacao para que a
-        nota final retorne 1500.0. O método deve retornar 1500.0 e a
+        Mockar o DiagnosticoDeResposta para retornar um DTO fake e o
+        MotorDePontuacao para que a nota final retorne 1500.0.
+        O método deve retornar o DTO com pontuacao_final=1500.0 e a
         pontuação acumulada deve ser incrementada com esse valor.
         """
         mock_diagnostico = MagicMock()
-        mock_diagnostico.gerar_diagnostico_pontuacao.return_value = "diagnostico_fake"
+        mock_diagnostico.gerar_diagnostico_pontuacao.return_value = diagnostico_fake
         mock_diagnostico_cls.return_value = mock_diagnostico
 
         mock_calc_vmax.return_value = 5000.0
@@ -379,14 +397,14 @@ class TestAvaliacaoDeRespostas:
         g._GerenciadorDeTurno__turno_iniciado = True
         g._GerenciadorDeTurno__relatorio_atual = relatorio_fake
 
-        pontuacao = g.avaliar_respostas_jogador(
+        resultado = g.avaliar_respostas_jogador(
             riscos_marcados=["FISICO"],
             fatores_marcados=["ATO_INSEGURO"],
             decisao="ADVERTIR",
             tempo_segundos=45,
         )
 
-        assert pontuacao == 1500.0
+        assert resultado.pontuacao_final == 1500.0
         assert g._GerenciadorDeTurno__pontuacao_acumulada_turno == 1500.0
         assert g._GerenciadorDeTurno__relatorio_atual is None
         mock_diagnostico.gerar_diagnostico_pontuacao.assert_called_once()
@@ -400,6 +418,7 @@ class TestAvaliacaoDeRespostas:
         mock_calc_vmax,
         mock_calc_pontuacao,
         relatorio_fake,
+        diagnostico_fake,
     ):
         """
         Avaliar libera relatorio_atual para o próximo pop.
@@ -408,7 +427,7 @@ class TestAvaliacaoDeRespostas:
         permitindo obter o próximo relatório da pilha.
         """
         mock_diagnostico = MagicMock()
-        mock_diagnostico.gerar_diagnostico_pontuacao.return_value = "diagnostico_fake"
+        mock_diagnostico.gerar_diagnostico_pontuacao.return_value = diagnostico_fake
         mock_diagnostico_cls.return_value = mock_diagnostico
         mock_calc_vmax.return_value = 5000.0
         mock_calc_pontuacao.return_value = 1500.0
