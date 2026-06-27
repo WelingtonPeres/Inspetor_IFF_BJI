@@ -2,6 +2,7 @@ import logging
 from typing import List, Optional
 
 from config.constants import DIRETORIO_BASE, QUANTIDADE_GERACAO
+from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
 from core.model.relatorio import Relatorio
 from core.model.folha_de_resposta import FolhaDeResposta
 from core.services.motor_de_pontuacao import MotorDePontuacao
@@ -84,7 +85,7 @@ class GerenciadorDeTurno:
                                   riscos_marcados: List[str],
                                   fatores_marcados: List[str],
                                   decisao: str,
-                                  tempo_segundos: int) -> float:
+                                  tempo_segundos: int) -> DiagnosticoPontuacaoDTO:
         """Calcula a pontuacao do relatorio respondido e acumula no turno."""
 
         if not self.__turno_iniciado:
@@ -103,10 +104,21 @@ class GerenciadorDeTurno:
         v_max = self.__motor_pontuacao.calcular_vmax_relatorio(self.__relatorio_atual)
         pontuacao_final = self.__motor_pontuacao.calcular_pontuacao_relatorio(v_max, dados_pontuacao)
 
+        diagnostico_com_nota = DiagnosticoPontuacaoDTO(
+            qnt_riscos_marcados=dados_pontuacao.qnt_riscos_marcados,
+            qnt_riscos_gabarito=dados_pontuacao.qnt_riscos_gabarito,
+            qnt_riscos_corretos_marcados=dados_pontuacao.qnt_riscos_corretos_marcados,
+            estado_ato=dados_pontuacao.estado_ato,
+            estado_condicao=dados_pontuacao.estado_condicao,
+            status_decisao_jogador=dados_pontuacao.status_decisao_jogador,
+            tempo_resposta_segundos=dados_pontuacao.tempo_resposta_segundos,
+            pontuacao_final=pontuacao_final,
+        )
+
         self.__pontuacao_acumulada_turno += pontuacao_final
         self.__relatorio_atual = None
 
-        return pontuacao_final
+        return diagnostico_com_nota
 
     def __processar_submissao_jogador(self,
                                       riscos_marcados: List[str],

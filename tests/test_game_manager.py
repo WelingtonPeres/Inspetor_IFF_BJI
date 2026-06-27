@@ -6,6 +6,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 
 from application.controllers.game_manager import GameManager
+from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
 
 
 # Fixtures
@@ -20,6 +21,21 @@ def view_mock():
 def gm(view_mock):
     """GameManager com View mockada, pronto para testes."""
     return GameManager(view_mock)
+
+
+@pytest.fixture
+def diagnostico_dto_fake():
+    """DiagnosticoPontuacaoDTO fake com pontuacao_final=1500.0 para testes de submissao."""
+    return DiagnosticoPontuacaoDTO(
+        qnt_riscos_marcados=1,
+        qnt_riscos_gabarito=1,
+        qnt_riscos_corretos_marcados=1,
+        estado_ato=True,
+        estado_condicao=True,
+        status_decisao_jogador="OTIMA",
+        tempo_resposta_segundos=45.0,
+        pontuacao_final=1500.0,
+    )
 
 
 # Testes de Inicialização
@@ -172,11 +188,17 @@ class TestIniciarExpediente:
         Fluxo Feliz do Expediente
 
         Mockar o GerenciadorDeTurno para que retorne um turno válido.
-        Chamar iniciar_expediente deve criar o turno, iniciá-lo e
-        instruir a View a trocar para a tela de inspeção.
+        Chamar iniciar_expediente deve criar o turno, iniciá-lo,
+        renderizar o primeiro relatório e instruir a View a trocar
+        para a tela de inspeção.
         """
+        dados_esperados = {"id_cenario": 1, "titulo": "Primeiro"}
+        mock_relatorio = MagicMock()
+        mock_relatorio.extrair_apresentacao_relatorio.return_value = dados_esperados
+
         mock_turno = MagicMock()
         mock_turno.iniciar_turno.return_value = True
+        mock_turno.obter_relatorio_da_pilha.return_value = mock_relatorio
         mock_turno_cls.return_value = mock_turno
 
         gm.iniciar_expediente("T_MEIO_AMBIENTE")
@@ -189,7 +211,9 @@ class TestIniciarExpediente:
 
         mock_turno_cls.assert_called_once_with("T_MEIO_AMBIENTE")
         mock_turno.iniciar_turno.assert_called_once_with()
+        mock_turno.obter_relatorio_da_pilha.assert_called_once()
         view_mock.trocar_para_tela_inspecao.assert_called_once_with()
+        view_mock.renderizar_relatorio.assert_called_once_with(dados_esperados)
 
     def test_iniciar_expediente_fora_do_menu_lanca_erro(self, gm):
         """
@@ -269,17 +293,17 @@ class TestProcessarSubmissao:
 
     @patch("application.controllers.game_manager.GerenciadorDeTurno")
     def test_submissao_com_sucesso_acumula_pontuacao(
-        self, mock_turno_cls, gm, view_mock
+        self, mock_turno_cls, gm, view_mock, diagnostico_dto_fake
     ):
         """
         Submissão com Sucesso Acumula Pontuação
 
-        Mockar o turno para retornar 1500.0 de pontuação. O método
-        deve acumular esse valor na pontuação global e chamar
-        view.exibir_tela_diagnostico com a pontuação.
+        Mockar o turno para retornar um DiagnosticoPontuacaoDTO com
+        pontuacao_final=1500.0. O método deve acumular esse valor na
+        pontuação global e chamar view.exibir_tela_diagnostico com o DTO.
         """
         mock_turno = MagicMock()
-        mock_turno.avaliar_respostas_jogador.return_value = 1500.0
+        mock_turno.avaliar_respostas_jogador.return_value = diagnostico_dto_fake
         mock_turno_cls.return_value = mock_turno
 
         gm._GameManager__gerenciador_turno = mock_turno
@@ -300,7 +324,7 @@ class TestProcessarSubmissao:
             decisao="ADVERTIR",
             tempo_segundos=45,
         )
-        view_mock.exibir_tela_diagnostico.assert_called_once_with(1500.0)
+        view_mock.exibir_tela_diagnostico.assert_called_once_with(diagnostico_dto_fake)
 
     @patch("application.controllers.game_manager.GerenciadorDeTurno")
     def test_submissao_captura_value_error_e_exibe_popup(
@@ -386,11 +410,17 @@ class TestAvancarFilaOuDia:
         Avançar sem Relatórios Inicia Próximo Dia
 
         Se a pilha está vazia (qnt_relatorios == 0) e dias_concluidos
-        ainda não atingiu o limite da campanha, deve iniciar o próximo dia.
+        ainda não atingiu o limite da campanha, deve iniciar o próximo dia
+        com o primeiro relatório já renderizado.
         """
+        dados_esperados = {"id_cenario": 1, "titulo": "Novo Dia"}
+        mock_relatorio = MagicMock()
+        mock_relatorio.extrair_apresentacao_relatorio.return_value = dados_esperados
+
         mock_turno = MagicMock()
         mock_turno.qnt_relatorios.return_value = 0
         mock_turno.iniciar_turno.return_value = True
+        mock_turno.obter_relatorio_da_pilha.return_value = mock_relatorio
         mock_turno_cls.return_value = mock_turno
 
         gm._GameManager__gerenciador_turno = mock_turno
@@ -403,7 +433,9 @@ class TestAvancarFilaOuDia:
         assert gm._GameManager__estado_atual == GameManager.ESTADO_EXPEDIENTE
         mock_turno_cls.assert_called_with("T_QUIMICA")
         mock_turno.iniciar_turno.assert_called_once()
+        mock_turno.obter_relatorio_da_pilha.assert_called_once()
         view_mock.trocar_para_tela_inspecao.assert_called_once()
+        view_mock.renderizar_relatorio.assert_called_once_with(dados_esperados)
 
     @patch("application.controllers.game_manager.GerenciadorDeTurno")
     def test_avancar_ultimo_dia_encerra_campanha(

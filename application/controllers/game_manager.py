@@ -2,6 +2,7 @@ import logging
 from typing import Any, Dict, Optional
 
 from application.controllers.gerenciador_de_turno import GerenciadorDeTurno
+from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ class GameManager:
           - exibir_menu()
           - exibir_selecao_perfil()
           - trocar_para_tela_inspecao()
-          - exibir_tela_diagnostico(pontuacao: float)
+          - exibir_tela_diagnostico(diagnostico: DiagnosticoPontuacaoDTO)
           - renderizar_relatorio(dados_relatorio: dict)
           - exibir_resultado(pontuacao_global: float, dias_concluidos: int)
           - exibir_popup_erro(mensagem: str)
@@ -37,13 +38,11 @@ class GameManager:
         self.__view = view
 
         self.__estado_atual: str = self.ESTADO_MENU
-        self.__gerenciador_turno: Optional[GerenciadorDeTurno] = None
+        self.__gerenciador_turno = None
 
         self.__perfil_selecionado: str = ""
         self.__dias_concluidos: int = 0
         self.__pontuacao_global: float = 0.0
-
-    # ── Públicos (chamados pela View) ──────────────────────────────
 
     def iniciar_aplicacao(self) -> None:
         """
@@ -122,15 +121,15 @@ class GameManager:
             raise RuntimeError("[Erro - GameManager] Nenhum turno ativo.")
 
         try:
-            pontuacao = self.__gerenciador_turno.avaliar_respostas_jogador(
+            diagnostico_dto: DiagnosticoPontuacaoDTO = self.__gerenciador_turno.avaliar_respostas_jogador(
                 riscos_marcados=respostas_jogador["riscos"],
                 fatores_marcados=respostas_jogador["fatores"],
                 decisao=respostas_jogador["decisao"],
                 tempo_segundos=respostas_jogador["tempo_segundos"],
             )
 
-            self.__pontuacao_global += pontuacao
-            self.__view.exibir_tela_diagnostico(pontuacao)
+            self.__pontuacao_global += diagnostico_dto.pontuacao_final
+            self.__view.exibir_tela_diagnostico(diagnostico_dto)
 
         except ValueError as erro_negocio:
             self.__view.exibir_popup_erro(str(erro_negocio))
@@ -161,8 +160,6 @@ class GameManager:
             dados = self.requisitar_dados_relatorio_atual()
             self.__view.renderizar_relatorio(dados)
 
-    # ── Privados (orquestração interna) ────────────────────────────
-
     def __iniciar_campanha(self, perfil: str) -> None:
         """
         Inicia uma nova campanha para o perfil escolhido.
@@ -186,9 +183,19 @@ class GameManager:
     def __iniciar_dia(self, dia: int) -> None:
         """
         Cria um novo GerenciadorDeTurno para o dia especificado
-        e prepara o expediente.
+        e prepara o expediente com o primeiro relatório já renderizado.
         """
-        self.__gerenciador_turno = GerenciadorDeTurno(self.__perfil_selecionado)
-        self.__gerenciador_turno.iniciar_turno()
-        self.__estado_atual = self.ESTADO_EXPEDIENTE
-        self.__view.trocar_para_tela_inspecao()
+        try:
+            self.__gerenciador_turno = GerenciadorDeTurno(self.__perfil_selecionado)
+            self.__gerenciador_turno.iniciar_turno()
+
+            self.__estado_atual = self.ESTADO_EXPEDIENTE
+            self.__view.trocar_para_tela_inspecao()
+
+            dados = self.requisitar_dados_relatorio_atual()
+            self.__view.renderizar_relatorio(dados)
+
+        except Exception as erro:
+            logger.error(f"Erro ao carregar o dia {dia}: {erro}")
+            self.__view.exibir_popup_erro(f"Falha ao carregar os dados do expediente: {erro}")
+            self.carregar_menu_principal()
