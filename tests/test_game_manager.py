@@ -1,0 +1,440 @@
+"""
+Suite completa de testes para o GameManager.
+"""
+
+import pytest
+from unittest.mock import MagicMock, patch
+
+from application.controllers.game_manager import GameManager
+
+
+# Fixtures
+
+@pytest.fixture
+def view_mock():
+    """Mock da View injetada no GameManager."""
+    return MagicMock()
+
+
+@pytest.fixture
+def gm(view_mock):
+    """GameManager com View mockada, pronto para testes."""
+    return GameManager(view_mock)
+
+
+# Testes de Inicialização
+
+class TestInicializacao:
+    """
+    Testes de Construção e Estado Inicial
+
+    Garantir que o GameManager é instanciado corretamente com a View injetada
+    e que o estado inicial reflete o menu sem campanha ativa.
+    """
+
+    def test_estado_inicial_menu(self, gm):
+        """
+        Estado Inicial é ESTADO_MENU
+
+        Ao instanciar o GameManager, o estado deve ser ESTADO_MENU,
+        nenhum turno ativo e nenhum perfil selecionado.
+        """
+        assert gm._GameManager__estado_atual == GameManager.ESTADO_MENU
+        assert gm._GameManager__gerenciador_turno is None
+        assert gm._GameManager__perfil_selecionado == ""
+        assert gm._GameManager__dias_concluidos == 0
+        assert gm._GameManager__pontuacao_global == 0.0
+
+    def test_view_injetada(self, gm, view_mock):
+        """
+        View Injetada Corretamente
+
+        A view passada no construtor deve ser armazenada internamente.
+        """
+        assert gm._GameManager__view is view_mock
+
+
+# Testes de Carregamento do Menu
+
+class TestCarregarMenuPrincipal:
+    """
+    Testes do Método carregar_menu_principal
+
+    Validar que o método reseta corretamente o estado da campanha
+    e instrui a View a exibir o menu.
+    """
+
+    def test_reseta_estado_para_menu(self, gm):
+        """
+        Reseta Estado para Menu
+
+        Configurar um estado de campanha ativa e depois chamar
+        carregar_menu_principal. O estado deve voltar ao inicial.
+        """
+        gm._GameManager__estado_atual = GameManager.ESTADO_EXPEDIENTE
+        gm._GameManager__perfil_selecionado = "T_QUIMICA"
+        gm._GameManager__dias_concluidos = 2
+        gm._GameManager__pontuacao_global = 5000.0
+
+        gm.carregar_menu_principal()
+
+        assert gm._GameManager__estado_atual == GameManager.ESTADO_MENU
+        assert gm._GameManager__gerenciador_turno is None
+        assert gm._GameManager__perfil_selecionado == ""
+        assert gm._GameManager__dias_concluidos == 0
+        assert gm._GameManager__pontuacao_global == 0.0
+
+    def test_view_exibir_menu_chamado(self, gm, view_mock):
+        """
+        View.exibir_menu é Chamado
+
+        carregar_menu_principal deve chamar o método exibir_menu da View.
+        """
+        gm.carregar_menu_principal()
+        view_mock.exibir_menu.assert_called_once_with()
+
+
+# Testes de Início de Aplicação
+
+class TestIniciarAplicacao:
+    """
+    Testes do Método iniciar_aplicacao
+
+    Validar que a aplicação inicializa a View e carrega o menu principal.
+    """
+
+    def test_inicializa_view_e_carrega_menu(self, gm, view_mock):
+        """
+        Inicializa View e Carrega Menu
+
+        iniciar_aplicacao deve chamar view.inicializar() e depois
+        carregar_menu_principal.
+        """
+        gm.iniciar_aplicacao()
+
+        view_mock.inicializar.assert_called_once_with()
+        view_mock.exibir_menu.assert_called_once_with()
+
+
+# Testes de Encerramento
+
+class TestEncerrarAplicacao:
+    """
+    Testes do Método encerrar_aplicacao
+
+    Validar que a aplicação instrui a View a fechar.
+    """
+
+    def test_view_fechar_chamado(self, gm, view_mock):
+        """
+        View.fechar é Chamado
+
+        encerrar_aplicacao deve chamar o método fechar da View.
+        """
+        gm.encerrar_aplicacao()
+        view_mock.fechar.assert_called_once_with()
+
+
+# Testes de on_iniciar_solicitado
+
+class TestOnIniciarSolicitado:
+    """
+    Testes do Método on_iniciar_solicitado
+
+    Validar que o método instrui a View a exibir a seleção de perfil.
+    """
+
+    def test_view_exibir_selecao_perfil_chamado(self, gm, view_mock):
+        """
+        View.exibir_selecao_perfil é Chamado
+
+        on_iniciar_solicitado deve chamar exibir_selecao_perfil da View.
+        """
+        gm.on_iniciar_solicitado()
+        view_mock.exibir_selecao_perfil.assert_called_once_with()
+
+
+# Testes de Iniciar Expediente
+
+class TestIniciarExpediente:
+    """
+    Testes do Método iniciar_expediente
+
+    Validar que o perfil é validado, a campanha é iniciada e o turno
+    é criado corretamente.
+    """
+
+    @patch("application.controllers.game_manager.GerenciadorDeTurno")
+    def test_iniciar_expediente_com_sucesso(
+        self, mock_turno_cls, gm, view_mock
+    ):
+        """
+        Fluxo Feliz do Expediente
+
+        Mockar o GerenciadorDeTurno para que retorne um turno válido.
+        Chamar iniciar_expediente deve criar o turno, iniciá-lo e
+        instruir a View a trocar para a tela de inspeção.
+        """
+        mock_turno = MagicMock()
+        mock_turno.iniciar_turno.return_value = True
+        mock_turno_cls.return_value = mock_turno
+
+        gm.iniciar_expediente("T_MEIO_AMBIENTE")
+
+        assert gm._GameManager__estado_atual == GameManager.ESTADO_EXPEDIENTE
+        assert gm._GameManager__perfil_selecionado == "T_MEIO_AMBIENTE"
+        assert gm._GameManager__dias_concluidos == 0
+        assert gm._GameManager__pontuacao_global == 0.0
+        assert gm._GameManager__gerenciador_turno is mock_turno
+
+        mock_turno_cls.assert_called_once_with("T_MEIO_AMBIENTE")
+        mock_turno.iniciar_turno.assert_called_once_with()
+        view_mock.trocar_para_tela_inspecao.assert_called_once_with()
+
+    def test_iniciar_expediente_fora_do_menu_lanca_erro(self, gm):
+        """
+        Expediente Fora do Menu Lança Erro
+
+        Chamar iniciar_expediente com estado diferente de ESTADO_MENU
+        deve lançar RuntimeError com a tag [Erro - GameManager].
+        """
+        gm._GameManager__estado_atual = GameManager.ESTADO_EXPEDIENTE
+
+        with pytest.raises(RuntimeError, match="\\[Erro - GameManager\\] Expediente"):
+            gm.iniciar_expediente("T_QUIMICA")
+
+
+# Testes de Requisição de Relatório
+
+class TestRequisitarDadosRelatorio:
+    """
+    Testes do Método requisitar_dados_relatorio_atual
+
+    Validar que os dados de apresentação do relatório são extraídos
+    corretamente do GerenciadorDeTurno.
+    """
+
+    @patch("application.controllers.game_manager.GerenciadorDeTurno")
+    def test_retorna_dict_de_apresentacao(self, mock_turno_cls, gm):
+        """
+        Retorna Dict de Apresentação
+
+        Configurar um turno mockado com um relatório fake que retorna
+        um dicionário. O método deve retornar esse dicionário.
+        """
+        dados_esperados = {
+            "id_cenario": 1,
+            "titulo": "Cenário Teste",
+            "atividade": "Inspeção",
+            "local": "Setor X",
+            "texto_descricao": "Descrição",
+            "envolvidos": ["Agente"],
+            "anexos": [],
+        }
+
+        mock_relatorio = MagicMock()
+        mock_relatorio.extrair_apresentacao_relatorio.return_value = dados_esperados
+
+        mock_turno = MagicMock()
+        mock_turno.obter_relatorio_da_pilha.return_value = mock_relatorio
+        mock_turno_cls.return_value = mock_turno
+
+        gm._GameManager__gerenciador_turno = mock_turno
+
+        resultado = gm.requisitar_dados_relatorio_atual()
+
+        assert resultado == dados_esperados
+        mock_turno.obter_relatorio_da_pilha.assert_called_once_with()
+
+    def test_sem_turno_ativo_lanca_erro(self, gm):
+        """
+        Sem Turno Ativo Lança Erro
+
+        Chamar requisitar_dados_relatorio_atual sem um turno ativo
+        deve lançar RuntimeError.
+        """
+        with pytest.raises(RuntimeError, match="\\[Erro - GameManager\\] Nenhum turno"):
+            gm.requisitar_dados_relatorio_atual()
+
+
+# Testes de Processamento de Submissão
+
+class TestProcessarSubmissao:
+    """
+    Testes do Método processar_submissao
+
+    Validar a delegação da avaliação para o GerenciadorDeTurno,
+    o acúmulo da pontuação global e o tratamento de erros.
+    """
+
+    @patch("application.controllers.game_manager.GerenciadorDeTurno")
+    def test_submissao_com_sucesso_acumula_pontuacao(
+        self, mock_turno_cls, gm, view_mock
+    ):
+        """
+        Submissão com Sucesso Acumula Pontuação
+
+        Mockar o turno para retornar 1500.0 de pontuação. O método
+        deve acumular esse valor na pontuação global e chamar
+        view.exibir_tela_diagnostico com a pontuação.
+        """
+        mock_turno = MagicMock()
+        mock_turno.avaliar_respostas_jogador.return_value = 1500.0
+        mock_turno_cls.return_value = mock_turno
+
+        gm._GameManager__gerenciador_turno = mock_turno
+        gm._GameManager__pontuacao_global = 500.0
+
+        gm.processar_submissao({
+            "riscos": ["FISICO"],
+            "fatores": ["ATO_INSEGURO"],
+            "decisao": "ADVERTIR",
+            "tempo_segundos": 45,
+        })
+
+        assert gm._GameManager__pontuacao_global == 2000.0
+
+        mock_turno.avaliar_respostas_jogador.assert_called_once_with(
+            riscos_marcados=["FISICO"],
+            fatores_marcados=["ATO_INSEGURO"],
+            decisao="ADVERTIR",
+            tempo_segundos=45,
+        )
+        view_mock.exibir_tela_diagnostico.assert_called_once_with(1500.0)
+
+    @patch("application.controllers.game_manager.GerenciadorDeTurno")
+    def test_submissao_captura_value_error_e_exibe_popup(
+        self, mock_turno_cls, gm, view_mock
+    ):
+        """
+        Submissão Captura ValueError
+
+        Se o turno lançar ValueError (regra de negócio violada),
+        o GameManager deve capturar e exibir o popup de erro na View.
+        """
+        mock_turno = MagicMock()
+        mock_turno.avaliar_respostas_jogador.side_effect = ValueError(
+            "[Erro - Turno] Decisão inválida."
+        )
+        mock_turno_cls.return_value = mock_turno
+
+        gm._GameManager__gerenciador_turno = mock_turno
+
+        gm.processar_submissao({
+            "riscos": [],
+            "fatores": [],
+            "decisao": "",
+            "tempo_segundos": 0,
+        })
+
+        view_mock.exibir_popup_erro.assert_called_once_with(
+            "[Erro - Turno] Decisão inválida."
+        )
+
+    def test_submissao_sem_turno_lanca_erro(self, gm):
+        """
+        Submissão sem Turno Lança Erro
+
+        Chamar processar_submissao sem um turno ativo deve lançar
+        RuntimeError.
+        """
+        with pytest.raises(RuntimeError, match="\\[Erro - GameManager\\] Nenhum turno"):
+            gm.processar_submissao({})
+
+
+# Testes de Avanço da Fila / Dia
+
+class TestAvancarFilaOuDia:
+    """
+    Testes do Método avancar_fila_ou_dia
+
+    Validar a lógica de decisão entre puxar o próximo relatório,
+    iniciar um novo dia ou encerrar a campanha.
+    """
+
+    @patch("application.controllers.game_manager.GerenciadorDeTurno")
+    def test_avancar_com_relatorios_restantes_volta_para_inspecao(
+        self, mock_turno_cls, gm, view_mock
+    ):
+        """
+        Avançar com Relatórios Restantes
+
+        Se ainda há relatórios na pilha, o método deve instruir a
+        View a trocar para a tela de inspeção e renderizar o próximo.
+        """
+        dados_esperados = {"id_cenario": 2, "titulo": "Próximo"}
+        mock_relatorio = MagicMock()
+        mock_relatorio.extrair_apresentacao_relatorio.return_value = dados_esperados
+
+        mock_turno = MagicMock()
+        mock_turno.qnt_relatorios.return_value = 2
+        mock_turno.obter_relatorio_da_pilha.return_value = mock_relatorio
+        mock_turno_cls.return_value = mock_turno
+
+        gm._GameManager__gerenciador_turno = mock_turno
+
+        gm.avancar_fila_ou_dia()
+
+        view_mock.trocar_para_tela_inspecao.assert_called_once_with()
+        view_mock.renderizar_relatorio.assert_called_once_with(dados_esperados)
+
+    @patch("application.controllers.game_manager.GerenciadorDeTurno")
+    def test_avancar_sem_relatorios_inicia_proximo_dia(
+        self, mock_turno_cls, gm, view_mock
+    ):
+        """
+        Avançar sem Relatórios Inicia Próximo Dia
+
+        Se a pilha está vazia (qnt_relatorios == 0) e dias_concluidos
+        ainda não atingiu o limite da campanha, deve iniciar o próximo dia.
+        """
+        mock_turno = MagicMock()
+        mock_turno.qnt_relatorios.return_value = 0
+        mock_turno.iniciar_turno.return_value = True
+        mock_turno_cls.return_value = mock_turno
+
+        gm._GameManager__gerenciador_turno = mock_turno
+        gm._GameManager__perfil_selecionado = "T_QUIMICA"
+        gm._GameManager__dias_concluidos = 1
+
+        gm.avancar_fila_ou_dia()
+
+        assert gm._GameManager__dias_concluidos == 2
+        assert gm._GameManager__estado_atual == GameManager.ESTADO_EXPEDIENTE
+        mock_turno_cls.assert_called_with("T_QUIMICA")
+        mock_turno.iniciar_turno.assert_called_once()
+        view_mock.trocar_para_tela_inspecao.assert_called_once()
+
+    @patch("application.controllers.game_manager.GerenciadorDeTurno")
+    def test_avancar_ultimo_dia_encerra_campanha(
+        self, mock_turno_cls, gm, view_mock
+    ):
+        """
+        Avançar no Último Dia Encerra Campanha
+
+        Se dias_concluidos atingir o limite da campanha, deve encerrar
+        a campanha e exibir o resultado.
+        """
+        mock_turno = MagicMock()
+        mock_turno.qnt_relatorios.return_value = 0
+        mock_turno_cls.return_value = mock_turno
+
+        gm._GameManager__gerenciador_turno = mock_turno
+        gm._GameManager__dias_concluidos = 2
+        gm._GameManager__pontuacao_global = 8500.0
+
+        gm.avancar_fila_ou_dia()
+
+        assert gm._GameManager__dias_concluidos == 3
+        assert gm._GameManager__estado_atual == GameManager.ESTADO_RESULTADO
+        view_mock.exibir_resultado.assert_called_once_with(8500.0, 3)
+
+    def test_avancar_sem_turno_lanca_erro(self, gm):
+        """
+        Avançar sem Turno Lança Erro
+
+        Chamar avancar_fila_ou_dia sem um turno ativo deve lançar
+        RuntimeError.
+        """
+        with pytest.raises(RuntimeError, match="\\[Erro - GameManager\\] Nenhum turno"):
+            gm.avancar_fila_ou_dia()
