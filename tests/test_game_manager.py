@@ -249,6 +249,18 @@ class TestIniciarExpediente:
         with pytest.raises(RuntimeError, match="\\[Erro - GameManager\\] Expediente"):
             gm.iniciar_expediente("T_QUIMICA")
 
+    def test_iniciar_campanha_guard_fora_do_menu_lanca_erro(self, gm):
+        """
+        Guarda de __iniciar_campanha Fora do Menu Lança Erro
+
+        Chamar __iniciar_campanha diretamente com estado diferente de
+        ESTADO_MENU deve lançar RuntimeError com a tag [Erro - GameManager].
+        """
+        gm._GameManager__estado_atual = GameManager.ESTADO_EXPEDIENTE
+
+        with pytest.raises(RuntimeError, match="\\[Erro - GameManager\\] Campanha"):
+            gm._GameManager__iniciar_campanha("T_QUIMICA")
+
 
 # Testes de Requisição de Relatório
 
@@ -375,6 +387,36 @@ class TestProcessarSubmissao:
 
         view_mock.exibir_popup_erro.assert_called_once_with(
             "[Erro - Turno] Decisão inválida."
+        )
+
+    @patch("application.controllers.game_manager.GerenciadorDeTurno")
+    def test_submissao_captura_exception_generico_e_exibe_popup(
+        self, mock_turno_cls, gm, view_mock
+    ):
+        """
+        Submissão Captura Exception Genérico
+
+        Se o turno lançar uma exceção que não seja ValueError
+        (ex: RuntimeError, KeyError), o GameManager deve capturar
+        e exibir popup genérico "Ocorreu um erro interno".
+        """
+        mock_turno = MagicMock()
+        mock_turno.avaliar_respostas_jogador.side_effect = RuntimeError(
+            "Falha inesperada no motor."
+        )
+        mock_turno_cls.return_value = mock_turno
+
+        gm._GameManager__gerenciador_turno = mock_turno
+
+        gm.processar_submissao({
+            "riscos": [],
+            "fatores": [],
+            "decisao": "",
+            "tempo_segundos": 0,
+        })
+
+        view_mock.exibir_popup_erro.assert_called_once_with(
+            "Ocorreu um erro interno ao processar o relatorio."
         )
 
     def test_submissao_sem_turno_lanca_erro(self, gm):
