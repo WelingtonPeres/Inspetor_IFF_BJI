@@ -36,7 +36,7 @@ LOG_LEVEL = (os.getenv("LOG_LEVEL") or _LEVEL_BY_ENV.get(ENV, "WARNING")).upper(
 LOG_DIR = Path("logs")
 LOG_DIR.mkdir(exist_ok=True)
 
-# ── Formato — sem timestamp, com módulo/função/linha ─────────────────────────
+# ── Formato: sem timestamp, com módulo/função/linha ─────────────────────────
 #    %(levelname)-8s  → nível alinhado em 8 chars  (ex: "INFO    ")
 #    %(name)s         → caminho do módulo           (ex: "services.payment")
 #    %(funcName)s     → nome da função              (ex: "process")

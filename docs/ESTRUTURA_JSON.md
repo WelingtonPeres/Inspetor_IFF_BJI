@@ -18,7 +18,7 @@ Desenvolvedores e *Level Designers* devem seguir rigorosamente este modelo ao cr
 
 ---
 
-## 2. JSON Schema — Estrutura Base
+## 2. JSON Schema: Estrutura Base
 
 O modelo estrutural genérico abaixo define o esqueleto que **todos** os cenários devem respeitar:
 
@@ -51,10 +51,10 @@ O modelo estrutural genérico abaixo define o esqueleto que **todos** os cenári
 ```
 
 **Notas sobre tipos de dados:**
-- `int` — número inteiro sem casas decimais;
-- `string` — texto entre aspas duplas (`"`);
-- `[...]` — array (lista ordenada de elementos do mesmo tipo);
-- `{...}` — objeto JSON (conjunto de pares chave-valor).
+- `int`: número inteiro sem casas decimais;
+- `string`: texto entre aspas duplas (`"`);
+- `[...]`: array (lista ordenada de elementos do mesmo tipo);
+- `{...}`: objeto JSON (conjunto de pares chave-valor).
 
 ---
 

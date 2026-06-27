@@ -59,7 +59,7 @@ class TestInicializacao:
         Pilha Vazia na Criação
 
         Ao instanciar o gerenciador, a pilha de relatórios ainda não
-        foi carregada — deve estar vazia.
+        foi carregada, deve estar vazia.
         """
         g = GerenciadorDeTurno("DEFAULT")
         assert g._GerenciadorDeTurno__pilha_relatorios == []
