@@ -215,6 +215,28 @@ class TestIniciarExpediente:
         view_mock.trocar_para_tela_inspecao.assert_called_once_with()
         view_mock.renderizar_relatorio.assert_called_once_with(dados_esperados)
 
+    def test_iniciar_expediente_perfil_invalido_retorna_ao_menu(self, gm, view_mock):
+        """
+        Expediente com Perfil Inválido Retorna ao Menu
+
+        Se o perfil não existir nos cursos válidos do RepositorioJSON,
+        o __iniciar_dia captura a exceção, exibe popup de erro e
+        retorna ao menu principal.
+        """
+        gm.iniciar_expediente("PERFIL_INVALIDO")
+
+        assert gm._GameManager__estado_atual == GameManager.ESTADO_MENU
+        assert gm._GameManager__gerenciador_turno is None
+        assert gm._GameManager__perfil_selecionado == ""
+        assert gm._GameManager__dias_concluidos == 0
+        assert gm._GameManager__pontuacao_global == 0.0
+        view_mock.exibir_popup_erro.assert_called_once()
+        args_chamada = view_mock.exibir_popup_erro.call_args[0][0]
+        assert "Falha ao carregar os dados do expediente" in args_chamada
+        assert "Curso" in args_chamada
+        assert "PERFIL_INVALIDO" in args_chamada
+        view_mock.exibir_menu.assert_called_once_with()
+
     def test_iniciar_expediente_fora_do_menu_lanca_erro(self, gm):
         """
         Expediente Fora do Menu Lança Erro
@@ -265,7 +287,7 @@ class TestRequisitarDadosRelatorio:
 
         gm._GameManager__gerenciador_turno = mock_turno
 
-        resultado = gm.requisitar_dados_relatorio_atual()
+        resultado = gm._GameManager__requisitar_dados_relatorio_atual()
 
         assert resultado == dados_esperados
         mock_turno.obter_relatorio_da_pilha.assert_called_once_with()
@@ -278,7 +300,7 @@ class TestRequisitarDadosRelatorio:
         deve lançar RuntimeError.
         """
         with pytest.raises(RuntimeError, match="\\[Erro - GameManager\\] Nenhum turno"):
-            gm.requisitar_dados_relatorio_atual()
+            gm._GameManager__requisitar_dados_relatorio_atual()
 
 
 # Testes de Processamento de Submissão
@@ -403,63 +425,28 @@ class TestAvancarFilaOuDia:
         view_mock.renderizar_relatorio.assert_called_once_with(dados_esperados)
 
     @patch("application.controllers.game_manager.GerenciadorDeTurno")
-    def test_avancar_sem_relatorios_inicia_proximo_dia(
-        self, mock_turno_cls, gm, view_mock
-    ):
-        """
-        Avançar sem Relatórios Inicia Próximo Dia
-
-        Se a pilha está vazia (qnt_relatorios == 0) e dias_concluidos
-        ainda não atingiu o limite da campanha, deve iniciar o próximo dia
-        com o primeiro relatório já renderizado.
-        """
-        dados_esperados = {"id_cenario": 1, "titulo": "Novo Dia"}
-        mock_relatorio = MagicMock()
-        mock_relatorio.extrair_apresentacao_relatorio.return_value = dados_esperados
-
-        mock_turno = MagicMock()
-        mock_turno.qnt_relatorios.return_value = 0
-        mock_turno.iniciar_turno.return_value = True
-        mock_turno.obter_relatorio_da_pilha.return_value = mock_relatorio
-        mock_turno_cls.return_value = mock_turno
-
-        gm._GameManager__gerenciador_turno = mock_turno
-        gm._GameManager__perfil_selecionado = "T_QUIMICA"
-        gm._GameManager__dias_concluidos = 1
-
-        gm.avancar_fila_ou_dia()
-
-        assert gm._GameManager__dias_concluidos == 2
-        assert gm._GameManager__estado_atual == GameManager.ESTADO_EXPEDIENTE
-        mock_turno_cls.assert_called_with("T_QUIMICA")
-        mock_turno.iniciar_turno.assert_called_once()
-        mock_turno.obter_relatorio_da_pilha.assert_called_once()
-        view_mock.trocar_para_tela_inspecao.assert_called_once()
-        view_mock.renderizar_relatorio.assert_called_once_with(dados_esperados)
-
-    @patch("application.controllers.game_manager.GerenciadorDeTurno")
     def test_avancar_ultimo_dia_encerra_campanha(
         self, mock_turno_cls, gm, view_mock
     ):
         """
         Avançar no Último Dia Encerra Campanha
 
-        Se dias_concluidos atingir o limite da campanha, deve encerrar
-        a campanha e exibir o resultado.
+        Com CAMPANHA_DURACAO_DIAS=1, ao finalizar o expediente do
+        primeiro dia a campanha deve encerrar e exibir o resultado.
         """
         mock_turno = MagicMock()
         mock_turno.qnt_relatorios.return_value = 0
         mock_turno_cls.return_value = mock_turno
 
         gm._GameManager__gerenciador_turno = mock_turno
-        gm._GameManager__dias_concluidos = 2
+        gm._GameManager__dias_concluidos = 0
         gm._GameManager__pontuacao_global = 8500.0
 
         gm.avancar_fila_ou_dia()
 
-        assert gm._GameManager__dias_concluidos == 3
+        assert gm._GameManager__dias_concluidos == 1
         assert gm._GameManager__estado_atual == GameManager.ESTADO_RESULTADO
-        view_mock.exibir_resultado.assert_called_once_with(8500.0, 3)
+        view_mock.exibir_resultado.assert_called_once_with(8500.0, 1)
 
     def test_avancar_sem_turno_lanca_erro(self, gm):
         """

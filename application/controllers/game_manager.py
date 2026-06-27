@@ -18,7 +18,7 @@ class GameManager:
     ESTADO_MENU = "ESTADO_MENU"
     ESTADO_EXPEDIENTE = "ESTADO_EXPEDIENTE"
     ESTADO_RESULTADO = "ESTADO_RESULTADO"
-    CAMPANHA_DURACAO_DIAS = 3
+    CAMPANHA_DURACAO_DIAS = 1
 
     def __init__(self, view):
         """
@@ -87,20 +87,6 @@ class GameManager:
 
         self.__iniciar_campanha(perfil)
 
-    def requisitar_dados_relatorio_atual(self) -> Dict[str, Any]:
-        """
-        Ponte MVP: obtém o próximo relatório da pilha do turno e
-        retorna os dados de apresentação para a View renderizar.
-
-        Retorna um dicionário com as chaves:
-          id_cenario, titulo, atividade, local, texto_descricao,
-          envolvidos, anexos.
-        """
-        if self.__gerenciador_turno is None:
-            raise RuntimeError("[Erro - GameManager] Nenhum turno ativo.")
-
-        relatorio = self.__gerenciador_turno.obter_relatorio_da_pilha()
-        return relatorio.extrair_apresentacao_relatorio()
 
     def processar_submissao(self, respostas_jogador: Dict[str, Any]) -> None:
         """
@@ -157,8 +143,23 @@ class GameManager:
                 self.__iniciar_dia(self.__dias_concluidos + 1)
         else:
             self.__view.trocar_para_tela_inspecao()
-            dados = self.requisitar_dados_relatorio_atual()
+            dados = self.__requisitar_dados_relatorio_atual()
             self.__view.renderizar_relatorio(dados)
+            
+    def __requisitar_dados_relatorio_atual(self) -> Dict[str, Any]:
+        """
+        Ponte MVP: obtém o próximo relatório da pilha do turno e
+        retorna os dados de apresentação para a View renderizar.
+
+        Retorna um dicionário com as chaves:
+          id_cenario, titulo, atividade, local, texto_descricao,
+          envolvidos, anexos.
+        """
+        if self.__gerenciador_turno is None:
+            raise RuntimeError("[Erro - GameManager] Nenhum turno ativo.")
+
+        relatorio = self.__gerenciador_turno.obter_relatorio_da_pilha()
+        return relatorio.extrair_apresentacao_relatorio()
 
     def __iniciar_campanha(self, perfil: str) -> None:
         """
@@ -192,7 +193,7 @@ class GameManager:
             self.__estado_atual = self.ESTADO_EXPEDIENTE
             self.__view.trocar_para_tela_inspecao()
 
-            dados = self.requisitar_dados_relatorio_atual()
+            dados = self.__requisitar_dados_relatorio_atual()
             self.__view.renderizar_relatorio(dados)
 
         except Exception as erro:
