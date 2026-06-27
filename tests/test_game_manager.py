@@ -5,6 +5,46 @@ Suite completa de testes para o GameManager.
 import pytest
 from unittest.mock import MagicMock, patch
 
+from infrastructure.repository.repositorio_json import RepositorioJSON
+
+
+def test_mascarar_perfil_mantem_DEFAULT():
+    """
+    Máscara Mantém DEFAULT
+
+    O perfil 'DEFAULT' não deve ser alterado pela máscara,
+    pois já possui dados disponíveis.
+    """
+    resultado = GameManager._GameManager__mascarar_perfil("DEFAULT")
+    assert resultado == "DEFAULT"
+
+
+def test_mascarar_perfil_mantem_invalido():
+    """
+    Máscara Mantém Perfil Inválido
+
+    Um perfil que não existe em CURSOS_VALIDOS deve passar
+    limpo pela máscara, para que a verificação de erro
+    em __iniciar_dia funcione.
+    """
+    resultado = GameManager._GameManager__mascarar_perfil("PERFIL_INVALIDO")
+    assert resultado == "PERFIL_INVALIDO"
+
+
+def test_mascarar_perfil_redireciona_para_DEFAULT():
+    """
+    Máscara Redireciona para DEFAULT
+
+    Perfis que existem em CURSOS_VALIDOS mas não são 'DEFAULT'
+    devem ser redirecionados para 'DEFAULT', já que atualmente
+    só existem cenários para o curso DEFAULT.
+    """
+    for curso in RepositorioJSON.CURSOS_VALIDOS:
+        if curso == "DEFAULT":
+            continue
+        resultado = GameManager._GameManager__mascarar_perfil(curso)
+        assert resultado == "DEFAULT", f"{curso} deveria ser mascarado para DEFAULT"
+
 from application.controllers.game_manager import GameManager
 from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
 
@@ -204,12 +244,12 @@ class TestIniciarExpediente:
         gm.iniciar_expediente("T_MEIO_AMBIENTE")
 
         assert gm._GameManager__estado_atual == GameManager.ESTADO_EXPEDIENTE
-        assert gm._GameManager__perfil_selecionado == "T_MEIO_AMBIENTE"
+        assert gm._GameManager__perfil_selecionado == "DEFAULT"
         assert gm._GameManager__dias_concluidos == 0
         assert gm._GameManager__pontuacao_global == 0.0
         assert gm._GameManager__gerenciador_turno is mock_turno
 
-        mock_turno_cls.assert_called_once_with("T_MEIO_AMBIENTE")
+        mock_turno_cls.assert_called_once_with("DEFAULT")
         mock_turno.iniciar_turno.assert_called_once_with()
         mock_turno.obter_relatorio_da_pilha.assert_called_once()
         view_mock.trocar_para_tela_inspecao.assert_called_once_with()
