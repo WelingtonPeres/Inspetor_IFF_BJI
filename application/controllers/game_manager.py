@@ -2,6 +2,7 @@ import logging
 from typing import Any, Dict, Optional
 
 from application.controllers.gerenciador_de_turno import GerenciadorDeTurno
+from application.interfaces.i_game_view import IGameView
 from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
 
 logger = logging.getLogger(__name__)
@@ -20,19 +21,10 @@ class GameManager:
     ESTADO_RESULTADO = "ESTADO_RESULTADO"
     CAMPANHA_DURACAO_DIAS = 1
 
-    def __init__(self, view):
+    def __init__(self, view: IGameView):
         """
-        Injeta a View e inicializa o estado da campanha.
-        A View deve expor métodos como:
-          - inicializar()
-          - fechar()
-          - exibir_menu()
-          - exibir_selecao_perfil()
-          - trocar_para_tela_inspecao()
-          - exibir_tela_diagnostico(diagnostico: DiagnosticoPontuacaoDTO)
-          - renderizar_relatorio(dados_relatorio: dict)
-          - exibir_resultado(pontuacao_global: float, dias_concluidos: int)
-          - exibir_popup_erro(mensagem: str)
+        Injeta a View (deve implementar IGameView) e inicializa
+        o estado da campanha.
         """
 
         self.__view = view
