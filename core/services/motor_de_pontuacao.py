@@ -51,7 +51,7 @@ class MotorDePontuacao:
             Valor float representando o Vmax daquele relatório específico.
         """
         if relatorio.folha_gabarito is None:
-            logger.warning("Relatório %s sem gabarito — Vmax tratado como 0", relatorio.id_cenario)
+            logger.warning("Relatório %s sem gabarito. Vmax tratado como 0", relatorio.id_cenario)
             return 0.0
 
         v_max = self.VALOR_BASE_PARTICIPACAO

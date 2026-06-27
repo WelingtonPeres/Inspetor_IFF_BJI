@@ -250,7 +250,7 @@ class TestMetaDadosAusentes:
     """
 
     def test_lista_vazia_lanca_excecao(self, motor):
-        """Lista vazia deve lançar AttributeError — não é permitido turno sem relatórios."""
+        """Lista vazia deve lançar AttributeError: não é permitido turno sem relatórios."""
         
         with pytest.raises(ValueError, match="Lista de Relatorios Vazio"):
             motor.calcular_meta_turno([])
@@ -375,7 +375,7 @@ class TestCenarioFDivisaoPorZero:
     """
 
     def test_riscos_corretos_zero_retorna_zero(self, motor, v_max_por_relatorio):
-        """0 riscos corretos com gabarito > 0 deve retornar 0 — sem divisão por zero."""
+        """0 riscos corretos com gabarito > 0 deve retornar 0, sem divisão por zero."""
         
         nota = motor._calcular_pontuacao_riscos(
             v_max=v_max_por_relatorio,
@@ -387,7 +387,7 @@ class TestCenarioFDivisaoPorZero:
         assert nota == pytest.approx(0.0)
 
     def test_riscos_marcados_zero_retorna_zero(self, motor, v_max_por_relatorio):
-        """0 riscos marcados com gabarito > 0 deve retornar 0 — proteção contra ZeroDivisionError na taxa de precisão."""
+        """0 riscos marcados com gabarito > 0 deve retornar 0: proteção contra ZeroDivisionError na taxa de precisão."""
         
         nota = motor._calcular_pontuacao_riscos(
             v_max=v_max_por_relatorio,

@@ -172,23 +172,23 @@ self._folha_gabarito     # Uso interno apenas
 ```python
 class Relatorio:
     def __init__(self, id_cenario, anexos):
-        self.__id_cenario = id_cenario
-        self.__anexos = anexos
-        self.__folha_gabarito = None
-        self.__folha_resposta = None
+        self._id_cenario = id_cenario
+        self._anexos = anexos
+        self._folha_gabarito = None
+        self._folha_resposta = None
     
     # Acesso controlado via property
     @property
     def id_cenario(self) -> int:
-        return self.__id_cenario
+        return self._id_cenario
     
     @property
     def anexos(self) -> List[Anexo]:
-        return self.__anexos
+        return self._anexos
     
     def adicionar_anexo(self, anexo: Anexo):
         """Método para modificar a lista protegida."""
-        self.__anexos.append(anexo)
+        self._anexos.append(anexo)
 ```
 
 ### Padrão: Atributo "Privado" (Name Mangling) (__snake_case)

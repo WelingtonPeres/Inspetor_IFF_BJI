@@ -213,7 +213,7 @@ class RepositorioJSON:
                         
                         cenarios_compativeis_dto.append(dto)
                 except KeyError:
-                    logger.warning("Cenário com chave ausente no arquivo %s — ignorando", caminho_arquivo.name)
+                    logger.warning("Cenário com chave ausente no arquivo %s. Ignorando", caminho_arquivo.name)
                     continue
                     
 
