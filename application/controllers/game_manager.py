@@ -153,14 +153,36 @@ class GameManager:
         relatorio = self.__gerenciador_turno.obter_relatorio_da_pilha()
         return relatorio.extrair_apresentacao_relatorio()
 
+    @staticmethod
+    def __mascarar_perfil(perfil: str) -> str:
+        """
+        [TEMP] Máscara provisória para perfis sem dados próprios.
+        TODO: Remover assim que houver cenários JSON para cada curso.
+
+        Se o perfil é um curso válido mas não possui cenários (só "DEFAULT"
+        tem dados atualmente), redireciona para "DEFAULT".
+        Perfis inválidos (não reconhecidos) passam limpos para manter
+        a verificação de erro em __iniciar_dia.
+        """
+        from infrastructure.repository.repositorio_json import RepositorioJSON
+
+        if perfil in RepositorioJSON.CURSOS_VALIDOS and perfil != "DEFAULT":
+            logger.info(
+                "Perfil '%s' mascarado para 'DEFAULT' (sem dados propios).", perfil
+            )
+            return "DEFAULT"
+        return perfil
+
     def __iniciar_campanha(self, perfil: str) -> None:
         """
         Inicia uma nova campanha para o perfil escolhido.
         Reseta contadores globais e parte para o primeiro dia.
+        Aplica a máscara de perfil antes de prosseguir.
         """
         if self.__estado_atual != self.ESTADO_MENU:
             raise RuntimeError("[Erro - GameManager] Campanha so pode ser iniciada pelo menu.")
 
+        perfil = self.__mascarar_perfil(perfil)
         self.__perfil_selecionado = perfil
         self.__dias_concluidos = 0
         self.__pontuacao_global = 0.0
