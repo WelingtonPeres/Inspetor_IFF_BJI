@@ -1,0 +1,219 @@
+/* ============================================================
+   style.qss — Tema Oficial do Inspetor IFF BJI
+   Baseado no DESIGN.md e nas diretrizes de IDENTIDADE.md
+   ============================================================ */
+
+/* --- Janela Principal --- */
+QMainWindow {
+    background-color: #0A171C;
+}
+
+QStackedWidget {
+    background-color: #0A171C;
+}
+
+/* --- Labels de Título --- */
+#titulo_menu {
+    color: #2F9E41;
+    font-family: "Open Sans";
+    font-size: 32px;
+    font-weight: 700;
+    padding: 24px;
+}
+
+#label_selecao_perfil {
+    color: #FDE2CF;
+    font-family: "Open Sans";
+    font-size: 20px;
+    font-weight: 700;
+}
+
+/* --- Label de Relatório (Inspeção) --- */
+#label_titulo_relatorio {
+    color: #FDE2CF;
+    font-family: "Open Sans";
+    font-size: 14px;
+    font-weight: 400;
+    padding: 16px;
+    background-color: #14312B;
+    border: 1px solid #1D4940;
+    border-radius: 4px;
+}
+
+/* --- Labels de Feedback (Diagnóstico / Resultado) --- */
+.label_feedback {
+    color: #FDE2CF;
+    font-family: "Open Sans";
+    font-size: 18px;
+    font-weight: 400;
+    padding: 24px;
+    background-color: #14312B;
+    border: 1px solid #1D4940;
+    border-radius: 4px;
+}
+
+/* --- Botões Primários --- */
+.btn_primario {
+    background-color: #2F9E41;
+    color: #FDE2CF;
+    font-family: "Open Sans";
+    font-size: 14px;
+    font-weight: 700;
+    border: 1px solid #1D4940;
+    border-radius: 4px;
+    padding: 10px 24px;
+    min-width: 160px;
+}
+
+.btn_primario:hover {
+    background-color: #37a547;
+    border-color: #2F9E41;
+}
+
+.btn_primario:pressed {
+    background-color: #006e22;
+}
+
+/* --- Group Boxes (Inspeção) --- */
+.group_box {
+    background-color: #14312B;
+    border: 1px solid #1D4940;
+    border-radius: 4px;
+    color: #2F9E41;
+    font-family: "Open Sans";
+    font-size: 14px;
+    font-weight: 700;
+    padding: 12px;
+    margin: 8px 0;
+}
+
+.group_box::title {
+    color: #2F9E41;
+    padding: 4px 8px;
+    subcontrol-origin: margin;
+    left: 12px;
+}
+
+/* --- Checkboxes (Riscos) --- */
+.chk_risco {
+    color: #FDE2CF;
+    font-family: "Open Sans";
+    font-size: 14px;
+    font-weight: 400;
+    spacing: 8px;
+}
+
+.chk_risco::indicator {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #1D4940;
+    background-color: #0A171C;
+    border-radius: 2px;
+}
+
+.chk_risco::indicator:checked {
+    background-color: #2F9E41;
+    border-color: #2F9E41;
+}
+
+/* --- Checkboxes (Fatores) --- */
+.chk_fator {
+    color: #FDE2CF;
+    font-family: "Open Sans";
+    font-size: 14px;
+    font-weight: 400;
+    spacing: 8px;
+}
+
+.chk_fator::indicator {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #1D4940;
+    background-color: #0A171C;
+    border-radius: 2px;
+}
+
+.chk_fator::indicator:checked {
+    background-color: #5BABB3;
+    border-color: #5BABB3;
+}
+
+/* --- Radio Buttons (Decisão) --- */
+.radio_decisao {
+    color: #FDE2CF;
+    font-family: "Open Sans";
+    font-size: 14px;
+    font-weight: 700;
+    spacing: 8px;
+    padding: 8px;
+}
+
+.radio_decisao::indicator {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #1D4940;
+    background-color: #0A171C;
+    border-radius: 10px;
+}
+
+.radio_decisao::indicator:checked {
+    background-color: #CD191E;
+    border-color: #CD191E;
+}
+
+/* --- ComboBox (Seleção de Perfil) --- */
+.combo_padrao {
+    background-color: #0A171C;
+    color: #FDE2CF;
+    font-family: "Open Sans";
+    font-size: 14px;
+    border: 1px solid #1D4940;
+    border-radius: 4px;
+    padding: 8px 16px;
+    min-width: 240px;
+}
+
+.combo_padrao:hover {
+    border-color: #2F9E41;
+}
+
+.combo_padrao::drop-down {
+    border: none;
+    width: 28px;
+}
+
+.combo_padrao QAbstractItemView {
+    background-color: #152127;
+    color: #FDE2CF;
+    border: 1px solid #1D4940;
+    selection-background-color: #2F9E41;
+    selection-color: #FDE2CF;
+}
+
+/* --- Popup de Erro --- */
+QMessageBox {
+    background-color: #152127;
+    color: #FDE2CF;
+    font-family: "Open Sans";
+}
+
+QMessageBox QLabel {
+    color: #FDE2CF;
+    font-family: "Open Sans";
+    font-size: 14px;
+}
+
+QMessageBox QPushButton {
+    background-color: #CD191E;
+    color: #FDE2CF;
+    font-family: "Open Sans";
+    font-weight: 700;
+    border: 1px solid #CD191E;
+    border-radius: 4px;
+    padding: 8px 20px;
+    min-width: 80px;
+}
+
+QMessageBox QPushButton:hover {
+    background-color: #bb0213;
+}

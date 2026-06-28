@@ -88,10 +88,13 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
         layout.setAlignment(Qt.AlignCenter)
 
         titulo = QLabel("Inspetor IFF-BJI: Análise de Risco")
+        titulo.setObjectName("titulo_menu")
         titulo.setAlignment(Qt.AlignCenter)
         layout.addWidget(titulo)
 
         self.__btn_iniciar = QPushButton("Iniciar")
+        self.__btn_iniciar.setObjectName("btn_iniciar")
+        self.__btn_iniciar.setProperty("class", "btn_primario")
         self.__btn_iniciar.clicked.connect(self.iniciar_solicitado.emit)
         layout.addWidget(self.__btn_iniciar)
 
@@ -104,10 +107,13 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
         layout.setAlignment(Qt.AlignCenter)
 
         label = QLabel("Selecione o perfil:")
+        label.setObjectName("label_selecao_perfil")
         label.setAlignment(Qt.AlignCenter)
         layout.addWidget(label)
 
         self.__combo_perfil = QComboBox()
+        self.__combo_perfil.setObjectName("combo_perfil")
+        self.__combo_perfil.setProperty("class", "combo_padrao")
         self.__combo_perfil.addItems([
             "T_QUIMICA", "T_INFORMATICA", "T_AGROPECUARIA",
             "T_ALIMENTOS", "T_MEIO_AMBIENTE", "T_ZOOTECNIA",
@@ -116,6 +122,8 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
         layout.addWidget(self.__combo_perfil)
 
         self.__btn_confirmar_perfil = QPushButton("Confirmar")
+        self.__btn_confirmar_perfil.setObjectName("btn_confirmar_perfil")
+        self.__btn_confirmar_perfil.setProperty("class", "btn_primario")
         self.__btn_confirmar_perfil.clicked.connect(
             lambda: self.perfil_confirmado.emit(self.__combo_perfil.currentText())
         )
@@ -130,41 +138,56 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
         layout.setAlignment(Qt.AlignTop)
 
         self.__label_titulo_relatorio = QLabel("Aguardando relatório...")
+        self.__label_titulo_relatorio.setObjectName("label_titulo_relatorio")
         self.__label_titulo_relatorio.setAlignment(Qt.AlignTop)
         self.__label_titulo_relatorio.setWordWrap(True)
         layout.addWidget(self.__label_titulo_relatorio)
 
         # Riscos
         grupo_riscos = QGroupBox("Riscos Identificados")
+        grupo_riscos.setObjectName("group_riscos")
+        grupo_riscos.setProperty("class", "group_box")
         layout_riscos = QVBoxLayout(grupo_riscos)
         self.__chk_riscos = {}
         for risco in ["FISICO", "QUIMICO", "BIOLOGICO", "ERGONOMICO", "ACIDENTE"]:
             chk = QCheckBox(risco)
+            chk.setObjectName(f"chk_risco_{risco}")
+            chk.setProperty("class", "chk_risco")
             self.__chk_riscos[risco] = chk
             layout_riscos.addWidget(chk)
         layout.addWidget(grupo_riscos)
 
         # Fatores de Inseguranca
         grupo_fatores = QGroupBox("Fatores de Insegurança")
+        grupo_fatores.setObjectName("group_fatores")
+        grupo_fatores.setProperty("class", "group_box")
         layout_fatores = QVBoxLayout(grupo_fatores)
         self.__chk_fatores = {}
         for fator in ["ATO_INSEGURO", "CONDICAO_INSEGURA"]:
             chk = QCheckBox(fator)
+            chk.setObjectName(f"chk_fator_{fator}")
+            chk.setProperty("class", "chk_fator")
             self.__chk_fatores[fator] = chk
             layout_fatores.addWidget(chk)
         layout.addWidget(grupo_fatores)
 
         # Decisao Administrativa
         grupo_decisao = QGroupBox("Decisão Administrativa")
+        grupo_decisao.setObjectName("group_decisao")
+        grupo_decisao.setProperty("class", "group_box")
         layout_decisao = QHBoxLayout(grupo_decisao)
         self.__radio_decisao = QButtonGroup(grupo_decisao)
         for decisao in ["ADVERTIR", "INTERDITAR", "IGNORAR"]:
             radio = QRadioButton(decisao)
+            radio.setObjectName(f"radio_decisao_{decisao}")
+            radio.setProperty("class", "radio_decisao")
             self.__radio_decisao.addButton(radio)
             layout_decisao.addWidget(radio)
         layout.addWidget(grupo_decisao)
 
         self.__btn_submeter = QPushButton("Submeter Respostas")
+        self.__btn_submeter.setObjectName("btn_submeter")
+        self.__btn_submeter.setProperty("class", "btn_primario")
         self.__btn_submeter.clicked.connect(self.__coletar_respostas)
         layout.addWidget(self.__btn_submeter)
 
@@ -209,10 +232,14 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
         layout.setAlignment(Qt.AlignCenter)
 
         self.__label_diagnostico = QLabel("")
+        self.__label_diagnostico.setObjectName("label_diagnostico")
+        self.__label_diagnostico.setProperty("class", "label_feedback")
         self.__label_diagnostico.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.__label_diagnostico)
 
         self.__btn_continuar = QPushButton("Continuar")
+        self.__btn_continuar.setObjectName("btn_continuar")
+        self.__btn_continuar.setProperty("class", "btn_primario")
         self.__btn_continuar.clicked.connect(self.continuar_solicitado.emit)
         layout.addWidget(self.__btn_continuar)
 
@@ -225,6 +252,8 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
         layout.setAlignment(Qt.AlignCenter)
 
         self.__label_resultado = QLabel("")
+        self.__label_resultado.setObjectName("label_resultado")
+        self.__label_resultado.setProperty("class", "label_feedback")
         self.__label_resultado.setAlignment(Qt.AlignCenter)
         self.__label_resultado.setWordWrap(True)
         layout.addWidget(self.__label_resultado)

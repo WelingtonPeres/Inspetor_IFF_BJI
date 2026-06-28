@@ -1,6 +1,10 @@
+import logging
 import sys
+from pathlib import Path
 
 from PySide6.QtWidgets import QApplication
+
+logger = logging.getLogger(__name__)
 
 from application.controllers.game_manager import GameManager
 from config.logging_config import setup_logging
@@ -16,6 +20,15 @@ def main():
     setup_logging()
 
     app = QApplication(sys.argv)
+
+    # Carrega o tema QSS global
+    qss_path = Path(__file__).resolve().parent / "view" / "assets" / "style.qss"
+    if qss_path.exists():
+        with open(qss_path, "r", encoding="utf-8") as f:
+            app.setStyleSheet(f.read())
+        logger.info("Tema QSS carregado de: %s", qss_path)
+    else:
+        logger.warning("Ficheiro QSS nao encontrado: %s", qss_path)
 
     janela = JanelaPrincipal()
     gm = GameManager(janela)
