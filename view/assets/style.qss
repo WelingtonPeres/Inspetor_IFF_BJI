@@ -1,7 +1,9 @@
-/* ============================================================
+/* 
+============================================================
    style.qss — Tema Oficial do Inspetor IFF BJI
    Baseado no DESIGN.md e nas diretrizes de IDENTIDADE.md
-   ============================================================ */
+============================================================ 
+*/
 
 /* --- Janela Principal --- */
 QMainWindow {
@@ -216,4 +218,220 @@ QMessageBox QPushButton {
 
 QMessageBox QPushButton:hover {
     background-color: #bb0213;
+}
+
+/* =============================================================
+   NOVOS COMPONENTES — Overlays (z-order)
+   ============================================================= */
+
+/* --- Overlay Area --- */
+QWidget#overlay_area {
+    background-color: transparent;
+}
+
+/* --- Taskbar (z=0) --- */
+QFrame#taskbar {
+    background-color: #0A171C;
+    border: none;
+    border-top: 1px solid #1D4940;
+}
+QPushButton#taskbar_start {
+    background-color: transparent;
+    border: none;
+    padding: 4px 12px;
+    border-radius: 4px;
+}
+QPushButton#taskbar_start:hover {
+    background-color: #14312B;
+}
+QLabel#taskbar_clock {
+    color: #FDE2CF;
+    font-family: "Open Sans";
+}
+
+/* --- Desktop (z=1) --- */
+QWidget#tela_menu_principal {
+    background-color: transparent;
+}
+QLabel#wallpaper_label {
+    background-color: #08151a;
+}
+QFrame#desktop_shortcut {
+    background-color: transparent;
+    border: 2px solid transparent;
+    border-radius: 4px;
+}
+QFrame#desktop_shortcut:hover {
+    background-color: rgba(45, 158, 65, 0.15);
+    border-color: rgba(47, 158, 65, 0.4);
+}
+QLabel#shortcut_icon {
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+    color: #FDE2CF;
+}
+QLabel#shortcut_label {
+    color: #FDE2CF;
+    background-color: rgba(10, 23, 28, 0.7);
+    border-radius: 3px;
+    padding: 2px 4px;
+    font-family: "Open Sans";
+}
+/* --- JanelaSistema (z=2, floating) --- */
+QFrame#janela_sistema {
+    background-color: #152127;
+    border: 1px solid #1D4940;
+    border-radius: 8px;
+}
+QFrame#window_title_bar {
+    background-color: #0A171C;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom: 1px solid #1D4940;
+}
+QLabel#window_title_text {
+    color: #2F9E41;
+    font-family: "Open Sans";
+    font-weight: bold;
+    font-size: 13px;
+}
+QPushButton#window_close_button {
+    background-color: transparent;
+    color: #FDE2CF;
+    border: none;
+    font-size: 14px;
+}
+QPushButton#window_close_button:hover {
+    background-color: #CD191E;
+    color: #ffffff;
+    border-radius: 4px;
+}
+QFrame#janela_sistema_body {
+    background-color: #152127;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+QLabel#janela_sistema_placeholder {
+    color: #4a6b62;
+    font-family: "Open Sans";
+}
+
+/* --- TelaInspecaoCheia (z=2, fullscreen) --- */
+QFrame#tela_inspecao_cheia {
+    background-color: #0A171C;
+}
+QFrame#header_bar {
+    background-color: #0A171C;
+    border-bottom: 1px solid #1D4940;
+}
+QLabel#header_title {
+    color: #2F9E41;
+    font-size: 14px;
+    font-weight: bold;
+    font-family: "Open Sans";
+}
+QPushButton#minimizar_button {
+    background-color: transparent;
+    color: #FDE2CF;
+    border: none;
+    font-size: 18px;
+    min-width: 32px;
+    min-height: 24px;
+}
+QPushButton#minimizar_button:hover {
+    background-color: #CD191E;
+    border-radius: 4px;
+}
+
+/* --- Paginas internas da TelaInspecaoCheia --- */
+QWidget.pagina_inspecao {
+    background-color: #0A171C;
+}
+QWidget.pagina_diagnostico {
+    background-color: #0A171C;
+}
+QWidget.pagina_resultado {
+    background-color: #0A171C;
+}
+
+/* --- Sidebar --- */
+QFrame#sidebar {
+    background-color: #0A171C;
+    border-right: 1px solid #1D4940;
+}
+.sidebar_item {
+    background-color: transparent;
+    color: #FDE2CF;
+    border: none;
+    border-bottom: 1px solid #1D4940;
+    font-family: "Open Sans";
+    font-size: 11px;
+    font-weight: 400;
+    padding: 8px;
+}
+.sidebar_item:hover {
+    background-color: #14312B;
+}
+.sidebar_item:disabled {
+    color: #4a6b62;
+}
+
+/* --- AnexoPreview --- */
+QFrame#anexo_preview {
+    background-color: #14312B;
+    border: 1px solid #1D4940;
+    border-radius: 4px;
+}
+QLabel#anexo_thumbnail {
+    background-color: #0A171C;
+    border: 1px solid #1D4940;
+    border-radius: 2px;
+}
+QLabel#anexo_metadados {
+    color: #FDE2CF;
+    font-family: "Open Sans";
+    font-size: 12px;
+}
+QPushButton#btn_ver_anexos {
+    background-color: #2F9E41;
+    color: #FDE2CF;
+    border: 1px solid #1D4940;
+    border-radius: 4px;
+    padding: 6px 16px;
+    font-family: "Open Sans";
+    font-size: 12px;
+    font-weight: 700;
+}
+QPushButton#btn_ver_anexos:hover {
+    background-color: #37a547;
+}
+
+/* --- AnexoGallery --- */
+QFrame#anexo_gallery {
+    background-color: rgba(0, 0, 0, 179);
+}
+QPushButton#gallery_close_button,
+QPushButton#gallery_prev_button,
+QPushButton#gallery_next_button {
+    background-color: rgba(0, 0, 0, 100);
+    color: #FDE2CF;
+    border: 1px solid #1D4940;
+    border-radius: 4px;
+    font-size: 16px;
+}
+QPushButton#gallery_close_button:hover,
+QPushButton#gallery_prev_button:hover,
+QPushButton#gallery_next_button:hover {
+    background-color: #2F9E41;
+}
+QLabel#gallery_indicador {
+    color: #FDE2CF;
+    font-family: "Open Sans";
+    font-size: 14px;
+    padding: 8px;
+}
+
+/* --- MediaViewer --- */
+QFrame#media_viewer {
+    background-color: rgba(0, 0, 0, 230);
 }

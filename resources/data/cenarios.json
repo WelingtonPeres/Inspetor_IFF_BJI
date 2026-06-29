@@ -31,7 +31,7 @@
       {
         "id_anexo": 101,
         "tipo": "VIDEO",
-        "caminho_arquivo": "resources/assets/anexos/videos/agua_destilada_beber.mp4"
+        "caminho_arquivo": "resources/anexos/videos/agua_destilada_beber.mp4"
       }
     ]
   },
@@ -68,7 +68,7 @@
       {
         "id_anexo": 201,
         "tipo": "VIDEO",
-        "caminho_arquivo": "resources/assets/anexos/videos/agua_destilada_guerra.mp4"
+        "caminho_arquivo": "resources/anexos/videos/agua_destilada_guerra.mp4"
       }
     ]
   },
@@ -104,7 +104,7 @@
       {
         "id_anexo": 301,
         "tipo": "VIDEO",
-        "caminho_arquivo": "resources/assets/anexos/videos/bureta_banco.mp4"
+        "caminho_arquivo": "resources/anexos/videos/bureta_banco.mp4"
       }
     ]
   },
@@ -139,7 +139,7 @@
       {
         "id_anexo": 401,
         "tipo": "VIDEO",
-        "caminho_arquivo": "resources/assets/anexos/videos/bureta_transborda.mp4"
+        "caminho_arquivo": "resources/anexos/videos/bureta_transborda.mp4"
       }
     ]
   },
@@ -173,7 +173,7 @@
       {
         "id_anexo": 501,
         "tipo": "VIDEO",
-        "caminho_arquivo": "resources/assets/anexos/videos/cadinho_quente_queda.mp4"
+        "caminho_arquivo": "resources/anexos/videos/cadinho_quente_queda.mp4"
       }
     ]
   },
@@ -210,7 +210,7 @@
       {
         "id_anexo": 601,
         "tipo": "VIDEO",
-        "caminho_arquivo": "resources/assets/anexos/videos/capela_chuveiro.mp4"
+        "caminho_arquivo": "resources/anexos/videos/capela_chuveiro.mp4"
       }
     ]
   },
@@ -246,7 +246,7 @@
       {
         "id_anexo": 701,
         "tipo": "VIDEO",
-        "caminho_arquivo": "resources/assets/anexos/videos/capela_lavador_de_olhos.mp4"
+        "caminho_arquivo": "resources/anexos/videos/capela_lavador_de_olhos.mp4"
       }
     ]
   },
@@ -281,7 +281,7 @@
       {
         "id_anexo": 801,
         "tipo": "VIDEO",
-        "caminho_arquivo": "resources/assets/anexos/videos/chuveiro_obistruido.mp4"
+        "caminho_arquivo": "resources/anexos/videos/chuveiro_obistruido.mp4"
       }
     ]
   },
@@ -317,7 +317,7 @@
       {
         "id_anexo": 901,
         "tipo": "VIDEO",
-        "caminho_arquivo": "resources/assets/anexos/videos/gota_bureta.mp4"
+        "caminho_arquivo": "resources/anexos/videos/gota_bureta.mp4"
       }
     ]
   },
@@ -353,7 +353,7 @@
       {
         "id_anexo": 1001,
         "tipo": "VIDEO",
-        "caminho_arquivo": "resources/assets/anexos/videos/mufra_queda.mp4"
+        "caminho_arquivo": "resources/anexos/videos/mufra_queda.mp4"
       }
     ]
   },
@@ -387,7 +387,7 @@
       {
         "id_anexo": 1101,
         "tipo": "VIDEO",
-        "caminho_arquivo": "resources/assets/anexos/videos/pipetagem_com_a_boca.mp4"
+        "caminho_arquivo": "resources/anexos/videos/pipetagem_com_a_boca.mp4"
       }
     ]
   },
@@ -423,7 +423,7 @@
       {
         "id_anexo": 1201,
         "tipo": "VIDEO",
-        "caminho_arquivo": "resources/assets/anexos/videos/vidraria_caindo.mp4"
+        "caminho_arquivo": "resources/anexos/videos/vidraria_caindo.mp4"
       }
     ]
   }

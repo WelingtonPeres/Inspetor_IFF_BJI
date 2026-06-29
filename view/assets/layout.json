@@ -1,0 +1,96 @@
+{
+  "meta": {
+    "resolucao_base": "1920x1080",
+    "proporcao": "16:9"
+  },
+  "fontes": {
+    "ocorrencias": {
+      "atalho_legenda": { "size": 9 },
+      "taskbar_texto": { "size": 9 },
+      "atalho_icone": { "size": 24 },
+      "modal_titulo_janela": { "size": 9 }
+    }
+  },
+  "atalho": {
+    "largura": 80,
+    "altura": 90,
+    "icone": { "largura": 48, "altura": 48, "border_radius": 4 },
+    "legenda": { "word_wrap": true },
+    "spacing_icone_legenda": 4
+  },
+  "taskbar": {
+    "altura": 40,
+    "margens": { "top": 0, "right": 12, "bottom": 0, "left": 12 },
+    "start_botao": {
+      "icone_arquivo": "logo_iff_branco.png",
+      "texto": "Iniciar",
+      "padding_y": 4,
+      "padding_x": 12,
+      "border_radius": 4
+    },
+    "system_tray": {
+      "relogio_formato": "HH:mm",
+      "atualizacao_segundos": 1
+    }
+  },
+  "tela": {
+    "margens": {
+      "desktop": { "top": 48, "right": 48, "bottom": 8, "left": 48 }
+    },
+    "spacing": { "atalhos_entre": 16 }
+  },
+  "wallpaper": {
+    "arquivo": "view/assets/images/fundo_iff_2.jpg",
+    "scaled_contents": true
+  },
+  "logo": {
+    "arquivo": "view/assets/images/logo-iff.png",
+    "largura_maxima": 300
+  },
+  "sidebar": {
+    "largura": 80,
+    "itens": [
+      { "id": "dashboard", "label": "Dashboard", "inativo": true },
+      { "id": "reports",   "label": "Reports",   "inativo": false },
+      { "id": "logs",      "label": "Logs",      "inativo": true },
+      { "id": "settings",  "label": "Settings",  "inativo": true }
+    ]
+  },
+  "anexo_preview": {
+    "altura": 120,
+    "thumbnail_largura": 160,
+    "thumbnail_altura": 90,
+    "margens": { "top": 8, "right": 16, "bottom": 8, "left": 16 }
+  },
+  "anexo_gallery": {
+    "seta_largura": 48,
+    "opacidade_fundo": 0.7,
+    "indicador_altura": 24
+  },
+  "media_viewer": {
+    "opacidade_fundo": 0.9
+  },
+  "video_player": {
+    "controls_altura": 36,
+    "progress_altura": 6,
+    "icone_tamanho": 20,
+    "font_size": 9
+  },
+  "janela_sistema": {
+    "largura": 480,
+    "altura": 340,
+    "title_bar": {
+      "altura": 32,
+      "margens": { "top": 0, "right": 12, "bottom": 0, "left": 12 }
+    },
+    "body": {
+      "margens": { "top": 24, "right": 40, "bottom": 24, "left": 40 },
+      "spacing_entre_elementos": 16
+    }
+  },
+  "atalhos_lista": [
+    { "icone_arquivo": "iniciar.png", "legenda": "Iniciar\nExpediente", "action": "iniciar" },
+    { "icone_arquivo": "pasta.png", "legenda": "Relatorios\nPendentes", "action": "info" },
+    { "icone_arquivo": "help.png", "legenda": "Ajuda e\nSuporte", "action": "info" }
+  ]
+}

@@ -1,0 +1,63 @@
+import logging
+from pathlib import Path
+from PySide6.QtCore import QSize, QTimer, QTime, Qt
+from PySide6.QtGui import QFont, QIcon
+from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton
+
+from view.infrastructure.layout_loader import LayoutLoader
+
+logger = logging.getLogger(__name__)
+
+
+class Taskbar(QFrame):
+    # QFrame: usado em vez de QWidget porque aceita setProperty("class")
+    # + bordas via QSS de forma mais confiavel. QWidgets puros ignoram
+    # border-radius e background-color em alguns padres do PySide6,
+    # enquanto QFrame respeita corretamente.
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        
+        self.setObjectName("taskbar")
+        self.setProperty("class", "taskbar")
+        self.__layout = LayoutLoader.instance()
+        self.__setup_ui()
+        self.__start_clock()
+
+    def __setup_ui(self):
+        L = self.__layout
+        self.setFixedHeight(L.scaled("taskbar", "altura"))
+
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(*L.scaled_margins("taskbar", "margens"))
+
+        font_size = L.scaled("fontes", "ocorrencias", "taskbar_texto", "size")
+        start_btn = QPushButton()
+        start_btn.setObjectName("taskbar_start")
+        icon_path = Path(__file__).resolve().parent.parent / "assets" / "images" / L.get("taskbar", "start_botao", "icone_arquivo")
+        if icon_path.exists():
+            start_btn.setIcon(QIcon(str(icon_path)))
+            icon_h = L.scaled("taskbar", "altura") - 16
+            start_btn.setIconSize(QSize(icon_h, icon_h))
+        start_btn.setToolTip(L.get("taskbar", "start_botao", "texto"))
+        layout.addWidget(start_btn)
+
+        layout.addStretch()
+
+        self.__clock_label = QLabel()
+        self.__clock_label.setObjectName("taskbar_clock")
+        self.__clock_label.setFont(QFont("Open Sans", font_size))
+        layout.addWidget(self.__clock_label)
+
+    def __start_clock(self):
+        L = self.__layout
+        fmt = L.get("taskbar", "system_tray", "relogio_formato")
+        interval = L.get("taskbar", "system_tray", "atualizacao_segundos") * 1000
+
+        def update_time():
+            self.__clock_label.setText(QTime.currentTime().toString(fmt))
+
+        update_time()
+        timer = QTimer(self)
+        timer.timeout.connect(update_time)
+        timer.start(interval)
