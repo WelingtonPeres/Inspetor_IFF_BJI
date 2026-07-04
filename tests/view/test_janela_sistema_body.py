@@ -54,7 +54,7 @@ class TestJanelaSistemaBody:
         pagina = stack.widget(1)
         combo = pagina.findChild(QComboBox, "combo_perfil")
         assert combo is not None
-        assert combo.count() == 8
+        assert combo.count() == 9
         btn = pagina.findChild(QPushButton, "btn_confirmar_perfil")
         assert btn is not None
 

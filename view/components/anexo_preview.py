@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class AnexoPreview(QFrame):
     ver_todos_anexos = Signal()
 
-    def __init__(self, caminho_thumbnail: str = "", metadados: str = "", parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("anexo_preview")
         self.setProperty("class", "anexo_preview")
@@ -31,13 +31,10 @@ class AnexoPreview(QFrame):
         self.__thumb_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.__thumb_label)
 
-        if caminho_thumbnail:
-            self._carregar_thumbnail(caminho_thumbnail)
-
         info_layout = QVBoxLayout()
-        self._meta_label = QLabel(metadados)
-        self._meta_label.setObjectName("anexo_metadados")
-        info_layout.addWidget(self._meta_label)
+        self.__meta_label = QLabel("")
+        self.__meta_label.setObjectName("anexo_metadados")
+        info_layout.addWidget(self.__meta_label)
         info_layout.addStretch()
         layout.addLayout(info_layout, stretch=1)
 
@@ -47,7 +44,7 @@ class AnexoPreview(QFrame):
         self.__btn_ver.clicked.connect(self.ver_todos_anexos.emit)
         layout.addWidget(self.__btn_ver)
 
-    def _carregar_thumbnail(self, caminho: str) -> None:
+    def carregar_thumbnail(self, caminho: str) -> None:
         path = Path(caminho)
         if not path.exists():
             logger.warning("Thumbnail nao encontrado: %s", caminho)
@@ -61,3 +58,6 @@ class AnexoPreview(QFrame):
             Qt.TransformationMode.SmoothTransformation,
         )
         self.__thumb_label.setPixmap(thumb)
+
+    def definir_metadados(self, texto: str) -> None:
+        self.__meta_label.setText(texto)

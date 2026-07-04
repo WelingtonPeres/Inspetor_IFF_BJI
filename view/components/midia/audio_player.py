@@ -42,7 +42,6 @@ class AudioPlayer(QFrame):
 
         self.__slider = QSlider(Qt.Orientation.Horizontal)
         self.__slider.setObjectName("audio_progress")
-        self.__slider.setRange(0, 100)
         self.__slider.sliderMoved.connect(self.__player.setPosition)
         controls.addWidget(self.__slider)
 
@@ -80,10 +79,11 @@ class AudioPlayer(QFrame):
     def __atualizar_progresso(self, pos: int) -> None:
         dur = self.__player.duration()
         if dur > 0:
-            self.__slider.setValue(int(pos * 100 / dur))
+            self.__slider.setValue(pos)
 
     def __atualizar_duracao(self, dur: int) -> None:
-        self.__slider.setRange(0, dur)
+        self.__slider.setRange(0, dur if dur > 0 else 100)
+        self.__label_tempo.setText(f"0:00 / {self.__format_tempo(dur)}")
 
     def __on_media_status(self, status):
         if status == QMediaPlayer.MediaStatus.EndOfMedia:

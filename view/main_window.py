@@ -37,6 +37,7 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
     perfil_confirmado = Signal(str)
     submeter_respostas = Signal(dict)
     continuar_solicitado = Signal()
+    voltar_menu_solicitado = Signal()
 
     def __init__(self):
         super().__init__()
@@ -71,6 +72,7 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
         self.__tela_inspecao.submeter_respostas.connect(self.submeter_respostas.emit)
         self.__tela_inspecao.continuar_solicitado.connect(self.continuar_solicitado.emit)
         self.__tela_inspecao.minimizar_solicitado.connect(self.__on_minimizar_inspecao)
+        self.__tela_inspecao.voltar_menu_solicitado.connect(self.voltar_menu_solicitado.emit)
         self.__overlay_area.add_overlay(self.__tela_inspecao)
 
     def __on_fechar_janela_sistema(self) -> None:
@@ -140,6 +142,7 @@ class _OverlayArea(QWidget):
         super().__init__(parent)
         self.setObjectName("overlay_area")
         self.__desktop: QWidget | None = None
+        self.__overlays: list[QWidget] = []
         self.__layout = QVBoxLayout(self)
         self.__layout.setContentsMargins(0, 0, 0, 0)
         self.__layout.setSpacing(0)
@@ -149,14 +152,14 @@ class _OverlayArea(QWidget):
         self.__layout.addWidget(widget)
 
     def add_overlay(self, widget: QWidget) -> None:
+        self.__overlays.append(widget)
         widget.setParent(self)
         widget.hide()
         widget.raise_()
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        for child in self.findChildren(QWidget):
-            if child is self.__desktop:
-                continue
-            if child.parent() is self and child.isVisible():
-                child.setGeometry(self.rect())
+        rect = self.rect()
+        for overlay in self.__overlays:
+            if overlay.isVisible():
+                overlay.setGeometry(rect)

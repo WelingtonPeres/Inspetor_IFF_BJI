@@ -114,6 +114,20 @@ class TestTelaInspecaoCheia:
         stack = tela.findChild(QStackedWidget)
         assert stack.currentIndex() == tela.IDX_RESULTADO
 
+    def test_resultado_botao_voltar(self, tela):
+        """Resultado deve conter botao 'Voltar ao Menu'."""
+        tela.exibir_resultado(pontuacao_global=5000.0, dias_concluidos=1)
+        btn = tela.findChild(QPushButton, "btn_voltar_menu")
+        assert btn is not None
+        assert btn.text() == "Voltar ao Menu"
+
+    def test_voltar_menu_signal(self, tela, qtbot):
+        """Clicar em voltar ao menu deve emitir voltar_menu_solicitado."""
+        tela.exibir_resultado(pontuacao_global=5000.0, dias_concluidos=1)
+        btn = tela.findChild(QPushButton, "btn_voltar_menu")
+        with qtbot.waitSignal(tela.voltar_menu_solicitado, timeout=1000):
+            qtbot.mouseClick(btn, Qt.MouseButton.LeftButton)
+
     def test_temporizador(self, tela):
         """renderizar_relatorio deve reiniciar o temporizador."""
         tela.renderizar_relatorio({

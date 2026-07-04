@@ -41,11 +41,12 @@ class TestJanelaPrincipal:
         assert isinstance(janela, IGameView)
 
     def test_tem_signals_corretos(self, janela):
-        """Deve expor os 4 sinais de navegacao."""
+        """Deve expor os 5 sinais de navegacao."""
         assert hasattr(janela, "iniciar_solicitado")
         assert hasattr(janela, "perfil_confirmado")
         assert hasattr(janela, "submeter_respostas")
         assert hasattr(janela, "continuar_solicitado")
+        assert hasattr(janela, "voltar_menu_solicitado")
 
     def test_inicializar_e_fechar(self, janela):
         """inicializar deve exibir a janela; fechar deve oculta-la."""

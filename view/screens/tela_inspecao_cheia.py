@@ -31,6 +31,7 @@ class TelaInspecaoCheia(QFrame):
     submeter_respostas = Signal(dict)
     continuar_solicitado = Signal()
     minimizar_solicitado = Signal()
+    voltar_menu_solicitado = Signal()
 
     IDX_INSPECAO = 0
     IDX_DIAGNOSTICO = 1
@@ -204,6 +205,12 @@ class TelaInspecaoCheia(QFrame):
         self.__label_resultado.setWordWrap(True)
         layout.addWidget(self.__label_resultado)
 
+        self.__btn_voltar_menu = QPushButton("Voltar ao Menu")
+        self.__btn_voltar_menu.setObjectName("btn_voltar_menu")
+        self.__btn_voltar_menu.setProperty("class", "btn_primario")
+        self.__btn_voltar_menu.clicked.connect(self.voltar_menu_solicitado.emit)
+        layout.addWidget(self.__btn_voltar_menu)
+
         return pagina
 
     def __coletar_respostas(self) -> None:
@@ -257,14 +264,21 @@ class TelaInspecaoCheia(QFrame):
             self.__media_viewer.show()
             self.__media_viewer.raise_()
         elif anexo.get("tipo_midia") == "VIDEO":
-            player = self.__anexo_gallery.findChild(VideoPlayer)
-            if player:
+            player = self.__anexo_gallery.obter_player_atual()
+            if isinstance(player, VideoPlayer):
+                player.sair_fullscreen_solicitado.connect(self.__fechar_video_fullscreen, type=Qt.ConnectionType.UniqueConnection)
                 player.entrar_fullscreen(self)
                 self.__video_player_fullscreen = player
                 self.__anexo_gallery.hide()
 
     def __fechar_media_viewer(self) -> None:
         self.__media_viewer.hide()
+
+    def __fechar_video_fullscreen(self) -> None:
+        self.__video_player_fullscreen = None
+        if self.__anexo_gallery:
+            self.__anexo_gallery.setGeometry(self.rect())
+            self.__anexo_gallery.show()
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -273,9 +287,7 @@ class TelaInspecaoCheia(QFrame):
         if self.__media_viewer.isVisible():
             self.__media_viewer.setGeometry(self.rect())
         if self.__video_player_fullscreen is not None:
-            vp = self.__video_player_fullscreen
-            if vp.property("class") == "video_player" and vp.isVisible():
-                vp.entrar_fullscreen(self)
+            self.__video_player_fullscreen.entrar_fullscreen(self)
 
     def exibir_tela_diagnostico(self, diagnostico: DiagnosticoPontuacaoDTO) -> None:
         logger.info("Exibindo diagnostico: %s", diagnostico)
@@ -298,10 +310,10 @@ class TelaInspecaoCheia(QFrame):
         self.__anexos_data = dados_relatorio.get("anexos", [])
         if self.__anexos_data:
             primeiro = self.__anexos_data[0]
-            self.__anexo_preview._carregar_thumbnail(
+            self.__anexo_preview.carregar_thumbnail(
                 primeiro.get("caminho_arquivo", "")
             )
-            self.__anexo_preview._meta_label.setText(
+            self.__anexo_preview.definir_metadados(
                 f"{len(self.__anexos_data)} anexo(s)"
             )
         self.__limpar_formulario_inspecao()

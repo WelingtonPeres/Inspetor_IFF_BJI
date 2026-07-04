@@ -116,6 +116,11 @@ class AnexoGallery(QFrame):
             self.__stack.setCurrentIndex(self.__indice_atual)
             self.__atualizar_indicador()
 
+    def obter_player_atual(self):
+        if 0 <= self.__indice_atual < len(self.__players):
+            return self.__players[self.__indice_atual]
+        return None
+
     def __atualizar_indicador(self) -> None:
         total = len(self.__players)
         if total > 0:

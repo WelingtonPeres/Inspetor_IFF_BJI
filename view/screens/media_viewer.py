@@ -49,10 +49,6 @@ class MediaViewer(QFrame):
         self.fechar_solicitado.emit()
         super().mouseDoubleClickEvent(event)
 
-    def mousePressEvent(self, event):
-        self.fechar_solicitado.emit()
-        super().mousePressEvent(event)
-
     def resizeEvent(self, event):
         super().resizeEvent(event)
         if self.__label.pixmap() and not self.__label.pixmap().isNull():

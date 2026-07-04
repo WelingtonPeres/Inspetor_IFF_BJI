@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from PySide6.QtCore import Qt, Signal, QUrl
+from PySide6.QtCore import Qt, QEvent, Signal, QUrl
 from PySide6.QtGui import QFont, QKeyEvent
 from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 from PySide6.QtMultimediaWidgets import QVideoWidget
@@ -24,6 +24,7 @@ class VideoPlayer(QFrame):
         self.__font_sz = L.scaled("video_player", "font_size")
         self.__controls_h = L.scaled("video_player", "controls_altura")
 
+        self.__fullscreen_container: QWidget | None = None
         self.__player = QMediaPlayer(self)
         self.__audio_output = QAudioOutput()
         self.__player.setAudioOutput(self.__audio_output)
@@ -99,21 +100,33 @@ class VideoPlayer(QFrame):
             self.sair_fullscreen_solicitado.emit()
 
     def entrar_fullscreen(self, container: QWidget) -> None:
+        self.__fullscreen_container = container
+        container.installEventFilter(self)
         self.__video_widget.setParent(container)
         self.__video_widget.setGeometry(container.rect())
         self.__video_widget.show()
         self.__video_widget.raise_()
 
     def sair_fullscreen(self) -> None:
+        if self.__fullscreen_container:
+            self.__fullscreen_container.removeEventFilter(self)
+            self.__fullscreen_container = None
         self.__video_widget.setParent(self)
         self.__video_widget.show()
         self.__controls.show()
         self.__btn_fullscreen.setText("⛶")
 
+    def eventFilter(self, obj, event):
+        if obj is self.__fullscreen_container and event.type() == QEvent.Type.KeyPress:
+            if event.key() == Qt.Key.Key_Escape and self.__btn_fullscreen.text() == "─":
+                self.__toggle_fullscreen()
+                return True
+        return super().eventFilter(obj, event)
+
     def __atualizar_progresso(self, pos: int) -> None:
         dur = self.__player.duration()
         if dur > 0:
-            self.__slider.setValue(int(pos * 100 / dur))
+            self.__slider.setValue(pos)
             self.__label_tempo.setText(
                 f"{self.__format_tempo(pos)} / {self.__format_tempo(dur)}"
             )

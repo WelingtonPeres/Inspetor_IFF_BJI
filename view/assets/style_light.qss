@@ -1,22 +1,22 @@
 /* 
 ============================================================
-   style.qss — Tema Dark (Dart)
-   Baseado no DESIGN.md — Dark Mode
+   style_light.qss — Tema Light
+   Baseado no DESIGN.md — Light Mode
 ============================================================ 
 */
 
 /* --- Janela Principal --- */
 QMainWindow {
-    background-color: #121414;
+    background-color: #f9f9f9;
 }
 
 QStackedWidget {
-    background-color: #121414;
+    background-color: #f9f9f9;
 }
 
 /* --- Labels de Título --- */
 #titulo_menu {
-    color: #71dd77;
+    color: #006b21;
     font-family: "Open Sans";
     font-size: 32px;
     font-weight: 700;
@@ -24,7 +24,7 @@ QStackedWidget {
 }
 
 #label_selecao_perfil {
-    color: #e2e2e2;
+    color: #1a1c1c;
     font-family: "Open Sans";
     font-size: 20px;
     font-weight: 700;
@@ -32,25 +32,25 @@ QStackedWidget {
 
 /* --- Label de Relatório (Inspeção) --- */
 #label_titulo_relatorio {
-    color: #e2e2e2;
+    color: #1a1c1c;
     font-family: "Open Sans";
     font-size: 14px;
     font-weight: 400;
     padding: 16px;
-    background-color: #1e2020;
-    border: 1px solid #3f4a3d;
+    background-color: #eeeeee;
+    border: 1px solid #becab9;
     border-radius: 4px;
 }
 
 /* --- Labels de Feedback (Diagnóstico / Resultado) --- */
 .label_feedback {
-    color: #e2e2e2;
+    color: #1a1c1c;
     font-family: "Open Sans";
     font-size: 14px;
     font-weight: 400;
     padding: 24px;
-    background-color: #1e2020;
-    border: 1px solid #3f4a3d;
+    background-color: #eeeeee;
+    border: 1px solid #becab9;
     border-radius: 4px;
 }
 
@@ -77,10 +77,10 @@ QStackedWidget {
 
 /* --- Group Boxes (Inspeção) --- */
 .group_box {
-    background-color: #1e2020;
-    border: 1px solid #3f4a3d;
+    background-color: #eeeeee;
+    border: 1px solid #becab9;
     border-radius: 8px;
-    color: #71dd77;
+    color: #006b21;
     font-family: "Open Sans";
     font-size: 14px;
     font-weight: 700;
@@ -89,7 +89,7 @@ QStackedWidget {
 }
 
 .group_box::title {
-    color: #71dd77;
+    color: #006b21;
     padding: 4px 8px;
     subcontrol-origin: margin;
     left: 12px;
@@ -97,7 +97,7 @@ QStackedWidget {
 
 /* --- Checkboxes (Riscos) --- */
 .chk_risco {
-    color: #e2e2e2;
+    color: #1a1c1c;
     font-family: "Open Sans";
     font-size: 14px;
     font-weight: 400;
@@ -107,8 +107,8 @@ QStackedWidget {
 .chk_risco::indicator {
     width: 20px;
     height: 20px;
-    border: 2px solid #3f4a3d;
-    background-color: #121414;
+    border: 2px solid #becab9;
+    background-color: #f9f9f9;
     border-radius: 4px;
 }
 
@@ -119,7 +119,7 @@ QStackedWidget {
 
 /* --- Checkboxes (Fatores) --- */
 .chk_fator {
-    color: #e2e2e2;
+    color: #1a1c1c;
     font-family: "Open Sans";
     font-size: 14px;
     font-weight: 400;
@@ -129,19 +129,19 @@ QStackedWidget {
 .chk_fator::indicator {
     width: 20px;
     height: 20px;
-    border: 2px solid #3f4a3d;
-    background-color: #121414;
+    border: 2px solid #becab9;
+    background-color: #f9f9f9;
     border-radius: 4px;
 }
 
 .chk_fator::indicator:checked {
-    background-color: #8dd2d8;
-    border-color: #8dd2d8;
+    background-color: #17666b;
+    border-color: #17666b;
 }
 
 /* --- Radio Buttons (Decisão) --- */
 .radio_decisao {
-    color: #e2e2e2;
+    color: #1a1c1c;
     font-family: "Open Sans";
     font-size: 14px;
     font-weight: 700;
@@ -152,8 +152,8 @@ QStackedWidget {
 .radio_decisao::indicator {
     width: 20px;
     height: 20px;
-    border: 2px solid #3f4a3d;
-    background-color: #121414;
+    border: 2px solid #becab9;
+    background-color: #f9f9f9;
     border-radius: 9999px;
 }
 
@@ -164,11 +164,11 @@ QStackedWidget {
 
 /* --- ComboBox (Seleção de Perfil) --- */
 .combo_padrao {
-    background-color: #121414;
-    color: #e2e2e2;
+    background-color: #f9f9f9;
+    color: #1a1c1c;
     font-family: "Open Sans";
     font-size: 14px;
-    border: 1px solid #3f4a3d;
+    border: 1px solid #becab9;
     border-radius: 8px;
     padding: 8px 16px;
     min-width: 240px;
@@ -184,22 +184,22 @@ QStackedWidget {
 }
 
 .combo_padrao QAbstractItemView {
-    background-color: #1e2020;
-    color: #e2e2e2;
-    border: 1px solid #3f4a3d;
+    background-color: #eeeeee;
+    color: #1a1c1c;
+    border: 1px solid #becab9;
     selection-background-color: #2F9E41;
     selection-color: #FFFFFF;
 }
 
 /* --- Popup de Erro --- */
 QMessageBox {
-    background-color: #1e2020;
-    color: #e2e2e2;
+    background-color: #eeeeee;
+    color: #1a1c1c;
     font-family: "Open Sans";
 }
 
 QMessageBox QLabel {
-    color: #e2e2e2;
+    color: #1a1c1c;
     font-family: "Open Sans";
     font-size: 14px;
 }
@@ -230,9 +230,9 @@ QWidget#overlay_area {
 
 /* --- Taskbar (z=0) --- */
 QFrame#taskbar {
-    background-color: #121414;
+    background-color: #f9f9f9;
     border: none;
-    border-top: 1px solid #3f4a3d;
+    border-top: 1px solid #becab9;
 }
 
 QPushButton#taskbar_start {
@@ -243,11 +243,11 @@ QPushButton#taskbar_start {
 }
 
 QPushButton#taskbar_start:hover {
-    background-color: #1e2020;
+    background-color: #eeeeee;
 }
 
 QLabel#taskbar_clock {
-    color: #e2e2e2;
+    color: #1a1c1c;
     font-family: "Open Sans";
 }
 
@@ -257,7 +257,7 @@ QWidget#tela_menu_principal {
 }
 
 QLabel#wallpaper_label {
-    background-color: #121414;
+    background-color: #f9f9f9;
 }
 
 QFrame#desktop_shortcut {
@@ -274,12 +274,12 @@ QFrame#desktop_shortcut:hover {
 QLabel#shortcut_icon {
     background-color: rgba(0, 0, 0, 0.5);
     border-radius: 8px;
-    color: #e2e2e2;
+    color: #1a1c1c;
 }
 
 QLabel#shortcut_label {
-    color: #e2e2e2;
-    background-color: rgba(18, 20, 20, 0.7);
+    color: #1a1c1c;
+    background-color: rgba(249, 249, 249, 0.7);
     border-radius: 4px;
     padding: 2px 4px;
     font-family: "Open Sans";
@@ -287,20 +287,20 @@ QLabel#shortcut_label {
 
 /* --- JanelaSistema (z=2, floating) --- */
 QFrame#janela_sistema {
-    background-color: #1e2020;
-    border: 1px solid #3f4a3d;
+    background-color: #eeeeee;
+    border: 1px solid #becab9;
     border-radius: 4px;
 }
 
 QFrame#window_title_bar {
-    background-color: #121414;
+    background-color: #f9f9f9;
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
-    border-bottom: 1px solid #3f4a3d;
+    border-bottom: 1px solid #becab9;
 }
 
 QLabel#window_title_text {
-    color: #71dd77;
+    color: #006b21;
     font-family: "Open Sans";
     font-weight: bold;
     font-size: 14px;
@@ -308,7 +308,7 @@ QLabel#window_title_text {
 
 QPushButton#window_close_button {
     background-color: transparent;
-    color: #e2e2e2;
+    color: #1a1c1c;
     border: none;
     font-size: 14px;
 }
@@ -320,28 +320,28 @@ QPushButton#window_close_button:hover {
 }
 
 QFrame#janela_sistema_body {
-    background-color: #1e2020;
+    background-color: #eeeeee;
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
 }
 
 QLabel#janela_sistema_placeholder {
-    color: #5e7a72;
+    color: #8a9a93;
     font-family: "Open Sans";
 }
 
 /* --- TelaInspecaoCheia (z=2, fullscreen) --- */
 QFrame#tela_inspecao_cheia {
-    background-color: #121414;
+    background-color: #f9f9f9;
 }
 
 QFrame#header_bar {
-    background-color: #121414;
-    border-bottom: 1px solid #3f4a3d;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #becab9;
 }
 
 QLabel#header_title {
-    color: #71dd77;
+    color: #006b21;
     font-size: 14px;
     font-weight: bold;
     font-family: "Open Sans";
@@ -349,7 +349,7 @@ QLabel#header_title {
 
 QPushButton#minimizar_button {
     background-color: transparent;
-    color: #e2e2e2;
+    color: #1a1c1c;
     border: none;
     font-size: 18px;
     min-width: 32px;
@@ -363,28 +363,28 @@ QPushButton#minimizar_button:hover {
 
 /* --- Paginas internas da TelaInspecaoCheia --- */
 QWidget.pagina_inspecao {
-    background-color: #121414;
+    background-color: #f9f9f9;
 }
 
 QWidget.pagina_diagnostico {
-    background-color: #121414;
+    background-color: #f9f9f9;
 }
 
 QWidget.pagina_resultado {
-    background-color: #121414;
+    background-color: #f9f9f9;
 }
 
 /* --- Sidebar --- */
 QFrame#sidebar {
-    background-color: #121414;
-    border-right: 1px solid #3f4a3d;
+    background-color: #f9f9f9;
+    border-right: 1px solid #becab9;
 }
 
 .sidebar_item {
     background-color: transparent;
-    color: #e2e2e2;
+    color: #1a1c1c;
     border: none;
-    border-bottom: 1px solid #3f4a3d;
+    border-bottom: 1px solid #becab9;
     font-family: "Open Sans";
     font-size: 12px;
     font-weight: 400;
@@ -392,28 +392,28 @@ QFrame#sidebar {
 }
 
 .sidebar_item:hover {
-    background-color: #1e2020;
+    background-color: #eeeeee;
 }
 
 .sidebar_item:disabled {
-    color: #5e7a72;
+    color: #8a9a93;
 }
 
 /* --- AnexoPreview --- */
 QFrame#anexo_preview {
-    background-color: #1e2020;
-    border: 1px solid #3f4a3d;
+    background-color: #eeeeee;
+    border: 1px solid #becab9;
     border-radius: 8px;
 }
 
 QLabel#anexo_thumbnail {
-    background-color: #121414;
-    border: 1px solid #3f4a3d;
+    background-color: #f9f9f9;
+    border: 1px solid #becab9;
     border-radius: 4px;
 }
 
 QLabel#anexo_metadados {
-    color: #e2e2e2;
+    color: #1a1c1c;
     font-family: "Open Sans";
     font-size: 12px;
 }
@@ -435,15 +435,15 @@ QPushButton#btn_ver_anexos:hover {
 
 /* --- AnexoGallery --- */
 QFrame#anexo_gallery {
-    background-color: rgba(0, 0, 0, 179);
+    background-color: rgba(249, 249, 249, 230);
 }
 
 QPushButton#gallery_close_button,
 QPushButton#gallery_prev_button,
 QPushButton#gallery_next_button {
-    background-color: rgba(0, 0, 0, 100);
-    color: #e2e2e2;
-    border: 1px solid #3f4a3d;
+    background-color: rgba(200, 200, 200, 150);
+    color: #1a1c1c;
+    border: 1px solid #becab9;
     border-radius: 8px;
     font-size: 16px;
 }
@@ -452,10 +452,11 @@ QPushButton#gallery_close_button:hover,
 QPushButton#gallery_prev_button:hover,
 QPushButton#gallery_next_button:hover {
     background-color: #2F9E41;
+    color: #FFFFFF;
 }
 
 QLabel#gallery_indicador {
-    color: #e2e2e2;
+    color: #1a1c1c;
     font-family: "Open Sans";
     font-size: 14px;
     padding: 8px;
@@ -463,5 +464,5 @@ QLabel#gallery_indicador {
 
 /* --- MediaViewer --- */
 QFrame#media_viewer {
-    background-color: rgba(0, 0, 0, 230);
+    background-color: rgba(249, 249, 249, 240);
 }

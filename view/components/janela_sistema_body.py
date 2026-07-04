@@ -59,7 +59,7 @@ class JanelaSistemaBody(QFrame):
         self.__combo_perfil.setObjectName("combo_perfil")
         self.__combo_perfil.setProperty("class", "combo_padrao")
         self.__combo_perfil.addItems([
-            "T_QUIMICA", "T_INFORMATICA", "T_AGROPECUARIA",
+            "DEFAULT", "T_QUIMICA", "T_INFORMATICA", "T_AGROPECUARIA",
             "T_ALIMENTOS", "T_MEIO_AMBIENTE", "T_ZOOTECNIA",
             "CT_ALIMENTOS", "E_COMPUTACAO",
         ])

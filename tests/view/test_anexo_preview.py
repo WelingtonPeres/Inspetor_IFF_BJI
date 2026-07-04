@@ -12,7 +12,9 @@ def qt_app(qapp):
 
 @pytest.fixture
 def preview():
-    return AnexoPreview(metadados="3 anexo(s)")
+    p = AnexoPreview()
+    p.definir_metadados("3 anexo(s)")
+    return p
 
 
 class TestAnexoPreview:

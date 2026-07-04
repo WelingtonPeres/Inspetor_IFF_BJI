@@ -15,3 +15,5 @@ CURSOS: list[str] = [
     "CT_ALIMENTOS",
     "E_COMPUTACAO",
 ]
+
+TEMA_PADRAO: str = "dark"  # "dark" ou "light"
