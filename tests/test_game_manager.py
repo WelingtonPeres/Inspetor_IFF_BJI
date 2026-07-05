@@ -3,8 +3,9 @@ Suite completa de testes para o GameManager.
 """
 
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, create_autospec, patch
 
+from application.interfaces.i_game_view import IGameView
 from infrastructure.repository.repositorio_json import RepositorioJSON
 
 
@@ -53,8 +54,8 @@ from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
 
 @pytest.fixture
 def view_mock():
-    """Mock da View injetada no GameManager."""
-    return MagicMock()
+    """Mock da View injetada no GameManager, validado contra IGameView."""
+    return create_autospec(IGameView)
 
 
 @pytest.fixture

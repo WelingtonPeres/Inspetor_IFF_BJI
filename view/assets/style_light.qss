@@ -1,0 +1,561 @@
+/* 
+============================================================
+   style_light.qss — Tema Light
+   Baseado no DESIGN.md — Light Mode
+============================================================ 
+*/
+
+/* --- Janela Principal --- */
+QMainWindow {
+    background-color: #f9f9f9;
+}
+
+QStackedWidget {
+    background-color: #f9f9f9;
+}
+
+/* --- Labels de Título --- */
+#titulo_menu {
+    color: #006b21;
+    font-family: "Open Sans";
+    font-size: 32px;
+    font-weight: 700;
+    padding: 24px;
+}
+
+#label_selecao_perfil {
+    color: #1a1c1c;
+    font-family: "Open Sans";
+    font-size: 20px;
+    font-weight: 700;
+}
+
+/* --- Label de Relatório (Inspeção) --- */
+#label_titulo_relatorio {
+    color: #1a1c1c;
+    font-family: "Open Sans";
+    font-size: 14px;
+    font-weight: 400;
+    padding: 16px;
+    background-color: #eeeeee;
+    border: 1px solid #becab9;
+    border-radius: 4px;
+}
+
+/* --- Labels de Feedback (Diagnóstico / Resultado) --- */
+.label_feedback {
+    color: #1a1c1c;
+    font-family: "Open Sans";
+    font-size: 14px;
+    font-weight: 400;
+    padding: 24px;
+    background-color: #eeeeee;
+    border: 1px solid #becab9;
+    border-radius: 4px;
+}
+
+/* --- Botões Primários --- */
+.btn_primario {
+    background-color: #2F9E41;
+    color: #FFFFFF;
+    font-family: "Open Sans";
+    font-size: 14px;
+    font-weight: 700;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 24px;
+    min-width: 160px;
+}
+
+.btn_primario:hover {
+    background-color: #37a547;
+}
+
+.btn_primario:pressed {
+    background-color: #006e22;
+}
+
+/* --- Group Boxes (Inspeção) --- */
+.group_box {
+    background-color: #eeeeee;
+    border: 1px solid #becab9;
+    border-radius: 4px;
+    color: #006b21;
+    font-family: "Open Sans";
+    font-size: 14px;
+    font-weight: 700;
+    padding: 12px;
+    margin: 8px 0;
+}
+
+.group_box::title {
+    color: #006b21;
+    padding: 4px 8px;
+    subcontrol-origin: margin;
+    left: 12px;
+}
+
+/* --- Checkboxes (Riscos) --- */
+.chk_risco {
+    color: #1a1c1c;
+    font-family: "Open Sans";
+    font-size: 14px;
+    font-weight: 400;
+    spacing: 8px;
+}
+
+.chk_risco::indicator {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #becab9;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+}
+
+.chk_risco::indicator:checked {
+    background-color: #2F9E41;
+    border-color: #2F9E41;
+}
+
+/* --- Checkboxes (Fatores) --- */
+.chk_fator {
+    color: #1a1c1c;
+    font-family: "Open Sans";
+    font-size: 14px;
+    font-weight: 400;
+    spacing: 8px;
+}
+
+.chk_fator::indicator {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #becab9;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+}
+
+.chk_fator::indicator:checked {
+    background-color: #17666b;
+    border-color: #17666b;
+}
+
+/* --- Radio Buttons (Decisão) --- */
+.radio_decisao {
+    color: #1a1c1c;
+    font-family: "Open Sans";
+    font-size: 14px;
+    font-weight: 700;
+    spacing: 8px;
+    padding: 8px;
+}
+
+.radio_decisao::indicator {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #becab9;
+    background-color: #f9f9f9;
+    border-radius: 9999px;
+}
+
+.radio_decisao::indicator:checked {
+    background-color: #CD191E;
+    border-color: #CD191E;
+}
+
+/* --- ComboBox (Seleção de Perfil) --- */
+.combo_padrao {
+    background-color: #f9f9f9;
+    color: #1a1c1c;
+    font-family: "Open Sans";
+    font-size: 14px;
+    border: 1px solid #becab9;
+    border-radius: 4px;
+    padding: 8px 16px;
+    min-width: 240px;
+}
+
+.combo_padrao:hover {
+    border-color: #2F9E41;
+}
+
+.combo_padrao::drop-down {
+    border: none;
+    width: 28px;
+}
+
+.combo_padrao QAbstractItemView {
+    background-color: #eeeeee;
+    color: #1a1c1c;
+    border: 1px solid #becab9;
+    selection-background-color: #2F9E41;
+    selection-color: #FFFFFF;
+}
+
+/* --- Popup de Erro --- */
+QMessageBox {
+    background-color: #eeeeee;
+    color: #1a1c1c;
+    font-family: "Open Sans";
+}
+
+QMessageBox QLabel {
+    color: #1a1c1c;
+    font-family: "Open Sans";
+    font-size: 14px;
+}
+
+QMessageBox QPushButton {
+    background-color: #CD191E;
+    color: #FFFFFF;
+    font-family: "Open Sans";
+    font-weight: 700;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 20px;
+    min-width: 80px;
+}
+
+QMessageBox QPushButton:hover {
+    background-color: #bb0213;
+}
+
+/* =============================================================
+   OVERLAYS (z-order)
+   ============================================================= */
+
+/* --- Overlay Area --- */
+QWidget#overlay_area {
+    background-color: transparent;
+}
+
+/* --- Taskbar (z=0) --- */
+QFrame#taskbar {
+    background-color: #f9f9f9;
+    border: none;
+    border-top: 1px solid #becab9;
+}
+
+QPushButton#taskbar_start {
+    background-color: transparent;
+    border: none;
+    padding: 4px 12px;
+    border-radius: 4px;
+}
+
+QPushButton#taskbar_start:hover {
+    background-color: #eeeeee;
+}
+
+QLabel#taskbar_clock {
+    color: #1a1c1c;
+    font-family: "Open Sans";
+}
+
+/* --- Desktop (z=1) --- */
+QWidget#tela_menu_principal {
+    background-color: transparent;
+}
+
+QLabel#wallpaper_label {
+    background-color: #f9f9f9;
+}
+
+QFrame#desktop_shortcut {
+    background-color: transparent;
+    border: 2px solid transparent;
+    border-radius: 8px;
+}
+
+QFrame#desktop_shortcut:hover {
+    background-color: rgba(47, 158, 65, 0.15);
+    border-color: rgba(47, 158, 65, 0.4);
+}
+
+QLabel#shortcut_icon {
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+    color: #1a1c1c;
+}
+
+QLabel#shortcut_label {
+    color: #1a1c1c;
+    background-color: rgba(249, 249, 249, 0.7);
+    border-radius: 4px;
+    padding: 2px 4px;
+    font-family: "Open Sans";
+}
+
+/* --- JanelaSistema (z=2, floating) --- */
+QFrame#janela_sistema {
+    background-color: #eeeeee;
+    border: 1px solid #becab9;
+    border-radius: 4px;
+}
+
+QFrame#window_title_bar {
+    background-color: #f0f0f0;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom: 2px solid #2F9E41;
+}
+
+QLabel#window_title_text {
+    color: #006b21;
+    font-family: "Courier New", Consolas, monospace;
+    font-weight: bold;
+    font-size: 12px;
+    padding: 4px 8px;
+}
+
+QPushButton#window_minimize_button,
+QPushButton#window_maximize_button,
+QPushButton#window_close_button {
+    background-color: transparent;
+    color: #1a1c1c;
+    border: none;
+    border-radius: 0px;
+    font-size: 16px;
+    min-width: 36px;
+    min-height: 28px;
+}
+
+QPushButton#window_minimize_button:hover {
+    background-color: #cccccc;
+}
+
+QPushButton#window_maximize_button:hover {
+    background-color: #2F9E41;
+    color: #FFFFFF;
+}
+
+QPushButton#window_close_button:hover {
+    background-color: #CD191E;
+    color: #FFFFFF;
+}
+
+QFrame#janela_sistema_body {
+    background-color: #eeeeee;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+QLabel#janela_sistema_placeholder {
+    color: #8a9a93;
+    font-family: "Open Sans";
+}
+
+/* --- TelaInspecaoCheia (z=2, fullscreen) --- */
+QFrame#tela_inspecao_cheia {
+    background-color: #f9f9f9;
+}
+
+QFrame#header_bar {
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #becab9;
+}
+
+QLabel#header_title {
+    color: #006b21;
+    font-size: 14px;
+    font-weight: bold;
+    font-family: "Open Sans";
+}
+
+QPushButton#minimizar_button {
+    background-color: transparent;
+    color: #1a1c1c;
+    border: none;
+    font-size: 18px;
+    min-width: 32px;
+    min-height: 24px;
+}
+
+QPushButton#minimizar_button:hover {
+    background-color: #CD191E;
+    border-radius: 4px;
+}
+
+/* --- Paginas internas da TelaInspecaoCheia --- */
+QWidget.pagina_inspecao {
+    background-color: #f9f9f9;
+}
+
+QWidget.pagina_diagnostico {
+    background-color: #f9f9f9;
+}
+
+QWidget.pagina_resultado {
+    background-color: #f9f9f9;
+}
+
+/* --- Sidebar --- */
+QFrame#sidebar {
+    background-color: #f9f9f9;
+    border-right: 1px solid #becab9;
+}
+
+.sidebar_item {
+    background-color: transparent;
+    color: #1a1c1c;
+    border: none;
+    border-bottom: 1px solid #becab9;
+    font-family: "Open Sans";
+    font-size: 12px;
+    font-weight: 400;
+    padding: 8px;
+}
+
+.sidebar_item:hover {
+    background-color: #eeeeee;
+}
+
+.sidebar_item:disabled {
+    color: #8a9a93;
+}
+
+/* --- AnexoPreview --- */
+QFrame#anexo_preview {
+    background-color: #eeeeee;
+    border: 1px solid #becab9;
+    border-radius: 4px;
+}
+
+QLabel#anexo_thumbnail {
+    background-color: #f9f9f9;
+    border: 1px solid #becab9;
+    border-radius: 4px;
+}
+
+QLabel#anexo_metadados {
+    color: #1a1c1c;
+    font-family: "Open Sans";
+    font-size: 12px;
+}
+
+QPushButton#btn_ver_anexos {
+    background-color: #2F9E41;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 16px;
+    font-family: "Open Sans";
+    font-size: 12px;
+    font-weight: 700;
+}
+
+QPushButton#btn_ver_anexos:hover {
+    background-color: #37a547;
+}
+
+/* --- AnexoGallery --- */
+QFrame#anexo_gallery {
+    background-color: rgba(249, 249, 249, 230);
+}
+
+QPushButton#gallery_close_button,
+QPushButton#gallery_prev_button,
+QPushButton#gallery_next_button {
+    background-color: rgba(200, 200, 200, 150);
+    color: #1a1c1c;
+    border: 1px solid #becab9;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+QPushButton#gallery_close_button:hover,
+QPushButton#gallery_prev_button:hover,
+QPushButton#gallery_next_button:hover {
+    background-color: #2F9E41;
+    color: #FFFFFF;
+}
+
+QLabel#gallery_indicador {
+    color: #1a1c1c;
+    font-family: "Open Sans";
+    font-size: 14px;
+    padding: 8px;
+}
+
+/* --- MediaViewer --- */
+QFrame#media_viewer {
+    background-color: rgba(249, 249, 249, 240);
+}
+
+/* ============================================================
+   TelaDeExpediente — Janela Flutuante do Expediente (z=2)
+   ============================================================ */
+
+QFrame#tela_de_expediente {
+    background-color: #ffffff;
+    border: 2px solid #2F9E41;
+    border-radius: 4px;
+}
+
+QFrame#expediente_sombra {
+    background-color: #888888;
+    border: none;
+}
+
+/* --- Página de Loading --- */
+#label_loading_texto {
+    color: #2F9E41;
+    font-family: "Courier New", Consolas, monospace;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+#loading_progress_bar {
+    background-color: #e0e0e0;
+    border: 1px solid #becab9;
+    border-radius: 2px;
+    max-height: 16px;
+}
+
+#loading_progress_bar::chunk {
+    background-color: #2F9E41;
+    border-radius: 2px;
+}
+
+/* --- Página EndGame --- */
+#label_endgame_titulo {
+    font-family: "Courier New", Consolas, monospace;
+    font-size: 24px;
+    font-weight: bold;
+    border: 2px solid;
+    border-radius: 4px;
+    padding: 16px;
+}
+
+#label_endgame_titulo[status="vitoria"] {
+    color: #2F9E41;
+    border-color: #2F9E41;
+    background-color: #e8f5e9;
+}
+
+#label_endgame_titulo[status="derrota"] {
+    color: #CD191E;
+    border-color: #CD191E;
+    background-color: #fde8e8;
+}
+
+#label_endgame_pontuacao {
+    color: #1a1c1c;
+    font-family: "Courier New", Consolas, monospace;
+    font-size: 16px;
+    padding: 8px;
+}
+
+/* --- Split-Desk 60/40 --- */
+QWidget#deck_observacao {
+    background-color: #f5f5f5;
+    border: 1px solid #becab9;
+    border-radius: 4px;
+    padding: 8px;
+}
+
+QWidget#prancheta {
+    background-color: #ffffff;
+    border: 1px solid #becab9;
+    border-radius: 4px;
+    padding: 8px;
+}
