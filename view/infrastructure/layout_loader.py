@@ -29,7 +29,9 @@ class LayoutLoader:
         self.__screen_h = h
 
     def _scale_factor(self) -> float:
-        return min(self.__screen_w / self.__ref_w, self.__screen_h / self.__ref_h)
+        factor_w = self.__screen_w / self.__ref_w
+        factor_h = self.__screen_h / self.__ref_h
+        return min(factor_w, factor_h)
 
     def _navigate(self, *keys: str) -> Any:
         current = self.__data

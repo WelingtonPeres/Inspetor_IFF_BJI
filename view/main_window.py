@@ -2,8 +2,8 @@ import abc
 import logging
 from typing import Any, Dict
 
-from PySide6.QtCore import Qt, Signal
-from PySide6.QtWidgets import QFrame, QHBoxLayout, QMainWindow, QMessageBox, QVBoxLayout, QWidget
+from PySide6.QtCore import Signal
+from PySide6.QtWidgets import QMainWindow, QMessageBox, QVBoxLayout, QWidget
 
 from application.interfaces.i_game_view import IGameView
 from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
@@ -93,7 +93,7 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
         self.__tela_expediente.exibir_tela_carregamento()
 
     def trocar_para_tela_inspecao(self) -> None:
-        logger.info("Garantindo visibilidade do expediente (compatibilidade).")
+        logger.info("Exibindo expediente (tela de inspecao).")
         self.__tela_expediente.show()
 
     def exibir_tela_diagnostico(self, diagnostico: DiagnosticoPontuacaoDTO) -> None:
@@ -103,13 +103,12 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
     def renderizar_relatorio(self, dados_relatorio: Dict[str, Any]) -> None:
         logger.info("Renderizando relatorio no expediente.")
         self.__tela_expediente.renderizar_relatorio(dados_relatorio)
-        if not self.__tela_expediente.isVisible():
-            self.__tela_expediente.show()
+        self.__tela_expediente.show()
 
     def exibir_resultado(self, pontuacao_global: float, dias_concluidos: int) -> None:
-        logger.info("Exibindo resultado final (compatibilidade).")
+        logger.info("Exibindo resultado final.")
         venceu = pontuacao_global > 0
-        self.__tela_expediente.exibir_tela_endgame(pontuacao_global, dias_concluidos, venceu)
+        self.exibir_tela_endgame(pontuacao_global, dias_concluidos, venceu)
 
     def exibir_tela_endgame(self, pontuacao_global: float, dias_concluidos: int, venceu: bool) -> None:
         logger.info("Exibindo endgame.")

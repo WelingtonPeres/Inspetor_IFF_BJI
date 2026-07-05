@@ -5,7 +5,6 @@ from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QFrame, QLabel, QVBoxLayout
 
 from view.components.midia.image_viewer import ImageViewer
-from view.infrastructure.layout_loader import LayoutLoader
 
 logger = logging.getLogger(__name__)
 
@@ -17,13 +16,6 @@ class MediaViewer(QFrame):
         super().__init__(parent)
         self.setObjectName("media_viewer")
         self.setProperty("class", "media_viewer")
-
-        L = LayoutLoader.instance()
-        opacidade = L.get("media_viewer", "opacidade_fundo")
-        alpha = int(255 * opacidade)
-        self.setStyleSheet(
-            f"QFrame#media_viewer {{ background-color: rgba(0,0,0,{alpha}); }}"
-        )
 
         self.__image_viewer: ImageViewer | None = None
         layout = QVBoxLayout(self)

@@ -40,7 +40,7 @@
     "spacing": { "atalhos_entre": 16 }
   },
   "wallpaper": {
-    "arquivo": "view/assets/images/fundo_iff_2.jpg",
+    "arquivo": "view/assets/images/wallpapers/fundo_iff_2.jpg",
     "scaled_contents": true
   },
   "logo": {
@@ -102,6 +102,7 @@
   "atalhos_lista": [
     { "icone_arquivo": "iniciar.png", "legenda": "Iniciar\nExpediente", "action": "iniciar" },
     { "icone_arquivo": "pasta.png", "legenda": "Relatorios\nPendentes", "action": "info" },
-    { "icone_arquivo": "help.png", "legenda": "Ajuda e\nSuporte", "action": "info" }
+    { "icone_arquivo": "help.png", "legenda": "Ajuda e\nSuporte", "action": "info" },
+    { "icone_arquivo": "config2.png", "legenda": "Personalizar\nPapel de Parede", "action": "wallpaper" }
   ]
 }

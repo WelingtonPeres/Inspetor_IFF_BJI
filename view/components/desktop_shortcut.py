@@ -49,7 +49,7 @@ class DesktopShortcut(QWidget):
         else:
             font_size = L.scaled("fontes", "ocorrencias", "atalho_icone", "size")
             self.__icon_label.setFont(QFont("Open Sans", font_size))
-            self.__icon_label.setText(icone_arquivo or "❓")
+            self.__icon_label.setText("?")
 
         layout.addWidget(self.__icon_label, alignment=Qt.AlignmentFlag.AlignCenter)
 
@@ -64,9 +64,11 @@ class DesktopShortcut(QWidget):
     def __carregar_pixmap(self, icone_arquivo: str):
         if not icone_arquivo:
             return None
-        path = Path(__file__).resolve().parent.parent / "assets" / "icons" / icone_arquivo
-        if path.exists():
-            return QPixmap(str(path))
+        base = Path(__file__).resolve().parent.parent / "assets" / "icons"
+        for sub in [base / "desktop_Icos", base]:
+            path = sub / icone_arquivo
+            if path.exists():
+                return QPixmap(str(path))
         return None
 
     def mousePressEvent(self, event: QMouseEvent):

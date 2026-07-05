@@ -6,8 +6,6 @@ from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QStacked
 from view.components.midia.audio_player import AudioPlayer
 from view.components.midia.image_viewer import ImageViewer
 from view.components.midia.video_player import VideoPlayer
-from view.infrastructure.layout_loader import LayoutLoader
-
 logger = logging.getLogger(__name__)
 
 
@@ -23,13 +21,6 @@ class AnexoGallery(QFrame):
         self.__anexos: List[Dict] = []
         self.__indice_atual: int = 0
         self.__players: List[QWidget] = []
-
-        L = LayoutLoader.instance()
-        opacidade = L.get("anexo_gallery", "opacidade_fundo")
-        alpha = int(255 * opacidade)
-        self.setStyleSheet(
-            f"QFrame#anexo_gallery {{ background-color: rgba(0,0,0,{alpha}); }}"
-        )
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
