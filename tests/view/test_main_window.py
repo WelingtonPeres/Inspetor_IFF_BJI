@@ -26,9 +26,9 @@ def janela():
 
 class TestJanelaPrincipal:
     """
-    Testes para a JanelaPrincipal refatorada com modelo de overlays.
+    Testes para a JanelaPrincipal refatorada com unico overlay expediente.
 
-    Verifica os 9 metodos do contrato IGameView e os sinais.
+    Verifica os metodos do contrato IGameView e os sinais.
     """
 
     def test_eh_qmainwindow(self, janela):
@@ -55,30 +55,24 @@ class TestJanelaPrincipal:
         janela.fechar()
         assert not janela.isVisible()
 
-    def test_exibir_menu_esconde_overlays(self, janela):
-        """exibir_menu deve esconder janela_sistema e tela_inspecao."""
+    def test_exibir_menu(self, janela):
+        """exibir_menu deve esconder o expediente."""
         janela.exibir_menu()
 
-    def test_exibir_selecao_perfil_mostra_janela_sistema(self, janela):
-        """exibir_selecao_perfil deve mostrar a JanelaSistema."""
+    def test_exibir_selecao_perfil_mostra_expediente(self, janela):
+        """exibir_selecao_perfil deve mostrar a TelaDeExpediente."""
         janela.show()
         janela.exibir_selecao_perfil()
-        js = janela.findChild(object, "janela_sistema")
-        assert js is not None
-        assert js.isVisible()
+        te = janela.findChild(object, "tela_de_expediente")
+        assert te is not None
+        assert te.isVisible()
 
-    def test_trocar_para_tela_inspecao_mostra_cheia(self, janela):
-        """trocar_para_tela_inspecao deve mostrar a TelaInspecaoCheia."""
-        janela.show()
-        janela.trocar_para_tela_inspecao()
-        ti = janela.findChild(object, "tela_inspecao_cheia")
-        assert ti is not None
-        assert ti.isVisible()
+    def test_exibir_tela_carregamento(self, janela):
+        """exibir_tela_carregamento deve delegar sem erros."""
+        janela.exibir_tela_carregamento()
 
     def test_exibir_tela_diagnostico(self, janela):
-        """exibir_tela_diagnostico deve delegar e trocar o stacked."""
-        janela.show()
-        janela.trocar_para_tela_inspecao()
+        """exibir_tela_diagnostico deve delegar sem erros."""
         dto = DiagnosticoPontuacaoDTO(
             qnt_riscos_marcados=2, qnt_riscos_gabarito=3,
             qnt_riscos_corretos_marcados=1, estado_ato=True,
@@ -94,8 +88,12 @@ class TestJanelaPrincipal:
         })
 
     def test_exibir_resultado(self, janela):
-        """exibir_resultado deve delegar sem erros."""
+        """exibir_resultado deve delegar para exibir_tela_endgame."""
         janela.exibir_resultado(pontuacao_global=5000.0, dias_concluidos=1)
+
+    def test_exibir_tela_endgame(self, janela):
+        """exibir_tela_endgame deve delegar sem erros."""
+        janela.exibir_tela_endgame(pontuacao_global=5000.0, dias_concluidos=1, venceu=True)
 
     def test_exibir_popup_erro(self, janela, qtbot):
         """exibir_popup_erro deve abrir um QMessageBox.critical."""

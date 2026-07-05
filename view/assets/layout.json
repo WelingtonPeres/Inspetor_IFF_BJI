@@ -76,6 +76,17 @@
     "icone_tamanho": 20,
     "font_size": 9
   },
+  "tela_de_expediente": {
+    "proporcao_tela": 0.8,
+    "title_bar": {
+      "altura": 32,
+      "margens": { "top": 0, "right": 8, "bottom": 0, "left": 12 }
+    },
+    "body": {
+      "margens": { "top": 16, "right": 24, "bottom": 16, "left": 24 },
+      "spacing_entre_elementos": 12
+    }
+  },
   "janela_sistema": {
     "largura": 480,
     "altura": 340,

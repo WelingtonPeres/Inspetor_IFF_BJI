@@ -7,9 +7,8 @@ from PySide6.QtWidgets import QFrame, QHBoxLayout, QMainWindow, QMessageBox, QVB
 
 from application.interfaces.i_game_view import IGameView
 from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
-from view.components.janela_sistema import JanelaSistema
 from view.components.taskbar import Taskbar
-from view.screens.tela_inspecao_cheia import TelaInspecaoCheia
+from view.screens.tela_de_expediente import TelaDeExpediente
 from view.screens.tela_menu_principal import TelaMenuPrincipal
 
 logger = logging.getLogger(__name__)
@@ -29,8 +28,7 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
 
       z=0: Taskbar (sempre visivel, rodape)
       z=1: Desktop (TelaMenuPrincipal, sempre visivel)
-      z=2: JanelaSistema (flutuante, oculta por padrao)
-      z=2: TelaInspecaoCheia (tela cheia, oculta por padrao)
+      z=2: TelaDeExpediente (flutuante 80%, oculta por padrao)
     """
 
     iniciar_solicitado = Signal()
@@ -41,14 +39,13 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Inspetor IFF-BJI: Análise de Risco") # Titulo da Janela
-        self.setMinimumSize(1920, 1080) # Tamanho da Janela (Virar Configuração no Futuro)
+        self.setWindowTitle("Inspetor IFF-BJI: Análise de Risco")
+        self.setMinimumSize(1920, 1080)
 
-        container = QWidget() 
+        container = QWidget()
         container.setObjectName("container_area")
-        self.setCentralWidget(container) # Torna o Widget central
-        
-        # Pilagem de Widget
+        self.setCentralWidget(container)
+
         layout = QVBoxLayout(container)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
@@ -63,23 +60,16 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
         self.__tela_menu.iniciar_solicitado.connect(lambda _: self.iniciar_solicitado.emit())
         self.__overlay_area.add_desktop(self.__tela_menu)
 
-        self.__janela_sistema = JanelaSistema()
-        self.__janela_sistema.close_requested.connect(self.__on_fechar_janela_sistema)
-        self.__janela_sistema.perfil_confirmado.connect(self.perfil_confirmado.emit)
-        self.__overlay_area.add_overlay(self.__janela_sistema)
+        self.__tela_expediente = TelaDeExpediente()
+        self.__tela_expediente.perfil_confirmado.connect(self.perfil_confirmado.emit)
+        self.__tela_expediente.submeter_respostas.connect(self.submeter_respostas.emit)
+        self.__tela_expediente.continuar_solicitado.connect(self.continuar_solicitado.emit)
+        self.__tela_expediente.voltar_menu_solicitado.connect(self.voltar_menu_solicitado.emit)
+        self.__tela_expediente.minimized_solicitado.connect(self.__on_minimizar_expediente)
+        self.__overlay_area.add_overlay(self.__tela_expediente, auto_resize=False)
 
-        self.__tela_inspecao = TelaInspecaoCheia()
-        self.__tela_inspecao.submeter_respostas.connect(self.submeter_respostas.emit)
-        self.__tela_inspecao.continuar_solicitado.connect(self.continuar_solicitado.emit)
-        self.__tela_inspecao.minimizar_solicitado.connect(self.__on_minimizar_inspecao)
-        self.__tela_inspecao.voltar_menu_solicitado.connect(self.voltar_menu_solicitado.emit)
-        self.__overlay_area.add_overlay(self.__tela_inspecao)
-
-    def __on_fechar_janela_sistema(self) -> None:
-        self.__janela_sistema.hide()
-
-    def __on_minimizar_inspecao(self) -> None:
-        self.__tela_inspecao.hide()
+    def __on_minimizar_expediente(self) -> None:
+        self.__tela_expediente.hide()
 
     def inicializar(self) -> None:
         logger.info("JanelaPrincipal inicializada.")
@@ -91,44 +81,43 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
 
     def exibir_menu(self) -> None:
         logger.info("Exibindo menu principal (desktop).")
-        self.__tela_inspecao.hide()
-        self.__janela_sistema.hide()
+        self.__tela_expediente.hide()
 
     def exibir_selecao_perfil(self) -> None:
-        logger.info("Exibindo selecao de perfil na JanelaSistema.")
-        self.__tela_inspecao.hide()
-        self.__janela_sistema.exibir_selecao_perfil()
-        self.__janela_sistema.show()
-        self.__centralizar_janela_sistema()
+        logger.info("Exibindo selecao de perfil no expediente.")
+        self.__tela_expediente.exibir_selecao_perfil()
+        self.__tela_expediente.exibir_com_tamanho_inicial(self.__overlay_area.rect())
+
+    def exibir_tela_carregamento(self) -> None:
+        logger.info("Exibindo tela de carregamento.")
+        self.__tela_expediente.exibir_tela_carregamento()
 
     def trocar_para_tela_inspecao(self) -> None:
-        logger.info("Exibindo tela de inspecao (cheia).")
-        self.__janela_sistema.hide()
-        self.__tela_inspecao.setGeometry(self.__overlay_area.rect())
-        self.__tela_inspecao.show()
+        logger.info("Garantindo visibilidade do expediente (compatibilidade).")
+        self.__tela_expediente.show()
 
     def exibir_tela_diagnostico(self, diagnostico: DiagnosticoPontuacaoDTO) -> None:
-        logger.info("Exibindo diagnostico na tela cheia.")
-        self.__tela_inspecao.exibir_tela_diagnostico(diagnostico)
+        logger.info("Exibindo diagnostico no expediente.")
+        self.__tela_expediente.exibir_tela_diagnostico(diagnostico)
 
     def renderizar_relatorio(self, dados_relatorio: Dict[str, Any]) -> None:
-        logger.info("Renderizando relatorio na tela cheia.")
-        self.__tela_inspecao.renderizar_relatorio(dados_relatorio)
+        logger.info("Renderizando relatorio no expediente.")
+        self.__tela_expediente.renderizar_relatorio(dados_relatorio)
+        if not self.__tela_expediente.isVisible():
+            self.__tela_expediente.show()
 
     def exibir_resultado(self, pontuacao_global: float, dias_concluidos: int) -> None:
-        logger.info("Exibindo resultado final.")
-        self.__tela_inspecao.exibir_resultado(pontuacao_global, dias_concluidos)
+        logger.info("Exibindo resultado final (compatibilidade).")
+        venceu = pontuacao_global > 0
+        self.__tela_expediente.exibir_tela_endgame(pontuacao_global, dias_concluidos, venceu)
+
+    def exibir_tela_endgame(self, pontuacao_global: float, dias_concluidos: int, venceu: bool) -> None:
+        logger.info("Exibindo endgame.")
+        self.__tela_expediente.exibir_tela_endgame(pontuacao_global, dias_concluidos, venceu)
 
     def exibir_popup_erro(self, mensagem: str) -> None:
         logger.warning("Popup de erro: %s", mensagem)
         QMessageBox.critical(self, "Erro", mensagem)
-
-    def __centralizar_janela_sistema(self) -> None:
-        area = self.__overlay_area.rect()
-        geo = self.__janela_sistema.geometry()
-        x = (area.width() - geo.width()) // 2
-        y = (area.height() - geo.height()) // 2
-        self.__janela_sistema.move(x, y)
 
 
 class _OverlayArea(QWidget):
@@ -142,7 +131,7 @@ class _OverlayArea(QWidget):
         super().__init__(parent)
         self.setObjectName("overlay_area")
         self.__desktop: QWidget | None = None
-        self.__overlays: list[QWidget] = []
+        self.__overlays: list[tuple[QWidget, bool]] = []
         self.__layout = QVBoxLayout(self)
         self.__layout.setContentsMargins(0, 0, 0, 0)
         self.__layout.setSpacing(0)
@@ -151,8 +140,8 @@ class _OverlayArea(QWidget):
         self.__desktop = widget
         self.__layout.addWidget(widget)
 
-    def add_overlay(self, widget: QWidget) -> None:
-        self.__overlays.append(widget)
+    def add_overlay(self, widget: QWidget, auto_resize: bool = True) -> None:
+        self.__overlays.append((widget, auto_resize))
         widget.setParent(self)
         widget.hide()
         widget.raise_()
@@ -160,6 +149,6 @@ class _OverlayArea(QWidget):
     def resizeEvent(self, event):
         super().resizeEvent(event)
         rect = self.rect()
-        for overlay in self.__overlays:
-            if overlay.isVisible():
-                overlay.setGeometry(rect)
+        for widget, auto_resize in self.__overlays:
+            if widget.isVisible() and auto_resize:
+                widget.setGeometry(rect)

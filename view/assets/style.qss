@@ -62,7 +62,7 @@ QStackedWidget {
     font-size: 14px;
     font-weight: 700;
     border: none;
-    border-radius: 8px;
+    border-radius: 4px;
     padding: 10px 24px;
     min-width: 160px;
 }
@@ -79,7 +79,7 @@ QStackedWidget {
 .group_box {
     background-color: #1e2020;
     border: 1px solid #3f4a3d;
-    border-radius: 8px;
+    border-radius: 4px;
     color: #71dd77;
     font-family: "Open Sans";
     font-size: 14px;
@@ -169,7 +169,7 @@ QStackedWidget {
     font-family: "Open Sans";
     font-size: 14px;
     border: 1px solid #3f4a3d;
-    border-radius: 8px;
+    border-radius: 4px;
     padding: 8px 16px;
     min-width: 240px;
 }
@@ -210,7 +210,7 @@ QMessageBox QPushButton {
     font-family: "Open Sans";
     font-weight: 700;
     border: none;
-    border-radius: 8px;
+    border-radius: 4px;
     padding: 8px 20px;
     min-width: 80px;
 }
@@ -293,30 +293,43 @@ QFrame#janela_sistema {
 }
 
 QFrame#window_title_bar {
-    background-color: #121414;
+    background-color: #21262D;
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
-    border-bottom: 1px solid #3f4a3d;
+    border-bottom: 2px solid #2F9E41;
 }
 
 QLabel#window_title_text {
-    color: #71dd77;
-    font-family: "Open Sans";
+    color: #58A6FF;
+    font-family: "Courier New", Consolas, monospace;
     font-weight: bold;
-    font-size: 14px;
+    font-size: 12px;
+    padding: 4px 8px;
 }
 
+QPushButton#window_minimize_button,
+QPushButton#window_maximize_button,
 QPushButton#window_close_button {
     background-color: transparent;
-    color: #e2e2e2;
+    color: #E6EDF3;
     border: none;
-    font-size: 14px;
+    border-radius: 0px;
+    font-size: 16px;
+    min-width: 36px;
+    min-height: 28px;
+}
+
+QPushButton#window_minimize_button:hover {
+    background-color: #484F58;
+}
+
+QPushButton#window_maximize_button:hover {
+    background-color: #2F9E41;
 }
 
 QPushButton#window_close_button:hover {
     background-color: #CD191E;
-    color: #ffffff;
-    border-radius: 8px;
+    color: #FFFFFF;
 }
 
 QFrame#janela_sistema_body {
@@ -358,7 +371,7 @@ QPushButton#minimizar_button {
 
 QPushButton#minimizar_button:hover {
     background-color: #CD191E;
-    border-radius: 8px;
+    border-radius: 4px;
 }
 
 /* --- Paginas internas da TelaInspecaoCheia --- */
@@ -403,7 +416,7 @@ QFrame#sidebar {
 QFrame#anexo_preview {
     background-color: #1e2020;
     border: 1px solid #3f4a3d;
-    border-radius: 8px;
+    border-radius: 4px;
 }
 
 QLabel#anexo_thumbnail {
@@ -422,7 +435,7 @@ QPushButton#btn_ver_anexos {
     background-color: #2F9E41;
     color: #FFFFFF;
     border: none;
-    border-radius: 8px;
+    border-radius: 4px;
     padding: 6px 16px;
     font-family: "Open Sans";
     font-size: 12px;
@@ -444,7 +457,7 @@ QPushButton#gallery_next_button {
     background-color: rgba(0, 0, 0, 100);
     color: #e2e2e2;
     border: 1px solid #3f4a3d;
-    border-radius: 8px;
+    border-radius: 4px;
     font-size: 16px;
 }
 
@@ -464,4 +477,83 @@ QLabel#gallery_indicador {
 /* --- MediaViewer --- */
 QFrame#media_viewer {
     background-color: rgba(0, 0, 0, 230);
+}
+
+/* ============================================================
+   TelaDeExpediente — Janela Flutuante do Expediente (z=2)
+   ============================================================ */
+
+QFrame#tela_de_expediente {
+    background-color: #161B22;
+    border: 2px solid #2F9E41;
+    border-radius: 4px;
+}
+
+QFrame#expediente_sombra {
+    background-color: #000000;
+    border: none;
+}
+
+/* --- Página de Loading --- */
+#label_loading_texto {
+    color: #2F9E41;
+    font-family: "Courier New", Consolas, monospace;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+#loading_progress_bar {
+    background-color: #30363D;
+    border: 1px solid #484F58;
+    border-radius: 2px;
+    max-height: 16px;
+}
+
+#loading_progress_bar::chunk {
+    background-color: #2F9E41;
+    border-radius: 2px;
+}
+
+/* --- Página EndGame --- */
+#label_endgame_titulo {
+    font-family: "Courier New", Consolas, monospace;
+    font-size: 24px;
+    font-weight: bold;
+    border: 2px solid;
+    border-radius: 4px;
+    padding: 16px;
+}
+
+#label_endgame_titulo[status="vitoria"] {
+    color: #2F9E41;
+    border-color: #2F9E41;
+    background-color: #0a1a0a;
+}
+
+#label_endgame_titulo[status="derrota"] {
+    color: #CD191E;
+    border-color: #CD191E;
+    background-color: #1a0a0a;
+}
+
+#label_endgame_pontuacao {
+    color: #E6EDF3;
+    font-family: "Courier New", Consolas, monospace;
+    font-size: 16px;
+    padding: 8px;
+}
+
+/* --- Split-Desk 60/40 --- */
+QWidget#deck_observacao {
+    background-color: #0D1117;
+    border: 1px solid #30363D;
+    border-radius: 4px;
+    padding: 8px;
+}
+
+QWidget#prancheta {
+    background-color: #161B22;
+    border: 1px solid #30363D;
+    border-radius: 4px;
+    padding: 8px;
 }
