@@ -274,46 +274,6 @@ class TestTamanho:
         assert not expediente._TelaDeExpediente__maximizado
 
 
-class TestFormulario:
-    """
-    Testes do formulario de inspecao (checkboxes, radios, submit).
-    """
-
-    def test_coletar_respostas_estrutura(self, expediente):
-        """__coletar_respostas deve retornar dict com chaves esperadas."""
-        expediente.renderizar_relatorio({"titulo": "Teste"})
-        resultado = expediente._TelaDeExpediente__coletar_respostas()
-        assert "riscos" in resultado
-        assert "fatores" in resultado
-        assert "decisao" in resultado
-        assert "tempo_segundos" in resultado
-
-    def test_limpar_formulario_inspecao(self, expediente):
-        """renderizar_relatorio deve limpar os campos."""
-        expediente.renderizar_relatorio({
-            "titulo": "Teste", "local": "Lab", "atividade": "teste",
-            "texto_descricao": "descricao",
-        })
-        chk_risco = expediente._TelaDeExpediente__chk_riscos["FISICO"]
-        chk_fator = expediente._TelaDeExpediente__chk_fatores["ATO_INSEGURO"]
-        assert not chk_risco.isChecked()
-        assert not chk_fator.isChecked()
-
-    def test_temporizador_reiniciado(self, expediente):
-        """renderizar_relatorio deve reiniciar o temporizador."""
-        expediente.renderizar_relatorio({
-            "titulo": "Teste", "local": "", "atividade": "",
-            "texto_descricao": "",
-        })
-        assert expediente._TelaDeExpediente__tempo_inicio_inspecao > 0
-
-    def test_submeter_sem_decisao_selecionada_envia_string_vazia(self, expediente):
-        """Se nenhum radio esta selecionado, decisao deve ser string vazia."""
-        expediente.renderizar_relatorio({"titulo": "Teste"})
-        resultado = expediente._TelaDeExpediente__coletar_respostas()
-        assert resultado["decisao"] == ""
-
-
 class TestSidebar:
     """
     Testes de visibilidade condicional da sidebar por pagina.

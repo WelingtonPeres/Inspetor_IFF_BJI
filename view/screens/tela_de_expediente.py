@@ -30,6 +30,7 @@ from view.screens.anexo_gallery import AnexoGallery
 from view.screens.media_viewer import MediaViewer
 from view.screens.pagina_diagnostico import PaginaDiagnostico
 from view.screens.pagina_endgame import PaginaEndgame
+from view.screens.pagina_inspecao import PaginaInspecao
 from view.screens.pagina_loading import PaginaLoading
 from view.screens.pagina_selecao_perfil import PaginaSelecaoPerfil
 
@@ -81,6 +82,7 @@ class TelaDeExpediente(QFrame):
         self.__pagina_loading: PaginaLoading
         self.__pagina_diagnostico: PaginaDiagnostico
         self.__pagina_endgame: PaginaEndgame
+        self.__pagina_inspecao: PaginaInspecao
         self.__combo_perfil: QComboBox
         self.__loading_progress: QProgressBar
 
@@ -113,11 +115,14 @@ class TelaDeExpediente(QFrame):
         self.__pagina_diagnostico.continuar_solicitado.connect(self.continuar_solicitado.emit)
         self.__pagina_endgame = PaginaEndgame()
         self.__pagina_endgame.voltar_menu_solicitado.connect(self.voltar_menu_solicitado.emit)
+        self.__pagina_inspecao = PaginaInspecao()
+        self.__pagina_inspecao.submeter_respostas.connect(self.submeter_respostas.emit)
+        self.__pagina_inspecao.ver_anexos_solicitado.connect(self.__abrir_gallery)
 
         self.__stack = QStackedWidget()
         self.__stack.addWidget(self.__pagina_perfil)
         self.__stack.addWidget(self.__pagina_loading)
-        self.__stack.addWidget(self.__criar_pagina_inspecao())
+        self.__stack.addWidget(self.__pagina_inspecao)
         self.__stack.addWidget(self.__pagina_diagnostico)
         self.__stack.addWidget(self.__pagina_endgame)
         self.__stack.setCurrentIndex(self.IDX_SELECAO_PERFIL)
@@ -325,39 +330,6 @@ class TelaDeExpediente(QFrame):
         self.__sidebar.setVisible(index in [self.IDX_INSPECAO, self.IDX_DIAGNOSTICO])
 
     @Slot()
-    def __coletar_respostas(self) -> Dict[str, Any]:
-        riscos_marcados: List[str] = [
-            nome for nome, chk in self.__chk_riscos.items() if chk.isChecked()
-        ]
-        fatores_marcados: List[str] = [
-            nome for nome, chk in self.__chk_fatores.items() if chk.isChecked()
-        ]
-        radio_selecionado = self.__radio_decisao.checkedButton()
-        decisao = radio_selecionado.text() if radio_selecionado else ""
-
-        tempo_gasto = time.time() - self.__tempo_inicio_inspecao
-
-        respostas = {
-            "riscos": riscos_marcados,
-            "fatores": fatores_marcados,
-            "decisao": decisao,
-            "tempo_segundos": int(tempo_gasto),
-        }
-        self.submeter_respostas.emit(respostas)
-        return respostas
-
-    def __limpar_formulario_inspecao(self) -> None:
-        for chk in self.__chk_riscos.values():
-            chk.setChecked(False)
-        for chk in self.__chk_fatores.values():
-            chk.setChecked(False)
-        if self.__radio_decisao.checkedButton():
-            self.__radio_decisao.setExclusive(False)
-            for btn in self.__radio_decisao.buttons():
-                btn.setChecked(False)
-            self.__radio_decisao.setExclusive(True)
-
-    @Slot()
     def __abrir_gallery(self) -> None:
         if not self.__anexos_data:
             return
@@ -441,23 +413,8 @@ class TelaDeExpediente(QFrame):
         logger.info("Renderizando relatorio: %s", dados_relatorio.get("titulo", ""))
         titulo = dados_relatorio.get("titulo", "Relatório")
         self.__title_bar.definir_titulo(f"Relatório: {titulo}")
-        self.__label_titulo_relatorio.setText(
-            f"Título: {dados_relatorio.get('titulo', '')}\n"
-            f"Local: {dados_relatorio.get('local', '')}\n"
-            f"Atividade: {dados_relatorio.get('atividade', '')}\n"
-            f"Descrição: {dados_relatorio.get('texto_descricao', '')}"
-        )
         self.__anexos_data = dados_relatorio.get("anexos", [])
-        if self.__anexos_data:
-            primeiro = self.__anexos_data[0]
-            self.__anexo_preview.carregar_thumbnail(
-                primeiro.get("caminho_arquivo", "")
-            )
-            self.__anexo_preview.definir_metadados(
-                f"{len(self.__anexos_data)} anexo(s)"
-            )
-        self.__limpar_formulario_inspecao()
-        self.__tempo_inicio_inspecao = time.time()
+        self.__pagina_inspecao.renderizar_relatorio(dados_relatorio)
         self.__stack.setCurrentIndex(self.IDX_INSPECAO)
 
     def exibir_tela_diagnostico(self, diagnostico: DiagnosticoPontuacaoDTO) -> None:
@@ -484,7 +441,7 @@ class TelaDeExpediente(QFrame):
         self.show()
 
     def reiniciar(self) -> None:
-        self.__limpar_formulario_inspecao()
+        self.__pagina_inspecao.limpar_formulario()
         self.__stack.setCurrentIndex(self.IDX_SELECAO_PERFIL)
         self.__title_bar.definir_titulo("Expediente")
 
