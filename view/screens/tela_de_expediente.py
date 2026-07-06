@@ -38,7 +38,6 @@ class TelaDeExpediente(QFrame):
     continuar_solicitado = Signal()
     voltar_menu_solicitado = Signal()
     minimized_solicitado = Signal()
-    maximized_solicitado = Signal()
 
     IDX_SELECAO_PERFIL = 0
     IDX_LOADING = 1

@@ -221,11 +221,6 @@ class TestSignals:
         with qtbot.waitSignal(expediente.minimized_solicitado, timeout=1000):
             expediente.minimized_solicitado.emit()
 
-    def test_maximized_signal(self, expediente, qtbot):
-        """maximized_solicitado deve ser emitivel."""
-        with qtbot.waitSignal(expediente.maximized_solicitado, timeout=1000):
-            expediente.maximized_solicitado.emit()
-
 
 class TestTamanho:
     """
