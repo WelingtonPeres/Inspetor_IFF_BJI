@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from PySide6.QtCore import QSize, QTimer, QTime, Qt
+from PySide6.QtCore import QSize, QTimer, QTime, Qt, Slot
 from PySide6.QtGui import QFont, QIcon
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton
 
@@ -34,7 +34,7 @@ class Taskbar(QFrame):
         font_size = L.scaled("fontes", "ocorrencias", "taskbar_texto", "size")
         start_btn = QPushButton()
         start_btn.setObjectName("taskbar_start")
-        icon_path = Path(__file__).resolve().parent.parent / "assets" / "images" / L.get("taskbar", "start_botao", "icone_arquivo")
+        icon_path = Path(__file__).resolve().parent.parent / "assets" / "icons" / "iff_Icons" / L.get("taskbar", "start_botao", "icone_arquivo")
         if icon_path.exists():
             start_btn.setIcon(QIcon(str(icon_path)))
             icon_h = L.scaled("taskbar", "altura") - 16
@@ -51,13 +51,14 @@ class Taskbar(QFrame):
 
     def __start_clock(self):
         L = self.__layout
-        fmt = L.get("taskbar", "system_tray", "relogio_formato")
+        self.__clock_fmt = L.get("taskbar", "system_tray", "relogio_formato")
         interval = L.get("taskbar", "system_tray", "atualizacao_segundos") * 1000
 
-        def update_time():
-            self.__clock_label.setText(QTime.currentTime().toString(fmt))
-
-        update_time()
+        self.__atualizar_relogio()
         timer = QTimer(self)
-        timer.timeout.connect(update_time)
+        timer.timeout.connect(self.__atualizar_relogio)
         timer.start(interval)
+
+    @Slot()
+    def __atualizar_relogio(self) -> None:
+        self.__clock_label.setText(QTime.currentTime().toString(self.__clock_fmt))

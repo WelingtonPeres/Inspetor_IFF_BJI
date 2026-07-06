@@ -46,14 +46,12 @@ def main():
     janela = JanelaPrincipal()
     gm = GameManager(janela)
 
-    # Conecta sinais da View ao GameManager
     janela.iniciar_solicitado.connect(gm.on_iniciar_solicitado)
     janela.perfil_confirmado.connect(gm.iniciar_expediente)
     janela.submeter_respostas.connect(gm.processar_submissao)
     janela.continuar_solicitado.connect(gm.avancar_fila_ou_dia)
     janela.voltar_menu_solicitado.connect(gm.carregar_menu_principal)
 
-    # Encerra o GameManager quando a janela fechar
     app.aboutToQuit.connect(gm.encerrar_aplicacao)
 
     gm.iniciar_aplicacao()

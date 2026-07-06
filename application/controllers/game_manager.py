@@ -193,7 +193,8 @@ class GameManager:
         Finaliza a campanha e instrui a View a exibir a tela de resultados.
         """
         self.__estado_atual = self.ESTADO_RESULTADO
-        self.__view.exibir_resultado(self.__pontuacao_global, self.__dias_concluidos)
+        venceu = self.__pontuacao_global > 0
+        self.__view.exibir_resultado(self.__pontuacao_global, self.__dias_concluidos, venceu)
 
     def __iniciar_dia(self, dia: int) -> None:
         """

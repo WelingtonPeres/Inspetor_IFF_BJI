@@ -21,7 +21,6 @@ import logging.config
 import os
 from pathlib import Path
 
-# ── Ambiente e nível ───────────────────────────────────────────────────────────
 ENV = os.getenv("APP_ENV", "development")
 
 _LEVEL_BY_ENV: dict[str, str] = {
@@ -32,11 +31,9 @@ _LEVEL_BY_ENV: dict[str, str] = {
 
 LOG_LEVEL = (os.getenv("LOG_LEVEL") or _LEVEL_BY_ENV.get(ENV, "WARNING")).upper()
 
-# ── Diretório de logs (criado automaticamente) ────────────────────────────────
 LOG_DIR = Path("logs")
 LOG_DIR.mkdir(exist_ok=True)
 
-# ── Formato: sem timestamp, com módulo/função/linha ─────────────────────────
 #    %(levelname)-8s  → nível alinhado em 8 chars  (ex: "INFO    ")
 #    %(name)s         → caminho do módulo           (ex: "services.payment")
 #    %(funcName)s     → nome da função              (ex: "process")
@@ -44,7 +41,6 @@ LOG_DIR.mkdir(exist_ok=True)
 #    %(message)s      → mensagem do log
 LOG_FORMAT = "%(levelname)-8s | %(name)s.%(funcName)s():%(lineno)d | %(message)s"
 
-# ── Handlers ativos por ambiente ──────────────────────────────────────────────
 _HANDLERS_BY_ENV: dict[str, list[str]] = {
     "development": ["console", "file_app", "file_errors"],
     "staging":     ["console", "file_app", "file_errors"],
@@ -55,7 +51,6 @@ LOGGING_CONFIG = {
     "version": 1,
     "disable_existing_loggers": False,
 
-    # ── Formatters ────────────────────────────────────────────────────────────
     "formatters": {
         "console": {
             "()": "config.logging_config.ColorFormatter",
@@ -66,7 +61,6 @@ LOGGING_CONFIG = {
         },
     },
 
-    # ── Handlers ──────────────────────────────────────────────────────────────
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
@@ -94,13 +88,11 @@ LOGGING_CONFIG = {
         },
     },
 
-    # ── Root logger ───────────────────────────────────────────────────────────
     "root": {
         "level": LOG_LEVEL,
         "handlers": _HANDLERS_BY_ENV.get(ENV, ["console"]),
     },
 
-    # ── Silenciar libs verbosas ───────────────────────────────────────────────
     "loggers": {
         "urllib3":   {"level": "WARNING"},
         "httpx":     {"level": "WARNING"},
@@ -110,7 +102,6 @@ LOGGING_CONFIG = {
 }
 
 
-# ── Color Formatter ───────────────────────────────────────────────────────────
 class ColorFormatter(logging.Formatter):
     """Colore o nível da mensagem no terminal. Sem efeito em arquivos."""
 
@@ -142,7 +133,6 @@ class ColorFormatter(logging.Formatter):
         return logging.Formatter(colored_fmt).format(record)
 
 
-# ── Ponto de entrada público ──────────────────────────────────────────────────
 def setup_logging() -> None:
     """
     Inicializa o sistema de logging.

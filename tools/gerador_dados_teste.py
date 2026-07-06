@@ -50,19 +50,15 @@ EXTENSOES_MIDIA = {
 def criar_cenario_valido(id_cenario: int) -> Dict[str, Any]:
     """Cria um cenário completamente válido de acordo com ESTRUTURA_JSON.md."""
     
-    # Seleciona cursos aleatoriamente (pode ser um ou múltiplos)
     if random.choice([True, False]):
         cursos = [random.choice(CURSOS_VALIDOS)]
     else:
         cursos = random.sample(CURSOS_VALIDOS[1:], k=random.randint(1, 3))  # Exclui DEFAULT
     
-    # Seleciona riscos válidos
     riscos = random.sample(RISCOS, k=random.randint(1, 3))
     
-    # Seleciona fatores de insegurança válidos
     fatores = random.sample(FATORES_INSEGURANCA, k=random.randint(1, 2))
     
-    # Seleciona duas decisões diferentes
     decisoes_diferentes = random.sample(DECISOES, k=2)
     
     anexos = []
@@ -121,7 +117,6 @@ def arquivo_cenario_incompleto_raiz(id_cenario: int) -> str:
     """Cria um arquivo com cenários faltando chaves raiz."""
     cenario = criar_cenario_valido(id_cenario)
     
-    # Remove uma chave raiz aleatória
     chaves_raiz = ["id_cenario", "titulo", "dificuldade", "relatorio", "anexos"]
     chave_removida = random.choice(chaves_raiz)
     del cenario[chave_removida]
@@ -183,7 +178,6 @@ def arquivo_anexos_tipo_invalido(id_cenario: int) -> str:
 def arquivo_anexo_tipo_invalido(id_cenario: int) -> str:
     """Cria um arquivo com um anexo não sendo um dicionário (inválido)."""
     cenario = criar_cenario_valido(id_cenario)
-    # Em vez de lista de dicts, coloca strings
     cenario["anexos"] = ["IMAGEM", "string em vez de dict"]
     return json.dumps([cenario])
 
@@ -192,7 +186,6 @@ def arquivo_anexo_chave_faltando(id_cenario: int) -> str:
     """Cria um arquivo com uma chave faltando em anexo."""
     cenario = criar_cenario_valido(id_cenario)
     
-    # Cria um anexo válido
     anexo_valido = {
         "id_anexo": 1001,
         "tipo": "IMAGEM",
@@ -233,15 +226,12 @@ def arquivo_mixed_validos_invalidos() -> str:
     """Cria um arquivo com cenários válidos e inválidos misturados."""
     cenarios = []
     
-    # Adiciona alguns válidos
     cenarios.append(criar_cenario_valido(0))
     
-    # Adiciona um inválido (falta chave)
     cenario_invalido = criar_cenario_valido(1)
     del cenario_invalido["relatorio"]
     cenarios.append(cenario_invalido)
     
-    # Adiciona mais um válido
     cenarios.append(criar_cenario_valido(2))
     
     return json.dumps(cenarios)
@@ -267,13 +257,11 @@ def gerar_arquivos_teste(diretorio_saida: str = None):
     diretorio_valido.mkdir(parents=True, exist_ok=True)
     diretorio_invalido.mkdir(parents=True, exist_ok=True)
     
-    # Arquivos VÁLIDOS
     casos_validos = [
         ("teste_valido_simples.json", lambda: arquivo_multiplos_cenarios_validos(1)),
         ("teste_valido_multiplos.json", lambda: arquivo_multiplos_cenarios_validos(5)),
     ]
     
-    # Arquivos INVÁLIDOS
     casos_invalidos = [
         ("teste_invalido_sintaxe_json.json", lambda: arquivo_json_invalido()),
         ("teste_invalido_nao_lista.json", lambda: arquivo_nao_lista()),
@@ -448,7 +436,6 @@ Exemplos:
     
     args = parser.parse_args()
     
-    # Se nenhum argumento foi fornecido, gera por padrão
     if not (args.gerar or args.limpar or args.listar):
         args.gerar = True
     

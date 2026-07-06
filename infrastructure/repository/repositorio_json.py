@@ -158,7 +158,6 @@ class RepositorioJSON:
         """
         cenarios_compativeis_dto: List[DadosCenarioDTO] = []
 
-        # O método glob('*.json') cria um iterador leve que busca todos os arquivos da pasta
         for caminho_arquivo in self.__diretorio_base.glob('*.json'):
 
             try:

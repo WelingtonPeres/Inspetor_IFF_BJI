@@ -268,7 +268,6 @@ QFrame#desktop_shortcut {
 
 QFrame#desktop_shortcut:hover {
     background-color: rgba(47, 158, 65, 0.15);
-    border-color: rgba(47, 158, 65, 0.4);
 }
 
 QLabel#shortcut_icon {
@@ -282,7 +281,6 @@ QLabel#shortcut_label {
     background-color: rgba(249, 249, 249, 0.7);
     border-radius: 4px;
     padding: 2px 4px;
-    font-family: "Open Sans";
 }
 
 /* --- JanelaSistema (z=2, floating) --- */
@@ -303,7 +301,6 @@ QLabel#window_title_text {
     color: #006b21;
     font-family: "Courier New", Consolas, monospace;
     font-weight: bold;
-    font-size: 12px;
     padding: 4px 8px;
 }
 

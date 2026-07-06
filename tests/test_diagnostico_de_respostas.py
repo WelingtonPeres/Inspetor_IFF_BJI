@@ -149,7 +149,6 @@ class TesteSuite2MatematicaDosRiscos:
         assert resultado.qnt_riscos_marcados == 5
         assert resultado.qnt_riscos_gabarito == 3
         
-        # Falsos positivos
         assert resultado.qnt_riscos_marcados - resultado.qnt_riscos_corretos_marcados == 2
 
     def test_riscos_desalinhamento_completo(self, diagnostico_servico, gabarito_simples):
@@ -379,7 +378,6 @@ class TesteSuite5EdgeCases:
             tempo_gasto_segundos=0.0
         )
         
-        # Não deve lançar exceção
         resultado = diagnostico_servico.gerar_diagnostico_pontuacao(gabarito_sem_fatores, resposta)
         
         assert isinstance(resultado, DiagnosticoPontuacaoDTO)

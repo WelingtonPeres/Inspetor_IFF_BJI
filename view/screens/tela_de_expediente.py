@@ -1,7 +1,7 @@
 import logging
 import time
 from typing import Any, Dict, List
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QButtonGroup,
@@ -150,6 +150,7 @@ class TelaDeExpediente(QFrame):
 
         return pagina
 
+    @Slot()
     def __on_perfil_confirmado(self) -> None:
         """Mostra loading internamente antes de emitir o signal para o controller."""
         perfil = self.__combo_perfil.currentText()
@@ -165,7 +166,6 @@ class TelaDeExpediente(QFrame):
         label_sistema.setObjectName("label_loading_titulo")
         label_sistema.setAlignment(Qt.AlignmentFlag.AlignCenter)
         label_sistema.setFont(QFont("Courier New", 16))
-        label_sistema.setStyleSheet("color: #2F9E41;")
         sub.addWidget(label_sistema)
 
         self.__loading_progress = QProgressBar()
@@ -307,9 +307,11 @@ class TelaDeExpediente(QFrame):
 
         return pagina
 
+    @Slot(int)
     def __on_page_changed(self, index: int) -> None:
         self.__sidebar.setVisible(index in [self.IDX_INSPECAO, self.IDX_DIAGNOSTICO])
 
+    @Slot()
     def __coletar_respostas(self) -> Dict[str, Any]:
         riscos_marcados: List[str] = [
             nome for nome, chk in self.__chk_riscos.items() if chk.isChecked()
@@ -342,6 +344,7 @@ class TelaDeExpediente(QFrame):
                 btn.setChecked(False)
             self.__radio_decisao.setExclusive(True)
 
+    @Slot()
     def __abrir_gallery(self) -> None:
         if not self.__anexos_data:
             return
@@ -350,9 +353,11 @@ class TelaDeExpediente(QFrame):
         self.__anexo_gallery.show()
         self.__anexo_gallery.raise_()
 
+    @Slot()
     def __fechar_gallery(self) -> None:
         self.__anexo_gallery.hide()
 
+    @Slot(int)
     def __abrir_media_viewer(self, indice: int) -> None:
         if indice < 0 or indice >= len(self.__anexos_data):
             return
@@ -370,19 +375,23 @@ class TelaDeExpediente(QFrame):
                 self.__video_player_fullscreen = player
                 self.__anexo_gallery.hide()
 
+    @Slot()
     def __fechar_media_viewer(self) -> None:
         self.__media_viewer.hide()
 
+    @Slot()
     def __fechar_video_fullscreen(self) -> None:
         self.__video_player_fullscreen = None
         if self.__anexo_gallery:
             self.__anexo_gallery.setGeometry(self.rect())
             self.__anexo_gallery.show()
 
+    @Slot()
     def __on_minimizar(self) -> None:
         self.hide()
         self.minimized_solicitado.emit()
 
+    @Slot()
     def __on_maximizar_restaurar(self) -> None:
         if self.__maximizado:
             self.__restaurar_tamanho()
@@ -401,12 +410,11 @@ class TelaDeExpediente(QFrame):
         if self.__tamanho_normal:
             self.setGeometry(self.__tamanho_normal)
 
+    @Slot()
     def __on_fechar(self) -> None:
         self.hide()
         self.__maximizado = False
         self.__title_bar.set_maximizado(False)
-
-    # --- Métodos Públicos (contrato) ---
 
     def exibir_selecao_perfil(self) -> None:
         self.__title_bar.definir_titulo("Seleção de Perfil")

@@ -13,8 +13,6 @@ class LayoutLoader:
         return cls._instance
 
     def __init__(self):
-        if LayoutLoader._instance is not None:
-            raise RuntimeError("Use LayoutLoader.instance()")
         path = Path(__file__).resolve().parent.parent / "assets" / "layout.json"
         with open(path, encoding="utf-8") as f:
             self.__data: dict = json.load(f)
@@ -29,7 +27,9 @@ class LayoutLoader:
         self.__screen_h = h
 
     def _scale_factor(self) -> float:
-        return min(self.__screen_w / self.__ref_w, self.__screen_h / self.__ref_h)
+        factor_w = self.__screen_w / self.__ref_w
+        factor_h = self.__screen_h / self.__ref_h
+        return min(factor_w, factor_h)
 
     def _navigate(self, *keys: str) -> Any:
         current = self.__data
