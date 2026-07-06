@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List
+from typing import Any, Dict
 from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtWidgets import (
     QFrame,
@@ -9,17 +9,16 @@ from PySide6.QtWidgets import (
 )
 
 from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
-from view.components.midia.video_player import VideoPlayer
-from view.components.sidebar import Sidebar
-from view.components.window_title_bar import WindowTitleBar
+from view.expediente.widgets.sidebar import Sidebar
+from view.expediente.widgets.window_title_bar import WindowTitleBar
 from view.infrastructure.layout_loader import LayoutLoader
-from view.screens.anexo_gallery import AnexoGallery
-from view.screens.media_viewer import MediaViewer
-from view.screens.pagina_diagnostico import PaginaDiagnostico
-from view.screens.pagina_endgame import PaginaEndgame
-from view.screens.pagina_inspecao import PaginaInspecao
-from view.screens.pagina_loading import PaginaLoading
-from view.screens.pagina_selecao_perfil import PaginaSelecaoPerfil
+from view.expediente.overlays.anexo_gallery import AnexoGallery
+from view.expediente.overlays.media_viewer import MediaViewer
+from view.expediente.paginas.diagnostico import PaginaDiagnostico
+from view.expediente.paginas.endgame import PaginaEndgame
+from view.expediente.paginas.inspecao import PaginaInspecao
+from view.expediente.paginas.loading import PaginaLoading
+from view.expediente.paginas.selecao_perfil import PaginaSelecaoPerfil
 
 logger = logging.getLogger(__name__)
 
@@ -50,9 +49,9 @@ class TelaDeExpediente(QFrame):
 
         self.__anexo_gallery: AnexoGallery
         self.__media_viewer: MediaViewer
-        self.__video_player_fullscreen: VideoPlayer | None = None
-        self.__anexos_data: List[Dict] = []
         self.__sidebar: Sidebar
+        
+        # Paginas Filhas
         self.__pagina_perfil: PaginaSelecaoPerfil
         self.__pagina_loading: PaginaLoading
         self.__pagina_diagnostico: PaginaDiagnostico
@@ -83,14 +82,16 @@ class TelaDeExpediente(QFrame):
 
         self.__pagina_perfil = PaginaSelecaoPerfil()
         self.__pagina_perfil.perfil_confirmado.connect(self.__on_perfil_confirmado)
+        
         self.__pagina_loading = PaginaLoading()
         self.__pagina_diagnostico = PaginaDiagnostico()
+        
         self.__pagina_diagnostico.continuar_solicitado.connect(self.continuar_solicitado.emit)
         self.__pagina_endgame = PaginaEndgame()
+        
         self.__pagina_endgame.voltar_menu_solicitado.connect(self.voltar_menu_solicitado.emit)
         self.__pagina_inspecao = PaginaInspecao()
         self.__pagina_inspecao.submeter_respostas.connect(self.submeter_respostas.emit)
-        self.__pagina_inspecao.ver_anexos_solicitado.connect(self.__abrir_gallery)
 
         self.__stack = QStackedWidget()
         self.__stack.addWidget(self.__pagina_perfil)
@@ -107,13 +108,12 @@ class TelaDeExpediente(QFrame):
         self.__sidebar.setVisible(False)
 
         self.__anexo_gallery = AnexoGallery(self)
-        self.__anexo_gallery.fechar_solicitado.connect(self.__fechar_gallery)
-        self.__anexo_gallery.ampliar_solicitado.connect(self.__abrir_media_viewer)
         self.__anexo_gallery.hide()
 
         self.__media_viewer = MediaViewer(self)
-        self.__media_viewer.fechar_solicitado.connect(self.__fechar_media_viewer)
         self.__media_viewer.hide()
+
+        self.__pagina_inspecao.configurar_midia(self.__anexo_gallery, self.__media_viewer)
 
     @Slot(str)
     def __on_perfil_confirmado(self, perfil: str) -> None:
@@ -123,48 +123,6 @@ class TelaDeExpediente(QFrame):
     @Slot(int)
     def __on_page_changed(self, index: int) -> None:
         self.__sidebar.setVisible(index in [self.IDX_INSPECAO, self.IDX_DIAGNOSTICO])
-
-    @Slot()
-    def __abrir_gallery(self) -> None:
-        if not self.__anexos_data:
-            return
-        self.__anexo_gallery.carregar_anexos(self.__anexos_data)
-        self.__anexo_gallery.setGeometry(self.rect())
-        self.__anexo_gallery.show()
-        self.__anexo_gallery.raise_()
-
-    @Slot()
-    def __fechar_gallery(self) -> None:
-        self.__anexo_gallery.hide()
-
-    @Slot(int)
-    def __abrir_media_viewer(self, indice: int) -> None:
-        if indice < 0 or indice >= len(self.__anexos_data):
-            return
-        anexo = self.__anexos_data[indice]
-        if anexo.get("tipo_midia") == "IMAGEM":
-            self.__media_viewer.exibir_imagem(anexo)
-            self.__media_viewer.setGeometry(self.rect())
-            self.__media_viewer.show()
-            self.__media_viewer.raise_()
-        elif anexo.get("tipo_midia") == "VIDEO":
-            player = self.__anexo_gallery.obter_player_atual()
-            if isinstance(player, VideoPlayer):
-                player.sair_fullscreen_solicitado.connect(self.__fechar_video_fullscreen, type=Qt.ConnectionType.UniqueConnection)
-                player.entrar_fullscreen(self)
-                self.__video_player_fullscreen = player
-                self.__anexo_gallery.hide()
-
-    @Slot()
-    def __fechar_media_viewer(self) -> None:
-        self.__media_viewer.hide()
-
-    @Slot()
-    def __fechar_video_fullscreen(self) -> None:
-        self.__video_player_fullscreen = None
-        if self.__anexo_gallery:
-            self.__anexo_gallery.setGeometry(self.rect())
-            self.__anexo_gallery.show()
 
     @Slot()
     def __on_minimizar(self) -> None:
@@ -208,7 +166,6 @@ class TelaDeExpediente(QFrame):
         logger.info("Renderizando relatorio: %s", dados_relatorio.get("titulo", ""))
         titulo = dados_relatorio.get("titulo", "Relatório")
         self.__title_bar.definir_titulo(f"Relatório: {titulo}")
-        self.__anexos_data = dados_relatorio.get("anexos", [])
         self.__pagina_inspecao.renderizar_relatorio(dados_relatorio)
         self.__stack.setCurrentIndex(self.IDX_INSPECAO)
 
@@ -248,5 +205,3 @@ class TelaDeExpediente(QFrame):
             self.__anexo_gallery.setGeometry(self.rect())
         if self.__media_viewer.isVisible():
             self.__media_viewer.setGeometry(self.rect())
-        if self.__video_player_fullscreen is not None:
-            self.__video_player_fullscreen.entrar_fullscreen(self)

@@ -6,7 +6,7 @@ import pytest
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel, QPushButton
 
-from view.screens.pagina_diagnostico import PaginaDiagnostico
+from view.expediente.paginas.diagnostico import PaginaDiagnostico
 from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
 
 

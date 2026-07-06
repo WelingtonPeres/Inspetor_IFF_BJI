@@ -2,7 +2,7 @@ import pytest
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel
 
-from view.screens.media_viewer import MediaViewer
+from view.expediente.overlays.media_viewer import MediaViewer
 
 
 @pytest.fixture(autouse=True)

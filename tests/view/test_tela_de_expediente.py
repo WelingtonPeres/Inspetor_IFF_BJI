@@ -9,12 +9,12 @@ from PySide6.QtWidgets import (
     QSplitter, QStackedWidget, QWidget,
 )
 
-from view.screens.tela_de_expediente import TelaDeExpediente
-from view.components.anexo_preview import AnexoPreview
-from view.components.sidebar import Sidebar
-from view.components.window_title_bar import WindowTitleBar
-from view.screens.anexo_gallery import AnexoGallery
-from view.screens.media_viewer import MediaViewer
+from view.expediente.tela import TelaDeExpediente
+from view.expediente.widgets.anexo_preview import AnexoPreview
+from view.expediente.widgets.sidebar import Sidebar
+from view.expediente.widgets.window_title_bar import WindowTitleBar
+from view.expediente.overlays.anexo_gallery import AnexoGallery
+from view.expediente.overlays.media_viewer import MediaViewer
 from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
 
 
@@ -378,27 +378,9 @@ class TestCasosLimite:
         expediente.reiniciar()
         assert expediente._TelaDeExpediente__stack.currentIndex() == 0
 
-    def test_gallery_abre_com_anexos(self, expediente, qtbot):
-        """renderizar_relatorio com anexos deve permitir abrir gallery."""
-        expediente.show()
-        qtbot.wait(50)
-        expediente.renderizar_relatorio({
-            "titulo": "Teste", "local": "", "atividade": "",
-            "texto_descricao": "",
-            "anexos": [{"tipo_midia": "IMAGEM", "caminho_arquivo": ""}],
-        })
-        expediente._TelaDeExpediente__abrir_gallery()
-        gallery = expediente.findChild(AnexoGallery)
-        assert gallery.isVisible()
-        expediente.hide()
-
-    def test_abrir_gallery_sem_anexos_nao_crasha(self, expediente):
-        """__abrir_gallery sem anexos nao deve crashar."""
-        expediente.renderizar_relatorio({"titulo": "Teste"})
-        expediente._TelaDeExpediente__abrir_gallery()
-
     def test_resize_event_nao_crasha(self, expediente):
         """resizeEvent nao deve crashar quando os sub-overlays estao ocultos."""
         from PySide6.QtGui import QResizeEvent
+        from PySide6.QtCore import QSize
         event = QResizeEvent(QSize(800, 600), QSize(1024, 768))
         expediente.resizeEvent(event)

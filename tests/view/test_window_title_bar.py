@@ -6,7 +6,7 @@ import pytest
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel, QPushButton
 
-from view.components.window_title_bar import WindowTitleBar
+from view.expediente.widgets.window_title_bar import WindowTitleBar
 from view.infrastructure.layout_loader import LayoutLoader
 
 

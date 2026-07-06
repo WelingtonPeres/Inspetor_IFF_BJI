@@ -6,7 +6,7 @@ import pytest
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel, QPushButton
 
-from view.screens.pagina_endgame import PaginaEndgame
+from view.expediente.paginas.endgame import PaginaEndgame
 
 
 @pytest.fixture(autouse=True)

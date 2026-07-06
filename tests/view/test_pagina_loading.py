@@ -5,7 +5,7 @@ Suite de testes para a PaginaLoading.
 import pytest
 from PySide6.QtWidgets import QLabel, QProgressBar
 
-from view.screens.pagina_loading import PaginaLoading
+from view.expediente.paginas.loading import PaginaLoading
 
 
 @pytest.fixture(autouse=True)

@@ -2,7 +2,7 @@ import pytest
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel, QPushButton, QStackedWidget
 
-from view.screens.anexo_gallery import AnexoGallery
+from view.expediente.overlays.anexo_gallery import AnexoGallery
 
 
 @pytest.fixture(autouse=True)

@@ -7,9 +7,9 @@ from PySide6.QtWidgets import QMainWindow, QMessageBox, QVBoxLayout, QWidget
 
 from application.interfaces.i_game_view import IGameView
 from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
-from view.components.taskbar import Taskbar
-from view.screens.tela_de_expediente import TelaDeExpediente
-from view.screens.tela_menu_principal import TelaMenuPrincipal
+from view.desktop.taskbar import Taskbar
+from view.expediente.tela import TelaDeExpediente
+from view.desktop.menu import TelaMenuPrincipal
 
 logger = logging.getLogger(__name__)
 

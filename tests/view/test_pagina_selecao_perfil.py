@@ -6,7 +6,7 @@ import pytest
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QComboBox, QPushButton
 
-from view.screens.pagina_selecao_perfil import PaginaSelecaoPerfil
+from view.expediente.paginas.selecao_perfil import PaginaSelecaoPerfil
 
 
 @pytest.fixture(autouse=True)

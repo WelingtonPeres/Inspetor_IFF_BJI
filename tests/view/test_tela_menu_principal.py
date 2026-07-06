@@ -5,7 +5,7 @@ Suite completa de testes para a TelaMenuPrincipal.
 import pytest
 from PySide6.QtWidgets import QLabel
 
-from view.screens.tela_menu_principal import TelaMenuPrincipal
+from view.desktop.menu import TelaMenuPrincipal
 
 
 @pytest.fixture(autouse=True)
@@ -52,7 +52,7 @@ class TestTelaMenuPrincipal:
 
         O layout possui 3 atalhos na lista 'atalhos_lista'.
         """
-        from view.components.desktop_shortcut import DesktopShortcut
+        from view.desktop.desktop_shortcut import DesktopShortcut
         shortcuts = tela.findChildren(DesktopShortcut)
         assert len(shortcuts) >= 3
 
@@ -61,7 +61,7 @@ class TestTelaMenuPrincipal:
         O shortcut 'Iniciar\\nExpediente' deve emitir o signal
         iniciar_solicitado ao ser clicado.
         """
-        from view.components.desktop_shortcut import DesktopShortcut
+        from view.desktop.desktop_shortcut import DesktopShortcut
         from PySide6.QtCore import Qt
 
         atalho = None

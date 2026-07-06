@@ -1,7 +1,7 @@
 import logging
 import time
 from typing import Any, Dict, List
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtWidgets import (
     QButtonGroup,
     QCheckBox,
@@ -15,7 +15,10 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from view.components.anexo_preview import AnexoPreview
+from view.expediente.widgets.anexo_preview import AnexoPreview
+from view.widgets.midia.video_player import VideoPlayer
+from view.expediente.overlays.anexo_gallery import AnexoGallery
+from view.expediente.overlays.media_viewer import MediaViewer
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +27,6 @@ class PaginaInspecao(QWidget):
     """Widget de inspecao com splitter 60/40, formulario e temporizador."""
 
     submeter_respostas = Signal(dict)
-    ver_anexos_solicitado = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -38,6 +40,10 @@ class PaginaInspecao(QWidget):
         self.__radio_decisao: QButtonGroup
         self.__btn_submeter: QPushButton
         self.__tempo_inicio_inspecao: float = 0.0
+        self.__gallery: AnexoGallery | None = None
+        self.__media_viewer: MediaViewer | None = None
+        self.__anexos_data: List[Dict] = []
+        self.__video_player_fullscreen: VideoPlayer | None = None
 
         self._build_ui()
 
@@ -54,7 +60,6 @@ class PaginaInspecao(QWidget):
         deck_layout.addWidget(self.__label_titulo_relatorio)
 
         self.__anexo_preview = AnexoPreview()
-        self.__anexo_preview.ver_todos_anexos.connect(self.ver_anexos_solicitado.emit)
         deck_layout.addWidget(self.__anexo_preview)
 
         deck_layout.addStretch()
@@ -128,14 +133,14 @@ class PaginaInspecao(QWidget):
             f"Atividade: {dados_relatorio.get('atividade', '')}\n"
             f"Descrição: {dados_relatorio.get('texto_descricao', '')}"
         )
-        anexos = dados_relatorio.get("anexos", [])
-        if anexos:
-            primeiro = anexos[0]
+        self.__anexos_data = dados_relatorio.get("anexos", [])
+        if self.__anexos_data:
+            primeiro = self.__anexos_data[0]
             self.__anexo_preview.carregar_thumbnail(
                 primeiro.get("caminho_arquivo", "")
             )
             self.__anexo_preview.definir_metadados(
-                f"{len(anexos)} anexo(s)"
+                f"{len(self.__anexos_data)} anexo(s)"
             )
         self.limpar_formulario()
         self.__tempo_inicio_inspecao = time.time()
@@ -173,3 +178,54 @@ class PaginaInspecao(QWidget):
         }
         self.submeter_respostas.emit(respostas)
         return respostas
+
+    def configurar_midia(self, gallery: AnexoGallery, media_viewer: MediaViewer) -> None:
+        """Recebe os overlays de midia e conecta os sinais."""
+        self.__gallery = gallery
+        self.__media_viewer = media_viewer
+        self.__anexo_preview.ver_todos_anexos.connect(self.__abrir_gallery)
+        self.__gallery.fechar_solicitado.connect(self.__fechar_gallery)
+        self.__gallery.ampliar_solicitado.connect(self.__abrir_media_viewer)
+        self.__media_viewer.fechar_solicitado.connect(self.__fechar_media_viewer)
+
+    @Slot()
+    def __abrir_gallery(self) -> None:
+        if not self.__anexos_data:
+            return
+        self.__gallery.carregar_anexos(self.__anexos_data)
+        self.__gallery.setGeometry(self.window().rect())
+        self.__gallery.show()
+        self.__gallery.raise_()
+
+    @Slot()
+    def __fechar_gallery(self) -> None:
+        self.__gallery.hide()
+
+    @Slot(int)
+    def __abrir_media_viewer(self, indice: int) -> None:
+        if indice < 0 or indice >= len(self.__anexos_data):
+            return
+        anexo = self.__anexos_data[indice]
+        if anexo.get("tipo_midia") == "IMAGEM":
+            self.__media_viewer.exibir_imagem(anexo)
+            self.__media_viewer.setGeometry(self.window().rect())
+            self.__media_viewer.show()
+            self.__media_viewer.raise_()
+        elif anexo.get("tipo_midia") == "VIDEO":
+            player = self.__gallery.obter_player_atual()
+            if isinstance(player, VideoPlayer):
+                player.sair_fullscreen_solicitado.connect(self.__fechar_video_fullscreen, type=Qt.ConnectionType.UniqueConnection)
+                player.entrar_fullscreen(self.window())
+                self.__video_player_fullscreen = player
+                self.__gallery.hide()
+
+    @Slot()
+    def __fechar_media_viewer(self) -> None:
+        self.__media_viewer.hide()
+
+    @Slot()
+    def __fechar_video_fullscreen(self) -> None:
+        self.__video_player_fullscreen = None
+        if self.__gallery:
+            self.__gallery.setGeometry(self.window().rect())
+            self.__gallery.show()

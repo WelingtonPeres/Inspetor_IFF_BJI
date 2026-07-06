@@ -5,7 +5,7 @@ Suite completa de testes para o componente Taskbar.
 import pytest
 from PySide6.QtWidgets import QApplication, QFrame, QLabel, QPushButton
 
-from view.components.taskbar import Taskbar
+from view.desktop.taskbar import Taskbar
 
 
 @pytest.fixture(autouse=True)

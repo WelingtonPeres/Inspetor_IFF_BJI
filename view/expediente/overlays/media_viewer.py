@@ -4,7 +4,7 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QFrame, QLabel, QVBoxLayout
 
-from view.components.midia.image_viewer import ImageViewer
+from view.widgets.midia.image_viewer import ImageViewer
 
 logger = logging.getLogger(__name__)
 

@@ -5,7 +5,7 @@ from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel
 
 from view.infrastructure.layout_loader import LayoutLoader
-from view.components.desktop_shortcut import DesktopShortcut
+from view.desktop.desktop_shortcut import DesktopShortcut
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +82,7 @@ class TelaMenuPrincipal(QWidget):
     @Slot()
     def __abrir_seletor_wallpaper(self) -> None:
         """Abre o dialogo de selecao de wallpaper."""
-        from view.components.wallpaper_selector import WallpaperSelector
+        from view.desktop.wallpaper_selector import WallpaperSelector
 
         dialog = WallpaperSelector(self)
         dialog.wallpaper_selecionado.connect(self.__aplicar_wallpaper)

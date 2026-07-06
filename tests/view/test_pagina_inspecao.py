@@ -6,8 +6,10 @@ import pytest
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QCheckBox, QLabel, QPushButton, QRadioButton, QSplitter, QWidget
 
-from view.screens.pagina_inspecao import PaginaInspecao
-from view.components.anexo_preview import AnexoPreview
+from view.expediente.paginas.inspecao import PaginaInspecao
+from view.expediente.widgets.anexo_preview import AnexoPreview
+from view.expediente.overlays.anexo_gallery import AnexoGallery
+from view.expediente.overlays.media_viewer import MediaViewer
 
 
 @pytest.fixture(autouse=True)
@@ -168,3 +170,39 @@ class TestComportamento:
         """Se nenhum radio esta selecionado, decisao deve ser string vazia."""
         resultado = pagina._PaginaInspecao__coletar_respostas()
         assert resultado["decisao"] == ""
+
+
+@pytest.fixture
+def pagina_com_midia():
+    """Retorna uma PaginaInspecao com overlays de midia configurados."""
+    from view.infrastructure.layout_loader import LayoutLoader
+    LayoutLoader._instance = None
+    LayoutLoader.instance().set_screen(1920, 1080)
+    pagina = PaginaInspecao()
+    gallery = AnexoGallery()
+    media_viewer = MediaViewer()
+    pagina.configurar_midia(gallery, media_viewer)
+    return pagina
+
+
+class TestMidia:
+    """
+    Testes dos overlays de midia (gallery, media viewer).
+    """
+
+    def test_abrir_gallery_com_anexos(self, pagina_com_midia, qtbot):
+        """renderizar_relatorio com anexos deve permitir abrir gallery."""
+        pagina = pagina_com_midia
+        gallery = pagina._PaginaInspecao__gallery
+        pagina.renderizar_relatorio({
+            "titulo": "Teste",
+            "anexos": [{"tipo_midia": "IMAGEM", "caminho_arquivo": ""}],
+        })
+        pagina._PaginaInspecao__abrir_gallery()
+        assert gallery.isVisible()
+
+    def test_abrir_gallery_sem_anexos_nao_crasha(self, pagina_com_midia):
+        """__abrir_gallery sem anexos nao deve crashar."""
+        pagina = pagina_com_midia
+        pagina.renderizar_relatorio({"titulo": "Teste"})
+        pagina._PaginaInspecao__abrir_gallery()
