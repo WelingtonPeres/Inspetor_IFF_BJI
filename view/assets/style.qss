@@ -367,19 +367,6 @@ QPushButton#minimizar_button:hover {
     border-radius: 4px;
 }
 
-/* --- Paginas internas da TelaInspecaoCheia --- */
-QWidget.pagina_inspecao {
-    background-color: #121414;
-}
-
-QWidget.pagina_diagnostico {
-    background-color: #121414;
-}
-
-QWidget.pagina_resultado {
-    background-color: #121414;
-}
-
 /* --- Sidebar --- */
 QFrame#sidebar {
     background-color: #121414;
@@ -487,28 +474,69 @@ QFrame#expediente_sombra {
     border: none;
 }
 
-/* --- Página de Loading --- */
-#label_loading_texto {
+/* --- PaginaSelecaoPerfil --- */
+PaginaSelecaoPerfil #label_selecao_perfil {
+    font-family: "Open Sans";
+    font-size: 16px;
+    color: #E6EDF3;
+}
+
+/* --- PaginaLoading --- */
+PaginaLoading #label_loading_titulo {
+    color: #E6EDF3;
+    font-family: "Courier New", Consolas, monospace;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+PaginaLoading #label_loading_texto {
     color: #2F9E41;
     font-family: "Courier New", Consolas, monospace;
     font-size: 14px;
     font-weight: bold;
 }
 
-#loading_progress_bar {
+PaginaLoading #loading_progress_bar {
     background-color: #30363D;
     border: 1px solid #484F58;
     border-radius: 2px;
     max-height: 16px;
 }
 
-#loading_progress_bar::chunk {
+PaginaLoading #loading_progress_bar::chunk {
     background-color: #2F9E41;
     border-radius: 2px;
 }
 
-/* --- Página EndGame --- */
-#label_endgame_titulo {
+/* --- PaginaInspecao: Split-Desk 60/40 --- */
+PaginaInspecao #label_titulo_relatorio {
+    color: #E6EDF3;
+    font-family: "Open Sans";
+    font-size: 14px;
+}
+
+PaginaInspecao #deck_observacao {
+    background-color: #0D1117;
+    border: 1px solid #30363D;
+    border-radius: 4px;
+    padding: 8px;
+}
+
+PaginaInspecao #prancheta {
+    background-color: #161B22;
+    border: 1px solid #30363D;
+    border-radius: 4px;
+    padding: 8px;
+}
+
+/* --- PaginaDiagnostico --- */
+PaginaDiagnostico #label_diagnostico {
+    font-family: "Open Sans";
+    font-size: 16px;
+}
+
+/* --- PaginaEndgame --- */
+PaginaEndgame #label_endgame_titulo {
     font-family: "Courier New", Consolas, monospace;
     font-size: 24px;
     font-weight: bold;
@@ -517,36 +545,21 @@ QFrame#expediente_sombra {
     padding: 16px;
 }
 
-#label_endgame_titulo[status="vitoria"] {
+PaginaEndgame #label_endgame_titulo[status="vitoria"] {
     color: #2F9E41;
     border-color: #2F9E41;
     background-color: #0a1a0a;
 }
 
-#label_endgame_titulo[status="derrota"] {
+PaginaEndgame #label_endgame_titulo[status="derrota"] {
     color: #CD191E;
     border-color: #CD191E;
     background-color: #1a0a0a;
 }
 
-#label_endgame_pontuacao {
+PaginaEndgame #label_endgame_pontuacao {
     color: #E6EDF3;
     font-family: "Courier New", Consolas, monospace;
     font-size: 16px;
-    padding: 8px;
-}
-
-/* --- Split-Desk 60/40 --- */
-QWidget#deck_observacao {
-    background-color: #0D1117;
-    border: 1px solid #30363D;
-    border-radius: 4px;
-    padding: 8px;
-}
-
-QWidget#prancheta {
-    background-color: #161B22;
-    border: 1px solid #30363D;
-    border-radius: 4px;
     padding: 8px;
 }
