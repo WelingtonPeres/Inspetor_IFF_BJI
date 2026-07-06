@@ -29,6 +29,7 @@ from view.infrastructure.layout_loader import LayoutLoader
 from view.screens.anexo_gallery import AnexoGallery
 from view.screens.media_viewer import MediaViewer
 from view.screens.pagina_diagnostico import PaginaDiagnostico
+from view.screens.pagina_endgame import PaginaEndgame
 from view.screens.pagina_loading import PaginaLoading
 from view.screens.pagina_selecao_perfil import PaginaSelecaoPerfil
 
@@ -79,6 +80,7 @@ class TelaDeExpediente(QFrame):
         self.__pagina_perfil: PaginaSelecaoPerfil
         self.__pagina_loading: PaginaLoading
         self.__pagina_diagnostico: PaginaDiagnostico
+        self.__pagina_endgame: PaginaEndgame
         self.__combo_perfil: QComboBox
         self.__loading_progress: QProgressBar
 
@@ -109,13 +111,15 @@ class TelaDeExpediente(QFrame):
         self.__pagina_loading = PaginaLoading()
         self.__pagina_diagnostico = PaginaDiagnostico()
         self.__pagina_diagnostico.continuar_solicitado.connect(self.continuar_solicitado.emit)
+        self.__pagina_endgame = PaginaEndgame()
+        self.__pagina_endgame.voltar_menu_solicitado.connect(self.voltar_menu_solicitado.emit)
 
         self.__stack = QStackedWidget()
         self.__stack.addWidget(self.__pagina_perfil)
         self.__stack.addWidget(self.__pagina_loading)
         self.__stack.addWidget(self.__criar_pagina_inspecao())
         self.__stack.addWidget(self.__pagina_diagnostico)
-        self.__stack.addWidget(self.__criar_pagina_endgame())
+        self.__stack.addWidget(self.__pagina_endgame)
         self.__stack.setCurrentIndex(self.IDX_SELECAO_PERFIL)
         body.addWidget(self.__stack, stretch=1)
 
@@ -465,20 +469,7 @@ class TelaDeExpediente(QFrame):
     def exibir_tela_endgame(self, pontuacao_global: float, dias_concluidos: int, venceu: bool) -> None:
         logger.info("Exibindo endgame: %.1f pts em %d dia(s), venceu=%s", pontuacao_global, dias_concluidos, venceu)
         self.__title_bar.definir_titulo("Fim do Expediente")
-
-        if venceu:
-            self.__label_endgame_titulo.setText("EXPEDIENTE CONCLUÍDO")
-            self.__label_endgame_titulo.setProperty("status", "vitoria")
-        else:
-            self.__label_endgame_titulo.setText("EXPEDIENTE INTERROMPIDO")
-            self.__label_endgame_titulo.setProperty("status", "derrota")
-        self.__label_endgame_titulo.style().unpolish(self.__label_endgame_titulo)
-        self.__label_endgame_titulo.style().polish(self.__label_endgame_titulo)
-
-        self.__label_endgame_pontuacao.setText(
-            f"Pontuação final: {pontuacao_global:.1f}\n"
-            f"Dias concluídos: {dias_concluidos}"
-        )
+        self.__pagina_endgame.exibir_resultado(pontuacao_global, dias_concluidos, venceu)
         self.__stack.setCurrentIndex(self.IDX_ENDGAME)
 
     def exibir_com_tamanho_inicial(self, parent_rect: Any) -> None:
