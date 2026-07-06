@@ -28,6 +28,7 @@ from view.components.window_title_bar import WindowTitleBar
 from view.infrastructure.layout_loader import LayoutLoader
 from view.screens.anexo_gallery import AnexoGallery
 from view.screens.media_viewer import MediaViewer
+from view.screens.pagina_diagnostico import PaginaDiagnostico
 from view.screens.pagina_loading import PaginaLoading
 from view.screens.pagina_selecao_perfil import PaginaSelecaoPerfil
 
@@ -77,6 +78,7 @@ class TelaDeExpediente(QFrame):
         self.__sidebar: Sidebar
         self.__pagina_perfil: PaginaSelecaoPerfil
         self.__pagina_loading: PaginaLoading
+        self.__pagina_diagnostico: PaginaDiagnostico
         self.__combo_perfil: QComboBox
         self.__loading_progress: QProgressBar
 
@@ -105,12 +107,14 @@ class TelaDeExpediente(QFrame):
         self.__pagina_perfil = PaginaSelecaoPerfil()
         self.__pagina_perfil.perfil_confirmado.connect(self.__on_perfil_confirmado)
         self.__pagina_loading = PaginaLoading()
+        self.__pagina_diagnostico = PaginaDiagnostico()
+        self.__pagina_diagnostico.continuar_solicitado.connect(self.continuar_solicitado.emit)
 
         self.__stack = QStackedWidget()
         self.__stack.addWidget(self.__pagina_perfil)
         self.__stack.addWidget(self.__pagina_loading)
         self.__stack.addWidget(self.__criar_pagina_inspecao())
-        self.__stack.addWidget(self.__criar_pagina_diagnostico())
+        self.__stack.addWidget(self.__pagina_diagnostico)
         self.__stack.addWidget(self.__criar_pagina_endgame())
         self.__stack.setCurrentIndex(self.IDX_SELECAO_PERFIL)
         body.addWidget(self.__stack, stretch=1)
@@ -455,12 +459,7 @@ class TelaDeExpediente(QFrame):
     def exibir_tela_diagnostico(self, diagnostico: DiagnosticoPontuacaoDTO) -> None:
         logger.info("Exibindo diagnostico: %s", diagnostico)
         self.__title_bar.definir_titulo("Resultado da Inspeção")
-        self.__label_diagnostico.setText(
-            f"Pontuação: {diagnostico.pontuacao_final:.1f}\n"
-            f"Riscos corretos: {diagnostico.qnt_riscos_corretos_marcados}/{diagnostico.qnt_riscos_gabarito}\n"
-            f"Decisão: {diagnostico.status_decisao_jogador}\n"
-            f"Tempo: {diagnostico.tempo_resposta_segundos:.0f}s"
-        )
+        self.__pagina_diagnostico.exibir_diagnostico(diagnostico)
         self.__stack.setCurrentIndex(self.IDX_DIAGNOSTICO)
 
     def exibir_tela_endgame(self, pontuacao_global: float, dias_concluidos: int, venceu: bool) -> None:
