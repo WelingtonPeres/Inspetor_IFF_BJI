@@ -487,6 +487,36 @@ PaginaSelecaoPerfil #label_selecao_perfil {
     color: #1a1c1c;
 }
 
+PaginaSelecaoPerfil #label_contador_perfil {
+    font-family: "Open Sans";
+    font-size: 12px;
+    font-weight: 500;
+    color: #7777aa;
+    padding: 3px 14px;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 4px;
+}
+
+/* --- Navegação do Carrossel --- */
+#carousel_btn_prev,
+#carousel_btn_next {
+    font-size: 18px;
+    background: rgba(0, 0, 0, 0.04);
+    color: #7777aa;
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    border-radius: 26px;
+}
+#carousel_btn_prev:hover,
+#carousel_btn_next:hover {
+    background: rgba(47, 158, 65, 0.15);
+    color: #2F9E41;
+    border-color: #2F9E41;
+}
+#carousel_btn_prev:pressed,
+#carousel_btn_next:pressed {
+    background: rgba(47, 158, 65, 0.25);
+}
+
 /* --- PaginaLoading --- */
 PaginaLoading #label_loading_titulo {
     color: #1a1c1c;
