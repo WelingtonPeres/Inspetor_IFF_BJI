@@ -1,27 +1,14 @@
 import logging
-import time
 from typing import Any, Dict, List
 from PySide6.QtCore import Qt, Signal, Slot
-from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
-    QButtonGroup,
-    QCheckBox,
-    QComboBox,
     QFrame,
-    QGroupBox,
     QHBoxLayout,
-    QLabel,
-    QProgressBar,
-    QPushButton,
-    QRadioButton,
-    QSplitter,
     QStackedWidget,
     QVBoxLayout,
-    QWidget,
 )
 
 from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
-from view.components.anexo_preview import AnexoPreview
 from view.components.midia.video_player import VideoPlayer
 from view.components.sidebar import Sidebar
 from view.components.window_title_bar import WindowTitleBar
@@ -61,18 +48,6 @@ class TelaDeExpediente(QFrame):
         self.__inicializado: bool = False
         self.__tamanho_normal: Any = None
 
-        self.__label_titulo_relatorio: QLabel
-        self.__chk_riscos: Dict[str, QCheckBox]
-        self.__chk_fatores: Dict[str, QCheckBox]
-        self.__radio_decisao: QButtonGroup
-        self.__btn_submeter: QPushButton
-        self.__label_diagnostico: QLabel
-        self.__btn_continuar: QPushButton
-        self.__label_endgame_titulo: QLabel
-        self.__label_endgame_pontuacao: QLabel
-        self.__btn_voltar_menu: QPushButton
-        self.__tempo_inicio_inspecao: float = 0.0
-        self.__anexo_preview: AnexoPreview
         self.__anexo_gallery: AnexoGallery
         self.__media_viewer: MediaViewer
         self.__video_player_fullscreen: VideoPlayer | None = None
@@ -83,8 +58,6 @@ class TelaDeExpediente(QFrame):
         self.__pagina_diagnostico: PaginaDiagnostico
         self.__pagina_endgame: PaginaEndgame
         self.__pagina_inspecao: PaginaInspecao
-        self.__combo_perfil: QComboBox
-        self.__loading_progress: QProgressBar
 
         self.__setup_ui()
 
@@ -142,188 +115,10 @@ class TelaDeExpediente(QFrame):
         self.__media_viewer.fechar_solicitado.connect(self.__fechar_media_viewer)
         self.__media_viewer.hide()
 
-    def __criar_pagina_selecao_perfil(self) -> QWidget:
-        pagina = QWidget()
-        sub = QVBoxLayout(pagina)
-        sub.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        label = QLabel("Selecione o perfil:")
-        label.setObjectName("label_selecao_perfil")
-        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        sub.addWidget(label)
-
-        self.__combo_perfil = QComboBox()
-        self.__combo_perfil.setObjectName("combo_perfil")
-        self.__combo_perfil.setProperty("class", "combo_padrao")
-        self.__combo_perfil.addItems([
-            "DEFAULT", "T_QUIMICA", "T_INFORMATICA", "T_AGROPECUARIA",
-            "T_ALIMENTOS", "T_MEIO_AMBIENTE", "T_ZOOTECNIA",
-            "CT_ALIMENTOS", "E_COMPUTACAO",
-        ])
-        sub.addWidget(self.__combo_perfil)
-
-        btn = QPushButton("Confirmar")
-        btn.setObjectName("btn_confirmar_perfil")
-        btn.setProperty("class", "btn_primario")
-        btn.clicked.connect(self.__on_perfil_confirmado)
-        sub.addWidget(btn)
-
-        return pagina
-
     @Slot(str)
     def __on_perfil_confirmado(self, perfil: str) -> None:
         self.exibir_tela_carregamento()
         self.perfil_confirmado.emit(perfil)
-
-    def __criar_pagina_loading(self) -> QWidget:
-        pagina = QWidget()
-        sub = QVBoxLayout(pagina)
-        sub.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        label_sistema = QLabel("IFF SISTEMA DE INSPEÇÃO")
-        label_sistema.setObjectName("label_loading_titulo")
-        label_sistema.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        label_sistema.setFont(QFont("Courier New", 16))
-        sub.addWidget(label_sistema)
-
-        self.__loading_progress = QProgressBar()
-        self.__loading_progress.setObjectName("loading_progress_bar")
-        self.__loading_progress.setRange(0, 0)
-        self.__loading_progress.setValue(0)
-        sub.addWidget(self.__loading_progress)
-
-        texto = QLabel("CARREGANDO EXPEDIENTE...")
-        texto.setObjectName("label_loading_texto")
-        texto.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        sub.addWidget(texto)
-
-        return pagina
-
-    def __criar_pagina_inspecao(self) -> QWidget:
-        pagina = QWidget()
-        pagina.setProperty("class", "pagina_inspecao")
-
-        splitter = QSplitter(Qt.Orientation.Horizontal)
-
-        deck = QWidget(objectName="deck_observacao")
-        deck_layout = QVBoxLayout(deck)
-
-        self.__label_titulo_relatorio = QLabel("Aguardando relatório...")
-        self.__label_titulo_relatorio.setObjectName("label_titulo_relatorio")
-        self.__label_titulo_relatorio.setAlignment(Qt.AlignmentFlag.AlignTop)
-        self.__label_titulo_relatorio.setWordWrap(True)
-        deck_layout.addWidget(self.__label_titulo_relatorio)
-
-        self.__anexo_preview = AnexoPreview()
-        self.__anexo_preview.ver_todos_anexos.connect(self.__abrir_gallery)
-        deck_layout.addWidget(self.__anexo_preview)
-
-        deck_layout.addStretch()
-
-        prancheta = QWidget(objectName="prancheta")
-        prancheta_layout = QVBoxLayout(prancheta)
-
-        grupo_riscos = QGroupBox("Riscos Identificados")
-        grupo_riscos.setObjectName("group_riscos")
-        grupo_riscos.setProperty("class", "group_box")
-        layout_riscos = QVBoxLayout(grupo_riscos)
-        self.__chk_riscos = {}
-        for risco in ["FISICO", "QUIMICO", "BIOLOGICO", "ERGONOMICO", "ACIDENTE"]:
-            chk = QCheckBox(risco)
-            chk.setObjectName(f"chk_risco_{risco}")
-            chk.setProperty("class", "chk_risco")
-            self.__chk_riscos[risco] = chk
-            layout_riscos.addWidget(chk)
-        prancheta_layout.addWidget(grupo_riscos)
-
-        grupo_fatores = QGroupBox("Fatores de Insegurança")
-        grupo_fatores.setObjectName("group_fatores")
-        grupo_fatores.setProperty("class", "group_box")
-        layout_fatores = QVBoxLayout(grupo_fatores)
-        self.__chk_fatores = {}
-        for fator in ["ATO_INSEGURO", "CONDICAO_INSEGURA"]:
-            chk = QCheckBox(fator)
-            chk.setObjectName(f"chk_fator_{fator}")
-            chk.setProperty("class", "chk_fator")
-            self.__chk_fatores[fator] = chk
-            layout_fatores.addWidget(chk)
-        prancheta_layout.addWidget(grupo_fatores)
-
-        grupo_decisao = QGroupBox("Decisão Administrativa")
-        grupo_decisao.setObjectName("group_decisao")
-        grupo_decisao.setProperty("class", "group_box")
-        layout_decisao = QHBoxLayout(grupo_decisao)
-        self.__radio_decisao = QButtonGroup(grupo_decisao)
-        for decisao in ["ADVERTIR", "INTERDITAR", "IGNORAR"]:
-            radio = QRadioButton(decisao)
-            radio.setObjectName(f"radio_decisao_{decisao}")
-            radio.setProperty("class", "radio_decisao")
-            self.__radio_decisao.addButton(radio)
-            layout_decisao.addWidget(radio)
-        prancheta_layout.addWidget(grupo_decisao)
-
-        self.__btn_submeter = QPushButton("Submeter Respostas")
-        self.__btn_submeter.setObjectName("btn_submeter")
-        self.__btn_submeter.setProperty("class", "btn_primario")
-        self.__btn_submeter.clicked.connect(self.__coletar_respostas)
-        prancheta_layout.addWidget(self.__btn_submeter)
-
-        prancheta_layout.addStretch()
-
-        splitter.addWidget(deck)
-        splitter.addWidget(prancheta)
-        splitter.setStretchFactor(0, 60)
-        splitter.setStretchFactor(1, 40)
-        splitter.setHandleWidth(2)
-
-        layout = QVBoxLayout(pagina)
-        layout.addWidget(splitter)
-        return pagina
-
-    def __criar_pagina_diagnostico(self) -> QWidget:
-        pagina = QWidget()
-        pagina.setProperty("class", "pagina_diagnostico")
-        layout = QVBoxLayout(pagina)
-        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.__label_diagnostico = QLabel("")
-        self.__label_diagnostico.setObjectName("label_diagnostico")
-        self.__label_diagnostico.setProperty("class", "label_feedback")
-        self.__label_diagnostico.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.__label_diagnostico)
-
-        self.__btn_continuar = QPushButton("Continuar")
-        self.__btn_continuar.setObjectName("btn_continuar")
-        self.__btn_continuar.setProperty("class", "btn_primario")
-        self.__btn_continuar.clicked.connect(self.continuar_solicitado.emit)
-        layout.addWidget(self.__btn_continuar)
-
-        return pagina
-
-    def __criar_pagina_endgame(self) -> QWidget:
-        pagina = QWidget()
-        pagina.setProperty("class", "pagina_endgame")
-        layout = QVBoxLayout(pagina)
-        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.__label_endgame_titulo = QLabel("")
-        self.__label_endgame_titulo.setObjectName("label_endgame_titulo")
-        self.__label_endgame_titulo.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.__label_endgame_titulo.setWordWrap(True)
-        layout.addWidget(self.__label_endgame_titulo)
-
-        self.__label_endgame_pontuacao = QLabel("")
-        self.__label_endgame_pontuacao.setObjectName("label_endgame_pontuacao")
-        self.__label_endgame_pontuacao.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.__label_endgame_pontuacao)
-
-        self.__btn_voltar_menu = QPushButton("Voltar ao Menu")
-        self.__btn_voltar_menu.setObjectName("btn_voltar_menu")
-        self.__btn_voltar_menu.setProperty("class", "btn_primario")
-        self.__btn_voltar_menu.clicked.connect(self.voltar_menu_solicitado.emit)
-        layout.addWidget(self.__btn_voltar_menu)
-
-        return pagina
 
     @Slot(int)
     def __on_page_changed(self, index: int) -> None:
