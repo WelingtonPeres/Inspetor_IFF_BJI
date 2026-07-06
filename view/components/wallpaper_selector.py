@@ -18,7 +18,6 @@ from PySide6.QtCore import Qt, QSettings, Signal, Slot
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (
     QDialog,
-    QFileDialog,
     QFrame,
     QGridLayout,
     QHBoxLayout,
@@ -74,20 +73,16 @@ class WallpaperSelector(QDialog):
         self.__setup_ui()
         self.__carregar_imagens()
 
-    # ------------------------------------------------------------------
-    # Construcao da UI
-    # ------------------------------------------------------------------
-
     def __setup_ui(self) -> None:
         layout = QVBoxLayout(self)
         layout.setContentsMargins(16, 16, 16, 16)
         layout.setSpacing(12)
 
-        label_instrucao = QLabel("Escolha um wallpaper para o ambiente de trabalho:")
+        label_instrucao = QLabel("Escolha um wallpaper para o ambiente de trabalho (disponível apenas no diretório fixo):")
+        label_instrucao.setProperty("class", "wallpaper_selector_instrucao")
         label_instrucao.setObjectName("wallpaper_selector_instrucao")
         layout.addWidget(label_instrucao)
 
-        # --- Area de scroll com grid de thumbnails ---
         scroll = QScrollArea()
         scroll.setObjectName("wallpaper_scroll")
         scroll.setWidgetResizable(True)
@@ -105,7 +100,6 @@ class WallpaperSelector(QDialog):
         scroll.setWidget(container)
         layout.addWidget(scroll, stretch=1)
 
-        # --- Preview da imagem selecionada ---
         preview_layout = QHBoxLayout()
         preview_layout.setSpacing(8)
 
@@ -121,15 +115,8 @@ class WallpaperSelector(QDialog):
 
         layout.addLayout(preview_layout)
 
-        # --- Botoes de accao ---
         botoes_layout = QHBoxLayout()
         botoes_layout.addStretch()
-
-        btn_explorar = QPushButton("Procurar...")
-        btn_explorar.setObjectName("btn_wallpaper_explorar")
-        btn_explorar.setProperty("class", "btn_secundario")
-        btn_explorar.clicked.connect(self.__on_explorar)
-        botoes_layout.addWidget(btn_explorar)
 
         self.__btn_aplicar = QPushButton("Aplicar")
         self.__btn_aplicar.setObjectName("btn_wallpaper_aplicar")
@@ -145,10 +132,6 @@ class WallpaperSelector(QDialog):
         botoes_layout.addWidget(btn_cancelar)
 
         layout.addLayout(botoes_layout)
-
-    # ------------------------------------------------------------------
-    # Carregamento dinamico das imagens
-    # ------------------------------------------------------------------
 
     def __carregar_imagens(self) -> None:
         """Scan dinamico do diretorio de wallpapers por extensoes validas."""
@@ -174,7 +157,6 @@ class WallpaperSelector(QDialog):
         self.__imagens = imagens_encontradas
         self.__popular_grid()
 
-        # Selecionar o wallpaper actual por omissao se existir na lista
         settings = QSettings()
         saved = settings.value(f"{SETTINGS_GROUP}/{SETTINGS_KEY}", "")
         if saved:
@@ -241,7 +223,6 @@ class WallpaperSelector(QDialog):
         nome_label.setProperty("class", "wallpaper_thumb_nome")
         frame_layout.addWidget(nome_label)
 
-        # Tornar o frame clicavel
         frame.mousePressEvent = lambda _event, i=index: self.__selecionar_thumbnail(
             i
         )
@@ -254,10 +235,6 @@ class WallpaperSelector(QDialog):
         if self.__imagens:
             self.__popular_grid()
 
-    # ------------------------------------------------------------------
-    # Selecao e accao
-    # ------------------------------------------------------------------
-
     def __selecionar_thumbnail(self, index: int) -> None:
         """Marca a thumbnail como selecionada e atualiza o preview."""
         if index < 0 or index >= len(self.__imagens):
@@ -269,7 +246,6 @@ class WallpaperSelector(QDialog):
         if self.__btn_aplicar:
             self.__btn_aplicar.setEnabled(True)
 
-        # Atualizar preview
         if self.__preview_label:
             pixmap = QPixmap(self.__selected_path)
             if not pixmap.isNull():
@@ -284,7 +260,6 @@ class WallpaperSelector(QDialog):
             else:
                 self.__preview_label.setText("Erro ao carregar imagem")
 
-        # Reset visual de todas as thumbs (propriedade "selected")
         for i in range(len(self.__imagens)):
             thumb_frame = self.findChild(QFrame, f"wallpaper_thumb_{i}")
             if thumb_frame:
@@ -293,39 +268,6 @@ class WallpaperSelector(QDialog):
                 thumb_frame.style().polish(thumb_frame)
 
         logger.info("Wallpaper selecionado: %s", selected_path.name)
-
-    @Slot()
-    def __on_explorar(self) -> None:
-        """Abre um QFileDialog para escolher uma imagem personalizada."""
-        caminho, _ = QFileDialog.getOpenFileName(
-            self,
-            "Selecionar Wallpaper",
-            str(DIRETORIO_WALLPAPERS),
-            "Imagens (*.jpg *.jpeg *.png *.bmp *.gif);;Todos (*.*)",
-        )
-        if not caminho:
-            return
-
-        self.__selected_path = caminho
-        if self.__btn_aplicar:
-            self.__btn_aplicar.setEnabled(True)
-
-        # Atualizar preview
-        if self.__preview_label:
-            pixmap = QPixmap(caminho)
-            if not pixmap.isNull():
-                preview_pixmap = pixmap.scaled(
-                    400,
-                    120,
-                    Qt.AspectRatioMode.KeepAspectRatio,
-                    Qt.TransformationMode.SmoothTransformation,
-                )
-                self.__preview_label.setPixmap(preview_pixmap)
-                self.__preview_label.setText("")
-            else:
-                self.__preview_label.setText("Erro ao carregar imagem")
-
-        logger.info("Wallpaper selecionado via explorador: %s", caminho)
 
     @Slot()
     def __on_aplicar(self) -> None:

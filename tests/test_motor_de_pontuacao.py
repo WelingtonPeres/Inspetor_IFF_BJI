@@ -6,8 +6,6 @@ from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
 from core.services.motor_de_pontuacao import MotorDePontuacao
 
 
-# Fixtures
-
 @pytest.fixture
 def motor():
     return MotorDePontuacao()

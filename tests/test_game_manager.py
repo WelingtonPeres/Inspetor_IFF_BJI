@@ -50,8 +50,6 @@ from application.controllers.game_manager import GameManager
 from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
 
 
-# Fixtures
-
 @pytest.fixture
 def view_mock():
     """Mock da View injetada no GameManager, validado contra IGameView."""
@@ -78,8 +76,6 @@ def diagnostico_dto_fake():
         pontuacao_final=1500.0,
     )
 
-
-# Testes de Inicialização
 
 class TestInicializacao:
     """
@@ -110,8 +106,6 @@ class TestInicializacao:
         """
         assert gm._GameManager__view is view_mock
 
-
-# Testes de Carregamento do Menu
 
 class TestCarregarMenuPrincipal:
     """
@@ -151,8 +145,6 @@ class TestCarregarMenuPrincipal:
         view_mock.exibir_menu.assert_called_once_with()
 
 
-# Testes de Início de Aplicação
-
 class TestIniciarAplicacao:
     """
     Testes do Método iniciar_aplicacao
@@ -173,8 +165,6 @@ class TestIniciarAplicacao:
         view_mock.exibir_menu.assert_called_once_with()
 
 
-# Testes de Encerramento
-
 class TestEncerrarAplicacao:
     """
     Testes do Método encerrar_aplicacao
@@ -192,8 +182,6 @@ class TestEncerrarAplicacao:
         view_mock.fechar.assert_called_once_with()
 
 
-# Testes de on_iniciar_solicitado
-
 class TestOnIniciarSolicitado:
     """
     Testes do Método on_iniciar_solicitado
@@ -210,8 +198,6 @@ class TestOnIniciarSolicitado:
         gm.on_iniciar_solicitado()
         view_mock.exibir_selecao_perfil.assert_called_once_with()
 
-
-# Testes de Iniciar Expediente
 
 class TestIniciarExpediente:
     """
@@ -303,8 +289,6 @@ class TestIniciarExpediente:
             gm._GameManager__iniciar_campanha("T_QUIMICA")
 
 
-# Testes de Requisição de Relatório
-
 class TestRequisitarDadosRelatorio:
     """
     Testes do Método requisitar_dados_relatorio_atual
@@ -355,8 +339,6 @@ class TestRequisitarDadosRelatorio:
         with pytest.raises(RuntimeError, match="\\[Erro - GameManager\\] Nenhum turno"):
             gm._GameManager__requisitar_dados_relatorio_atual()
 
-
-# Testes de Processamento de Submissão
 
 class TestProcessarSubmissao:
     """
@@ -471,8 +453,6 @@ class TestProcessarSubmissao:
             gm.processar_submissao({})
 
 
-# Testes de Avanço da Fila / Dia
-
 class TestAvancarFilaOuDia:
     """
     Testes do Método avancar_fila_ou_dia
@@ -529,7 +509,7 @@ class TestAvancarFilaOuDia:
 
         assert gm._GameManager__dias_concluidos == 1
         assert gm._GameManager__estado_atual == GameManager.ESTADO_RESULTADO
-        view_mock.exibir_resultado.assert_called_once_with(8500.0, 1)
+        view_mock.exibir_resultado.assert_called_once_with(8500.0, 1, True)
 
     def test_avancar_sem_turno_lanca_erro(self, gm):
         """

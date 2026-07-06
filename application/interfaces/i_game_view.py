@@ -38,7 +38,7 @@ class IGameView(ABC):
         pass
 
     @abstractmethod
-    def exibir_resultado(self, pontuacao_global: float, dias_concluidos: int) -> None:
+    def exibir_resultado(self, pontuacao_global: float, dias_concluidos: int, venceu: bool) -> None:
         pass
 
     @abstractmethod

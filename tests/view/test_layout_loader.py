@@ -54,21 +54,21 @@ class TestLayoutLoader:
         """
         Na resolucao de referencia (1920x1080) o fator de escala deve ser 1.0.
 
-        scaled(80) deve retornar 80.
+        scaled(100) deve retornar 100.
         """
         loader.set_screen(1920, 1080)
-        valor = loader.scaled("atalho", "largura")
-        assert valor == 80
+        valor = loader.scaled("desktop_shortcut", "largura")
+        assert valor == 100
 
     def test_scaled_1280x720(self, loader):
         """
         Em 1280x720 (resolucao minima) o fator deve ser ~0.66.
 
-        scaled(80) deve retornar ~53 (80 * 720/1080 ≈ 53.33).
+        scaled(100) deve retornar ~67 (100 * 720/1080 ≈ 66.67).
         """
         loader.set_screen(1280, 720)
-        valor = loader.scaled("atalho", "largura")
-        assert valor == 53
+        valor = loader.scaled("desktop_shortcut", "largura")
+        assert valor == 67
 
     def test_scaled_margens(self, loader):
         """

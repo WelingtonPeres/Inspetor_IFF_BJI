@@ -2,7 +2,7 @@ import abc
 import logging
 from typing import Any, Dict
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Signal, Slot
 from PySide6.QtWidgets import QMainWindow, QMessageBox, QVBoxLayout, QWidget
 
 from application.interfaces.i_game_view import IGameView
@@ -57,7 +57,7 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
         layout.addWidget(self.__taskbar)
 
         self.__tela_menu = TelaMenuPrincipal()
-        self.__tela_menu.iniciar_solicitado.connect(lambda _: self.iniciar_solicitado.emit())
+        self.__tela_menu.iniciar_solicitado.connect(self.__encaminhar_iniciar)
         self.__overlay_area.add_desktop(self.__tela_menu)
 
         self.__tela_expediente = TelaDeExpediente()
@@ -68,8 +68,13 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
         self.__tela_expediente.minimized_solicitado.connect(self.__on_minimizar_expediente)
         self.__overlay_area.add_overlay(self.__tela_expediente, auto_resize=False)
 
+    @Slot()
     def __on_minimizar_expediente(self) -> None:
         self.__tela_expediente.hide()
+
+    @Slot(str)
+    def __encaminhar_iniciar(self, _legenda: str) -> None:
+        self.iniciar_solicitado.emit()
 
     def inicializar(self) -> None:
         logger.info("JanelaPrincipal inicializada.")
@@ -105,9 +110,8 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
         self.__tela_expediente.renderizar_relatorio(dados_relatorio)
         self.__tela_expediente.show()
 
-    def exibir_resultado(self, pontuacao_global: float, dias_concluidos: int) -> None:
+    def exibir_resultado(self, pontuacao_global: float, dias_concluidos: int, venceu: bool) -> None:
         logger.info("Exibindo resultado final.")
-        venceu = pontuacao_global > 0
         self.exibir_tela_endgame(pontuacao_global, dias_concluidos, venceu)
 
     def exibir_tela_endgame(self, pontuacao_global: float, dias_concluidos: int, venceu: bool) -> None:

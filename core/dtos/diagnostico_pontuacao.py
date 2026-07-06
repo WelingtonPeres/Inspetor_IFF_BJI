@@ -12,7 +12,6 @@ class DiagnosticoPontuacaoDTO:
     qnt_riscos_gabarito: int
     qnt_riscos_corretos_marcados: int
     
-    # True se o resultado do confronto entre o ato inseguro do gabarito e o ato marcado pelo jogador indicar que o ato foi identificado, False caso contrário.
     estado_ato: bool 
     estado_condicao: bool
     

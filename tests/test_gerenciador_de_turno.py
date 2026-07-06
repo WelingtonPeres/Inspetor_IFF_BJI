@@ -12,8 +12,6 @@ from core.model.relatorio import Relatorio
 from core.model.folha_de_gabarito import FolhaDeGabarito
 
 
-# Fixtures
-
 @pytest.fixture
 def diagnostico_fake():
     """DiagnosticoPontuacaoDTO fake para usar como retorno do mock."""
@@ -49,8 +47,6 @@ def relatorio_fake():
         ),
     )
 
-
-# Testes de Inicialização
 
 class TestInicializacao:
     """
@@ -109,8 +105,6 @@ class TestInicializacao:
         with pytest.raises(Exception, match="Turno ainda n"):
             g.verificar_vitoria_do_turno()
 
-
-# Testes de Inicialização do Turno (iniciar_turno)
 
 class TestIniciarTurno:
     """
@@ -271,8 +265,6 @@ class TestIniciarTurno:
             g.iniciar_turno()
 
 
-# Testes de Controle da Pilha
-
 class TestManipulacaoDePilha:
     """
     Testes de Consulta e Consumo da Pilha de Relatórios
@@ -343,8 +335,6 @@ class TestManipulacaoDePilha:
         with pytest.raises(RuntimeError, match="ainda não foi avaliado"):
             g.obter_relatorio_da_pilha()
 
-
-# Testes de Avaliação e Pontuação
 
 class TestAvaliacaoDeRespostas:
     """
@@ -447,8 +437,6 @@ class TestAvaliacaoDeRespostas:
         prox = g.obter_relatorio_da_pilha()
         assert prox is relatorio_fake
 
-
-# Testes de Encerramento do Turno
 
 class TestVerificarVitoria:
     """

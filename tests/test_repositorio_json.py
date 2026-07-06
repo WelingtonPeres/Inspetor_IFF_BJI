@@ -103,7 +103,6 @@ class TesteInicializacao:
         
         Abortar com `ValueError` (exigindo inteiros positivos).
         """
-        # Teste com quantidade 0
         with pytest.raises(ValueError, match="inteiro positivo"):
             RepositorioJSON(
                 diretorio_base=diretorio_dados_teste_valido,
@@ -111,7 +110,6 @@ class TesteInicializacao:
                 quantidade_gerada=0
             )
         
-        # Teste com quantidade negativa
         with pytest.raises(ValueError, match="inteiro positivo"):
             RepositorioJSON(
                 diretorio_base=diretorio_dados_teste_valido,
@@ -276,7 +274,6 @@ class TesteEsquema:
         
         assert isinstance(resultado, list)
         assert len(resultado) >= 1
-        # Todos devem ter anexos como lista (vazia ou com itens)
         assert all(isinstance(dto.anexos, list) for dto in resultado)
 
 class TesteExtracao:
@@ -326,7 +323,6 @@ class TesteExtracao:
         assert isinstance(resultado, list)
         assert len(resultado) > 0
         
-        # Validar que todos contêm T_QUIMICA
         for dto in resultado:
             assert "T_QUIMICA" in dto.curso
 

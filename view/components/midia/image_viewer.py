@@ -19,7 +19,6 @@ class ImageViewer(QFrame):
         self.__label = QLabel()
         self.__label.setObjectName("image_viewer_label")
         self.__label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.__label.setStyleSheet("background-color: transparent;")
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)

@@ -89,7 +89,7 @@ class TestJanelaPrincipal:
 
     def test_exibir_resultado(self, janela):
         """exibir_resultado deve delegar para exibir_tela_endgame."""
-        janela.exibir_resultado(pontuacao_global=5000.0, dias_concluidos=1)
+        janela.exibir_resultado(pontuacao_global=5000.0, dias_concluidos=1, venceu=True)
 
     def test_exibir_tela_endgame(self, janela):
         """exibir_tela_endgame deve delegar sem erros."""

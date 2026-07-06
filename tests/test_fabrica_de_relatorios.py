@@ -66,9 +66,7 @@ def test_fabrica_deve_construir_relatorio_sem_anexos(dto_cenario_perfeito):
         fatores_inseguranca=["ATO_INSEGURO"],
         decisao_otima="INTERDITAR",
         decisao_boa="ADVERTIR",
-        anexos=[
-            # Lista vazia de anexos
-        ]
+        anexos=[]
     )
     
     lista_bruta = [dto_sem_anexos]
@@ -145,7 +143,6 @@ def test_fabrica_deve_instanciar_diferentes_tipos_de_midia(dto_cenario_perfeito)
     
     assert len(anexos) == 3
     
-    # Valida que cada um é uma instância da classe correta 
     assert isinstance(anexos[0], AnexoImagem), "Primeiro anexo deve ser AnexoImagem"
     assert isinstance(anexos[1], AnexoVideo), "Segundo anexo deve ser AnexoVideo"
     assert isinstance(anexos[2], AnexoAudio), "Terceiro anexo deve ser AnexoAudio"
@@ -200,7 +197,6 @@ def test_fabrica_deve_rejeitar_cenario_com_riscos_invalidos_no_gabarito(dto_cena
     lista_bruta = [dto_riscos_invalidos]
     pilha_resultado = FabricaDeRelatorios.construir_pilha(lista_bruta)
     
-    # Valida que o cenário foi rejeitado e a pilha está vazia
     assert len(pilha_resultado) == 0
     
 
@@ -318,7 +314,6 @@ def test_fabrica_deve_processar_lote_completo_mesmo_com_erro_valor(dto_cenario_p
     lista_bruta = [dto_valido_1, dto_com_erro, dto_valido_2]
     pilha_resultado = FabricaDeRelatorios.construir_pilha(lista_bruta)
     
-    # Deve retornar apenas os 2 válidos
     assert len(pilha_resultado) == 2
     assert pilha_resultado[0].id_cenario == 1
     assert pilha_resultado[1].id_cenario == 9
@@ -338,7 +333,6 @@ def test_fabrica_deve_capturar_valor_error_durante_construcao_de_anexos(dto_cena
         
         pilha_resultado = FabricaDeRelatorios.construir_pilha(lista_bruta)
         
-        # O relatório deve ser construído
         assert len(pilha_resultado) == 1
         relatorio = pilha_resultado[0]
         

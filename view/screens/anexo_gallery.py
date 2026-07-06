@@ -1,6 +1,6 @@
 import logging
 from typing import Dict, List
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QStackedWidget, QVBoxLayout, QWidget
 
 from view.components.midia.audio_player import AudioPlayer
@@ -84,9 +84,7 @@ class AnexoGallery(QFrame):
         caminho = item.get("caminho_arquivo", "")
         if tipo == "IMAGEM":
             viewer = ImageViewer(caminho)
-            viewer.ampliar_solicitado.connect(
-                lambda: self.ampliar_solicitado.emit(self.__indice_atual)
-            )
+            viewer.ampliar_solicitado.connect(self.__ampliar_atual)
             return viewer
         elif tipo == "VIDEO":
             return VideoPlayer(caminho)
@@ -95,12 +93,18 @@ class AnexoGallery(QFrame):
         logger.warning("Tipo de midia desconhecido: %s", tipo)
         return None
 
+    @Slot()
+    def __ampliar_atual(self) -> None:
+        self.ampliar_solicitado.emit(self.__indice_atual)
+
+    @Slot()
     def __anterior(self) -> None:
         if self.__indice_atual > 0:
             self.__indice_atual -= 1
             self.__stack.setCurrentIndex(self.__indice_atual)
             self.__atualizar_indicador()
 
+    @Slot()
     def __proximo(self) -> None:
         if self.__indice_atual < len(self.__players) - 1:
             self.__indice_atual += 1

@@ -1,0 +1,27 @@
+============================================================================
+ Inspetor IFF BJI — Icones de Desktop
+============================================================================
+ Data       : 2026-07-05
+ Este projecto utiliza icon packs de terceiros. Seguem os creditos e
+ termos de licenca de cada pack.
+
+----------------------------------------------------------------------------
+ 1) Gartoon Icons
+----------------------------------------------------------------------------
+ Designer  : Gartoon Team
+ URL       : https://www.iconarchive.com/artist/gartoon-team.html
+ GitHub    : https://github.com/daemonblade/gartoon-redux
+ Licenca   : GPL / LGPL
+ Categoria : Application
+ Descricao : Conjunto de icones no estilo cartoon com tematica desktop
+
+ Uso licenciado sob GPL (GNU General Public License) ou LGPL
+ (Lesser General Public License). Atribuicao exigida conforme
+ os termos das licencas.
+
+----------------------------------------------------------------------------
+ Notas
+----------------------------------------------------------------------------
+ Os icones contidos nesta pasta (desktop_Icons/) sao uma seleccao manual
+ do pack Gartoon para uso no ambiente de desktop ficticio do simulador.
+ Consulte o diretorio view/assets/icons/ para a coleccao completa.

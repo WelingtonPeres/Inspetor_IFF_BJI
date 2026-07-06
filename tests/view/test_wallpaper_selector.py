@@ -1,5 +1,8 @@
 """
 Suite completa de testes para o componente WallpaperSelector.
+
+Testa seleção de wallpapers apenas do diretório fixo (view/assets/images/wallpapers/).
+Sem botão de exploração externo - apenas thumbnails do diretório fixo.
 """
 
 from pathlib import Path
@@ -39,8 +42,9 @@ class TestWallpaperSelector:
     """
     Testes para o componente WallpaperSelector.
 
-    Verifica scan de imagens, thumbnails, preview, botoes,
+    Verifica scan de imagens do diretório fixo, thumbnails, preview, botoes,
     signals, persistencia em QSettings e comportamento ao redimensionar.
+    Sem acesso a explorador de arquivos externo - apenas seleção de diretório fixo.
     """
 
     def test_object_name(self, wallpaper_selector):
@@ -48,7 +52,7 @@ class TestWallpaperSelector:
         assert wallpaper_selector.objectName() == "wallpaper_selector"
 
     def test_imagens_carregadas(self, wallpaper_selector):
-        """O scan dinamico deve encontrar pelo menos 5 imagens (ha 6 no diretorio)."""
+        """O scan deve encontrar pelo menos 5 imagens (ha 6 no diretorio fixo)."""
         assert len(wallpaper_selector._WallpaperSelector__imagens) >= 5
 
     def test_imagens_sao_paths_validos(self, wallpaper_selector):
@@ -109,12 +113,6 @@ class TestWallpaperSelector:
         mock_qsettings.setValue.assert_called_once_with(
             "wallpaper/caminho_atual", caminho_esperado
         )
-
-    def test_explorar_botao_existe(self, wallpaper_selector):
-        """O botao 'Procurar...' deve existir com objectName 'btn_wallpaper_explorar'."""
-        btn = wallpaper_selector.findChild(QPushButton, "btn_wallpaper_explorar")
-        assert btn is not None
-        assert btn.text() == "Procurar..."
 
     def test_grid_refresh_ao_redimensionar(self, wallpaper_selector):
         """Redimensionar o dialogo nao deve quebrar a grid (mesmo numero de itens)."""

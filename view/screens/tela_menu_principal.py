@@ -97,7 +97,7 @@ class TelaMenuPrincipal(QWidget):
         L = self.__layout
         shortcuts_layout = QVBoxLayout()
         shortcuts_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        shortcuts_layout.setSpacing(L.scaled("tela", "spacing", "atalhos_entre"))
+        shortcuts_layout.setSpacing(L.scaled("desktop_shortcut", "spacing", "entre_atalhos"))
 
         for item in L.get("atalhos_lista"):
             shortcut = DesktopShortcut(
@@ -106,9 +106,7 @@ class TelaMenuPrincipal(QWidget):
             )
             action = item.get("action")
             if action == "iniciar":
-                shortcut.clicked.connect(
-                    lambda _, a=item["legenda"]: self.iniciar_solicitado.emit(a)
-                )
+                shortcut.clicked.connect(self.iniciar_solicitado.emit)
             elif action == "wallpaper":
                 shortcut.clicked.connect(self.__abrir_seletor_wallpaper)
             else:
@@ -118,7 +116,8 @@ class TelaMenuPrincipal(QWidget):
 
         parent_layout.addLayout(shortcuts_layout)
 
-    def __on_shortcut_info(self, legenda: str):
+    @Slot(str)
+    def __on_shortcut_info(self, legenda: str) -> None:
         logger.info("Shortcut info clicado: %s", legenda)
 
     def resizeEvent(self, event):

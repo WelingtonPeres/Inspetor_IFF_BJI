@@ -5,18 +5,29 @@
   },
   "fontes": {
     "ocorrencias": {
-      "atalho_legenda": { "size": 9 },
       "taskbar_texto": { "size": 9 },
-      "atalho_icone": { "size": 24 },
       "modal_titulo_janela": { "size": 9 }
     }
   },
-  "atalho": {
-    "largura": 80,
-    "altura": 90,
-    "icone": { "largura": 48, "altura": 48, "border_radius": 4 },
-    "legenda": { "word_wrap": true },
-    "spacing_icone_legenda": 4
+  "desktop_shortcut": {
+    "largura": 100,
+    "altura": 100,
+    "icone": {
+      "largura": 48,
+      "altura": 48,
+      "border_radius": 4,
+      "font_size": 24,
+      "font_family": "Open Sans"
+    },
+    "legenda": {
+      "word_wrap": true,
+      "font_size": 9,
+      "font_family": "Open Sans"
+    },
+    "spacing": {
+      "icone_legenda": 5,
+      "entre_atalhos": 16
+    }
   },
   "taskbar": {
     "altura": 40,
@@ -36,15 +47,14 @@
   "tela": {
     "margens": {
       "desktop": { "top": 48, "right": 48, "bottom": 8, "left": 48 }
-    },
-    "spacing": { "atalhos_entre": 16 }
+    }
   },
   "wallpaper": {
-    "arquivo": "view/assets/images/wallpapers/fundo_iff_2.jpg",
+    "arquivo": "view/assets/images/wallpapers/wallpaper_fundo.jpg",
     "scaled_contents": true
   },
   "logo": {
-    "arquivo": "view/assets/images/logo-iff.png",
+    "arquivo": "view/assets/icons/iff_Icons/logo-iff.png",
     "largura_maxima": 300
   },
   "sidebar": {
@@ -100,9 +110,9 @@
     }
   },
   "atalhos_lista": [
-    { "icone_arquivo": "iniciar.png", "legenda": "Iniciar\nExpediente", "action": "iniciar" },
-    { "icone_arquivo": "pasta.png", "legenda": "Relatorios\nPendentes", "action": "info" },
-    { "icone_arquivo": "help.png", "legenda": "Ajuda e\nSuporte", "action": "info" },
-    { "icone_arquivo": "config2.png", "legenda": "Personalizar\nPapel de Parede", "action": "wallpaper" }
+    { "icone_arquivo": "game.png", "legenda": "Iniciar", "action": "iniciar" },
+    { "icone_arquivo": "pasta_verde.png", "legenda": "Arquivos", "action": "info" },
+    { "icone_arquivo": "help.png", "legenda": "Help", "action": "info" },
+    { "icone_arquivo": "image.png", "legenda": "Wallpapers", "action": "wallpaper" }
   ]
 }

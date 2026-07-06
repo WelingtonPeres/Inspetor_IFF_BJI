@@ -124,7 +124,6 @@ class Relatorio:
             "anexos": lista_anexos_apresentacao,
         }
     
-    # Métodos relacionados aos Anexos 
     def obter_anexos(self) -> List[Anexo]:
         """ Devolve a lista de anexos do relatório """
         return self.__anexos
@@ -137,7 +136,6 @@ class Relatorio:
         """ Verifica se o relatório tem anexos atribuídos """
         return len(self.__anexos) > 0
     
-    # Métodos relacionados à resposta do jogador
     def anexar_resposta_jogador(self, resposta: FolhaDeResposta):
         """Recebe a parte do Relatório que o jogador preencheu e guarda internamente"""
         self.__folha_resposta = resposta

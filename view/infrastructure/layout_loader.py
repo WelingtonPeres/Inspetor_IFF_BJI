@@ -13,8 +13,6 @@ class LayoutLoader:
         return cls._instance
 
     def __init__(self):
-        if LayoutLoader._instance is not None:
-            raise RuntimeError("Use LayoutLoader.instance()")
         path = Path(__file__).resolve().parent.parent / "assets" / "layout.json"
         with open(path, encoding="utf-8") as f:
             self.__data: dict = json.load(f)
