@@ -28,6 +28,7 @@ from view.components.window_title_bar import WindowTitleBar
 from view.infrastructure.layout_loader import LayoutLoader
 from view.screens.anexo_gallery import AnexoGallery
 from view.screens.media_viewer import MediaViewer
+from view.screens.pagina_loading import PaginaLoading
 from view.screens.pagina_selecao_perfil import PaginaSelecaoPerfil
 
 logger = logging.getLogger(__name__)
@@ -75,6 +76,7 @@ class TelaDeExpediente(QFrame):
         self.__anexos_data: List[Dict] = []
         self.__sidebar: Sidebar
         self.__pagina_perfil: PaginaSelecaoPerfil
+        self.__pagina_loading: PaginaLoading
         self.__combo_perfil: QComboBox
         self.__loading_progress: QProgressBar
 
@@ -102,10 +104,11 @@ class TelaDeExpediente(QFrame):
 
         self.__pagina_perfil = PaginaSelecaoPerfil()
         self.__pagina_perfil.perfil_confirmado.connect(self.__on_perfil_confirmado)
+        self.__pagina_loading = PaginaLoading()
 
         self.__stack = QStackedWidget()
         self.__stack.addWidget(self.__pagina_perfil)
-        self.__stack.addWidget(self.__criar_pagina_loading())
+        self.__stack.addWidget(self.__pagina_loading)
         self.__stack.addWidget(self.__criar_pagina_inspecao())
         self.__stack.addWidget(self.__criar_pagina_diagnostico())
         self.__stack.addWidget(self.__criar_pagina_endgame())
