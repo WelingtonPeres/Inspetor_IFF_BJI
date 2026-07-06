@@ -20,9 +20,9 @@ class PaginaDiagnostico(QWidget):
         self.__label_feedback: QLabel
         self.__btn_continuar: QPushButton
 
-        self._build_ui()
+        self.__setup_ui()
 
-    def _build_ui(self) -> None:
+    def __setup_ui(self) -> None:
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 

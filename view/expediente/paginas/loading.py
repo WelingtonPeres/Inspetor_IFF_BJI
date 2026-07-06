@@ -18,10 +18,10 @@ class PaginaLoading(QWidget):
         self.__progress: QProgressBar
         self.__label_texto: QLabel
 
-        self._build_ui()
+        self.__setup_ui()
         logger.info("PaginaLoading exibida")
 
-    def _build_ui(self) -> None:
+    def __setup_ui(self) -> None:
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 

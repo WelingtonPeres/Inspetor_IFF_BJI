@@ -45,9 +45,9 @@ class PaginaInspecao(QWidget):
         self.__anexos_data: List[Dict] = []
         self.__video_player_fullscreen: VideoPlayer | None = None
 
-        self._build_ui()
+        self.__setup_ui()
 
-    def _build_ui(self) -> None:
+    def __setup_ui(self) -> None:
         splitter = QSplitter(Qt.Orientation.Horizontal)
 
         deck = QWidget(objectName="deck_observacao")
@@ -211,7 +211,8 @@ class PaginaInspecao(QWidget):
             self.__media_viewer.setGeometry(self.window().rect())
             self.__media_viewer.show()
             self.__media_viewer.raise_()
-        elif anexo.get("tipo_midia") == "VIDEO":
+            return
+        if anexo.get("tipo_midia") == "VIDEO":
             player = self.__gallery.obter_player_atual()
             if isinstance(player, VideoPlayer):
                 player.sair_fullscreen_solicitado.connect(self.__fechar_video_fullscreen, type=Qt.ConnectionType.UniqueConnection)

@@ -19,9 +19,9 @@ class PaginaEndgame(QWidget):
         self.__label_pontuacao: QLabel
         self.__btn_voltar: QPushButton
 
-        self._build_ui()
+        self.__setup_ui()
 
-    def _build_ui(self) -> None:
+    def __setup_ui(self) -> None:
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -46,16 +46,23 @@ class PaginaEndgame(QWidget):
         """Preenche os labels com o resultado do expediente."""
         logger.info("Endgame: %.1f pts, venceu=%s", pontuacao_global, venceu)
 
-        if venceu:
-            self.__label_titulo.setText("EXPEDIENTE CONCLUÍDO")
-            self.__label_titulo.setProperty("status", "vitoria")
-        else:
-            self.__label_titulo.setText("EXPEDIENTE INTERROMPIDO")
-            self.__label_titulo.setProperty("status", "derrota")
-        self.__label_titulo.style().unpolish(self.__label_titulo)
-        self.__label_titulo.style().polish(self.__label_titulo)
+        self.__preencher_titulo(venceu)
 
         self.__label_pontuacao.setText(
             f"Pontuação final: {pontuacao_global:.1f}\n"
             f"Dias concluídos: {dias_concluidos}"
         )
+
+    def __preencher_titulo(self, venceu: bool) -> None:
+        if venceu:
+            self.__label_titulo.setText("EXPEDIENTE CONCLUÍDO")
+            self.__label_titulo.setProperty("status", "vitoria")
+            self.__atualizar_estilo()
+            return
+        self.__label_titulo.setText("EXPEDIENTE INTERROMPIDO")
+        self.__label_titulo.setProperty("status", "derrota")
+        self.__atualizar_estilo()
+
+    def __atualizar_estilo(self) -> None:
+        self.__label_titulo.style().unpolish(self.__label_titulo)
+        self.__label_titulo.style().polish(self.__label_titulo)

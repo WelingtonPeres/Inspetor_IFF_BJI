@@ -21,9 +21,9 @@ class PaginaSelecaoPerfil(QWidget):
         self.__combo_perfil: QComboBox
         self.__btn_confirmar: QPushButton
 
-        self._build_ui()
+        self.__setup_ui()
 
-    def _build_ui(self) -> None:
+    def __setup_ui(self) -> None:
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -45,10 +45,10 @@ class PaginaSelecaoPerfil(QWidget):
         self.__btn_confirmar = QPushButton("Confirmar")
         self.__btn_confirmar.setObjectName("btn_confirmar_perfil")
         self.__btn_confirmar.setProperty("class", "btn_primario")
-        self.__btn_confirmar.clicked.connect(self._on_confirmar)
+        self.__btn_confirmar.clicked.connect(self.__on_confirmar)
         layout.addWidget(self.__btn_confirmar)
 
-    def _on_confirmar(self) -> None:
+    def __on_confirmar(self) -> None:
         perfil = self.__combo_perfil.currentText()
         if not perfil:
             logger.warning("[Aviso - PaginaSelecaoPerfil] Perfil vazio ao confirmar")
