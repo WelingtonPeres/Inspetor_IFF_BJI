@@ -28,6 +28,7 @@ from view.components.window_title_bar import WindowTitleBar
 from view.infrastructure.layout_loader import LayoutLoader
 from view.screens.anexo_gallery import AnexoGallery
 from view.screens.media_viewer import MediaViewer
+from view.screens.pagina_selecao_perfil import PaginaSelecaoPerfil
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +74,7 @@ class TelaDeExpediente(QFrame):
         self.__video_player_fullscreen: VideoPlayer | None = None
         self.__anexos_data: List[Dict] = []
         self.__sidebar: Sidebar
+        self.__pagina_perfil: PaginaSelecaoPerfil
         self.__combo_perfil: QComboBox
         self.__loading_progress: QProgressBar
 
@@ -98,8 +100,11 @@ class TelaDeExpediente(QFrame):
         self.__sidebar = Sidebar()
         body.addWidget(self.__sidebar)
 
+        self.__pagina_perfil = PaginaSelecaoPerfil()
+        self.__pagina_perfil.perfil_confirmado.connect(self.__on_perfil_confirmado)
+
         self.__stack = QStackedWidget()
-        self.__stack.addWidget(self.__criar_pagina_selecao_perfil())
+        self.__stack.addWidget(self.__pagina_perfil)
         self.__stack.addWidget(self.__criar_pagina_loading())
         self.__stack.addWidget(self.__criar_pagina_inspecao())
         self.__stack.addWidget(self.__criar_pagina_diagnostico())
@@ -149,10 +154,8 @@ class TelaDeExpediente(QFrame):
 
         return pagina
 
-    @Slot()
-    def __on_perfil_confirmado(self) -> None:
-        """Mostra loading internamente antes de emitir o signal para o controller."""
-        perfil = self.__combo_perfil.currentText()
+    @Slot(str)
+    def __on_perfil_confirmado(self, perfil: str) -> None:
         self.exibir_tela_carregamento()
         self.perfil_confirmado.emit(perfil)
 
