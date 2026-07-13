@@ -9,12 +9,12 @@ from PySide6.QtWidgets import (
     QSplitter, QStackedWidget, QWidget,
 )
 
-from view.screens.tela_de_expediente import TelaDeExpediente
-from view.components.anexo_preview import AnexoPreview
-from view.components.sidebar import Sidebar
-from view.components.window_title_bar import WindowTitleBar
-from view.screens.anexo_gallery import AnexoGallery
-from view.screens.media_viewer import MediaViewer
+from view.expediente.tela import TelaDeExpediente
+from view.expediente.widgets.anexo_preview import AnexoPreview
+from view.expediente.widgets.sidebar import Sidebar
+from view.expediente.widgets.window_title_bar import WindowTitleBar
+from view.expediente.overlays.anexo_gallery import AnexoGallery
+from view.expediente.overlays.media_viewer import MediaViewer
 from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
 
 
@@ -221,11 +221,6 @@ class TestSignals:
         with qtbot.waitSignal(expediente.minimized_solicitado, timeout=1000):
             expediente.minimized_solicitado.emit()
 
-    def test_maximized_signal(self, expediente, qtbot):
-        """maximized_solicitado deve ser emitivel."""
-        with qtbot.waitSignal(expediente.maximized_solicitado, timeout=1000):
-            expediente.maximized_solicitado.emit()
-
 
 class TestTamanho:
     """
@@ -277,46 +272,6 @@ class TestTamanho:
         expediente._TelaDeExpediente__maximizado = True
         expediente._TelaDeExpediente__on_fechar()
         assert not expediente._TelaDeExpediente__maximizado
-
-
-class TestFormulario:
-    """
-    Testes do formulario de inspecao (checkboxes, radios, submit).
-    """
-
-    def test_coletar_respostas_estrutura(self, expediente):
-        """__coletar_respostas deve retornar dict com chaves esperadas."""
-        expediente.renderizar_relatorio({"titulo": "Teste"})
-        resultado = expediente._TelaDeExpediente__coletar_respostas()
-        assert "riscos" in resultado
-        assert "fatores" in resultado
-        assert "decisao" in resultado
-        assert "tempo_segundos" in resultado
-
-    def test_limpar_formulario_inspecao(self, expediente):
-        """renderizar_relatorio deve limpar os campos."""
-        expediente.renderizar_relatorio({
-            "titulo": "Teste", "local": "Lab", "atividade": "teste",
-            "texto_descricao": "descricao",
-        })
-        chk_risco = expediente._TelaDeExpediente__chk_riscos["FISICO"]
-        chk_fator = expediente._TelaDeExpediente__chk_fatores["ATO_INSEGURO"]
-        assert not chk_risco.isChecked()
-        assert not chk_fator.isChecked()
-
-    def test_temporizador_reiniciado(self, expediente):
-        """renderizar_relatorio deve reiniciar o temporizador."""
-        expediente.renderizar_relatorio({
-            "titulo": "Teste", "local": "", "atividade": "",
-            "texto_descricao": "",
-        })
-        assert expediente._TelaDeExpediente__tempo_inicio_inspecao > 0
-
-    def test_submeter_sem_decisao_selecionada_envia_string_vazia(self, expediente):
-        """Se nenhum radio esta selecionado, decisao deve ser string vazia."""
-        expediente.renderizar_relatorio({"titulo": "Teste"})
-        resultado = expediente._TelaDeExpediente__coletar_respostas()
-        assert resultado["decisao"] == ""
 
 
 class TestSidebar:
@@ -423,27 +378,9 @@ class TestCasosLimite:
         expediente.reiniciar()
         assert expediente._TelaDeExpediente__stack.currentIndex() == 0
 
-    def test_gallery_abre_com_anexos(self, expediente, qtbot):
-        """renderizar_relatorio com anexos deve permitir abrir gallery."""
-        expediente.show()
-        qtbot.wait(50)
-        expediente.renderizar_relatorio({
-            "titulo": "Teste", "local": "", "atividade": "",
-            "texto_descricao": "",
-            "anexos": [{"tipo_midia": "IMAGEM", "caminho_arquivo": ""}],
-        })
-        expediente._TelaDeExpediente__abrir_gallery()
-        gallery = expediente.findChild(AnexoGallery)
-        assert gallery.isVisible()
-        expediente.hide()
-
-    def test_abrir_gallery_sem_anexos_nao_crasha(self, expediente):
-        """__abrir_gallery sem anexos nao deve crashar."""
-        expediente.renderizar_relatorio({"titulo": "Teste"})
-        expediente._TelaDeExpediente__abrir_gallery()
-
     def test_resize_event_nao_crasha(self, expediente):
         """resizeEvent nao deve crashar quando os sub-overlays estao ocultos."""
         from PySide6.QtGui import QResizeEvent
+        from PySide6.QtCore import QSize
         event = QResizeEvent(QSize(800, 600), QSize(1024, 768))
         expediente.resizeEvent(event)

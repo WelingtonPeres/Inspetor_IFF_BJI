@@ -6,7 +6,7 @@ import pytest
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel
 
-from view.components.desktop_shortcut import DesktopShortcut
+from view.desktop.desktop_shortcut import DesktopShortcut
 
 
 @pytest.fixture(autouse=True)

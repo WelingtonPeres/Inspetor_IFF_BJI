@@ -12,7 +12,7 @@ import pytest
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QFrame, QLabel, QPushButton
 
-from view.components.wallpaper_selector import WallpaperSelector
+from view.desktop.wallpaper_selector import WallpaperSelector
 
 
 @pytest.fixture(autouse=True)
@@ -23,7 +23,7 @@ def qt_app(qapp):
 @pytest.fixture
 def mock_qsettings():
     """Mock global do QSettings para evitar persistencia real."""
-    with patch("view.components.wallpaper_selector.QSettings") as mock:
+    with patch("view.desktop.wallpaper_selector.QSettings") as mock:
         instance = MagicMock()
         instance.value.return_value = ""
         mock.return_value = instance

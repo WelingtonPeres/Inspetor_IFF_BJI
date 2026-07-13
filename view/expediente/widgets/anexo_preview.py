@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QVBoxLayout
 
@@ -18,31 +18,43 @@ class AnexoPreview(QFrame):
         self.setProperty("class", "anexo_preview")
 
         L = LayoutLoader.instance()
-        self.setFixedHeight(L.scaled("anexo_preview", "altura"))
-
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(*L.scaled_margins("anexo_preview", "margens"))
+        self.__main_layout = QHBoxLayout(self)
+        self.__main_layout.setContentsMargins(*L.scaled_margins("anexo_preview", "margens"))
 
         self.__thumb_label = QLabel()
         self.__thumb_label.setObjectName("anexo_thumbnail")
-        thumb_w = L.scaled("anexo_preview", "thumbnail_largura")
-        thumb_h = L.scaled("anexo_preview", "thumbnail_altura")
-        self.__thumb_label.setFixedSize(thumb_w, thumb_h)
+        self.__thumb_label.setFixedSize(
+            L.scaled("anexo_preview", "thumbnail_largura"),
+            L.scaled("anexo_preview", "thumbnail_altura"),
+        )
         self.__thumb_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.__thumb_label)
+        self.__main_layout.addWidget(self.__thumb_label)
 
         info_layout = QVBoxLayout()
         self.__meta_label = QLabel("")
         self.__meta_label.setObjectName("anexo_metadados")
         info_layout.addWidget(self.__meta_label)
         info_layout.addStretch()
-        layout.addLayout(info_layout, stretch=1)
+        self.__main_layout.addLayout(info_layout, stretch=1)
 
         self.__btn_ver = QPushButton("Ver Anexos")
         self.__btn_ver.setObjectName("btn_ver_anexos")
         self.__btn_ver.setProperty("class", "btn_primario")
         self.__btn_ver.clicked.connect(self.ver_todos_anexos.emit)
-        layout.addWidget(self.__btn_ver)
+        self.__main_layout.addWidget(self.__btn_ver)
+
+        self.setFixedHeight(L.scaled("anexo_preview", "altura"))
+        L.escala_atualizada.connect(self.__reaplicar_dimensoes)
+
+    @Slot()
+    def __reaplicar_dimensoes(self) -> None:
+        L = LayoutLoader.instance()
+        self.setFixedHeight(L.scaled("anexo_preview", "altura"))
+        self.__thumb_label.setFixedSize(
+            L.scaled("anexo_preview", "thumbnail_largura"),
+            L.scaled("anexo_preview", "thumbnail_altura"),
+        )
+        self.__main_layout.setContentsMargins(*L.scaled_margins("anexo_preview", "margens"))
 
     def carregar_thumbnail(self, caminho: str) -> None:
         path = Path(caminho)

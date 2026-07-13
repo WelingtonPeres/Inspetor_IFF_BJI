@@ -3,9 +3,9 @@ from typing import Dict, List
 from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QStackedWidget, QVBoxLayout, QWidget
 
-from view.components.midia.audio_player import AudioPlayer
-from view.components.midia.image_viewer import ImageViewer
-from view.components.midia.video_player import VideoPlayer
+from view.widgets.midia.audio_player import AudioPlayer
+from view.widgets.midia.image_viewer import ImageViewer
+from view.widgets.midia.video_player import VideoPlayer
 logger = logging.getLogger(__name__)
 
 

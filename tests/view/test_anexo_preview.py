@@ -2,7 +2,7 @@ import pytest
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel, QPushButton
 
-from view.components.anexo_preview import AnexoPreview
+from view.expediente.widgets.anexo_preview import AnexoPreview
 
 
 @pytest.fixture(autouse=True)

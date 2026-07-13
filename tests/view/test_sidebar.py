@@ -2,7 +2,7 @@ import pytest
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QPushButton
 
-from view.components.sidebar import Sidebar
+from view.expediente.widgets.sidebar import Sidebar
 
 
 @pytest.fixture(autouse=True)

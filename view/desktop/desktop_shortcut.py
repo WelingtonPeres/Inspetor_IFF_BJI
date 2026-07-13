@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QColor, QFont, QMouseEvent, QPixmap
 from PySide6.QtWidgets import QFrame, QGraphicsDropShadowEffect, QVBoxLayout, QLabel
 
@@ -24,9 +24,12 @@ class DesktopShortcut(QFrame):
         self.setObjectName("desktop_shortcut")
         self.__legenda = legenda
         self.__layout = layout_loader or LayoutLoader.instance()
+        self.__icone_arquivo = icone_arquivo
         self.__icon_label: QLabel | None = None
         self.__text_label: QLabel | None = None
+        self.__main_layout: QVBoxLayout | None = None
         self.__setup_ui(icone_arquivo)
+        self.__layout.escala_atualizada.connect(self.__reaplicar_dimensoes)
 
     def __setup_ui(self, icone_arquivo: str):
         self.__configure_size()
@@ -48,11 +51,33 @@ class DesktopShortcut(QFrame):
             L.scaled("desktop_shortcut", "altura"),
         )
 
+    @Slot()
+    def __reaplicar_dimensoes(self) -> None:
+        L = self.__layout
+        self.setFixedSize(
+            L.scaled("desktop_shortcut", "largura"),
+            L.scaled("desktop_shortcut", "altura"),
+        )
+        if self.__main_layout is not None:
+            self.__main_layout.setSpacing(
+                L.scaled("desktop_shortcut", "spacing", "icone_legenda")
+            )
+        if self.__icon_label is not None:
+            icon_w = L.scaled("desktop_shortcut", "icone", "largura")
+            icon_h = L.scaled("desktop_shortcut", "icone", "altura")
+            self.__icon_label.setFixedSize(icon_w, icon_h)
+            self.__set_icon_content(self.__icon_label, self.__icone_arquivo, icon_w, icon_h)
+        if self.__text_label is not None:
+            font_family = L.get("desktop_shortcut", "legenda", "font_family")
+            font_size = L.scaled("desktop_shortcut", "legenda", "font_size")
+            self.__text_label.setFont(QFont(font_family, font_size, QFont.Weight.DemiBold))
+
     def __create_main_layout(self) -> QVBoxLayout:
         L = self.__layout
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.setSpacing(L.scaled("desktop_shortcut", "spacing", "icone_legenda"))
+        self.__main_layout = layout
         return layout
 
     def __build_icon_label(self, icone_arquivo: str) -> QLabel:
