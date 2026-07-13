@@ -1,10 +1,11 @@
 import logging
+from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import List, Optional
 
 from PySide6.QtCore import (
-    Qt, QPropertyAnimation, Property, Signal,
-    QEasingCurve, QRectF,
+    Qt, QPropertyAnimation, QAbstractAnimation, Property,
+    Signal, QEasingCurve, QRectF,
 )
 from PySide6.QtWidgets import (
     QWidget, QPushButton, QSizePolicy,
@@ -33,9 +34,9 @@ class CardRenderData:
     z_order: float
 
 
-CARD_WIDTH      = 180
-CARD_HEIGHT     = 340
-SLOT_SPACING    = 250
+CARD_WIDTH      = 260
+CARD_HEIGHT     = 460
+SLOT_SPACING    = 340
 ANIM_DURATION   = 350
 BUMP_DURATION   = 200
 
@@ -97,8 +98,9 @@ class CharacterCarousel(QWidget):
         self.__index = 0
         self.__scroll_offset = 0.0
         self.__animation: Optional[QPropertyAnimation] = None
+        self.__scale = 1.0
 
-        self.setMinimumHeight(CARD_HEIGHT + 60)
+        self.setMinimumHeight(int((CARD_HEIGHT + 60) * 0.5))
         self.setSizePolicy(
             QSizePolicy.Policy.Expanding,
             QSizePolicy.Policy.Expanding,
@@ -107,17 +109,47 @@ class CharacterCarousel(QWidget):
 
         self.__btn_prev = QPushButton("\u25C0", self)
         self.__btn_prev.setObjectName("carousel_btn_prev")
-        self.__btn_prev.setFixedSize(NAV_BTN_SIZE, NAV_BTN_SIZE)
+        self.__btn_prev.setFixedSize(
+            self.__nav_btn_size(), self.__nav_btn_size()
+        )
         self.__btn_prev.setToolTip("Anterior (\u2190)")
         self.__btn_prev.clicked.connect(self.slide_previous)
 
         self.__btn_next = QPushButton("\u25B6", self)
         self.__btn_next.setObjectName("carousel_btn_next")
-        self.__btn_next.setFixedSize(NAV_BTN_SIZE, NAV_BTN_SIZE)
+        self.__btn_next.setFixedSize(
+            self.__nav_btn_size(), self.__nav_btn_size()
+        )
         self.__btn_next.setToolTip("Pr\u00F3ximo (\u2192)")
         self.__btn_next.clicked.connect(self.slide_next)
 
         self.index_changed.emit(self.__index)
+
+    def __compute_scale(self) -> float:
+        """Factor de escala proporcional ao tamanho disponivel.
+
+        Os valores base (CARD_WIDTH, CARD_HEIGHT, etc.) foram desenhados
+        para uma area de referencia de 1000x600. Em areas maiores ou
+        menores, todos os elementos escalam uniformemente.
+        """
+        if self.width() == 0 or self.height() == 0:
+            return 1.0
+        return min(self.width() / 1000.0, self.height() / 600.0)
+
+    def __card_width(self) -> float:
+        return CARD_WIDTH * self.__scale
+
+    def __card_height(self) -> float:
+        return CARD_HEIGHT * self.__scale
+
+    def __slot_spacing(self) -> float:
+        return SLOT_SPACING * self.__scale
+
+    def __nav_btn_size(self) -> int:
+        return int(NAV_BTN_SIZE * self.__scale)
+
+    def __nav_btn_margin(self) -> int:
+        return int(NAV_BTN_MARGIN * self.__scale)
 
     def _get_offset(self) -> float:
         return self.__scroll_offset
@@ -140,25 +172,44 @@ class CharacterCarousel(QWidget):
 
     def current_character(self) -> CharacterData:
         """Retorna o CharacterData do perfil no centro do carousel."""
+        if not self.__characters:
+            raise ValueError(
+                "[Erro - CharacterCarousel] Nao ha personagens no carousel."
+            )
         return self.__characters[self.__index]
 
     def slide_previous(self) -> None:
         """Desliza para o perfil anterior ou executa bump no inicio."""
-        if self.__index <= 0:
-            self.__bump_animation(1.0)
-            return
-        self.__start_animation(SLOT_SPACING)
+        self.__tentar_deslizar(-1)
 
     def slide_next(self) -> None:
         """Desliza para o perfil seguinte ou executa bump no fim."""
-        if self.__index >= len(self.__characters) - 1:
-            self.__bump_animation(-1.0)
+        self.__tentar_deslizar(1)
+
+    def __tentar_deslizar(self, direcao: int) -> None:
+        """Tenta deslizar o carousel, executando bump se estiver no limite."""
+        if direcao not in (-1, 1):
             return
-        self.__start_animation(-SLOT_SPACING)
+        if (self.__animation
+                and self.__animation.state() == QAbstractAnimation.State.Running):
+            self.__animation.stop()
+            self.__ancorar_indice()
+        if direcao == -1:
+            if self.__index <= 0:
+                self.__bump_animation(1.0)
+                return
+            self.__start_animation(self.__slot_spacing())
+            return
+        if direcao == 1:
+            if self.__index >= len(self.__characters) - 1:
+                self.__bump_animation(-1.0)
+                return
+            self.__start_animation(-self.__slot_spacing())
 
     def __bump_animation(self, direction: float) -> None:
         """Animacao elastica de ricochete nos limites do carousel."""
-        if self.__animation and self.__animation.state():
+        if (self.__animation
+                and self.__animation.state() == QAbstractAnimation.State.Running):
             self.__animation.stop()
         self.__animation = QPropertyAnimation(self, b"scroll_offset")
         self.__animation.setDuration(BUMP_DURATION)
@@ -170,7 +221,8 @@ class CharacterCarousel(QWidget):
 
     def __start_animation(self, target: float) -> None:
         """Animacao de deslize suave entre perfis."""
-        if self.__animation and self.__animation.state():
+        if (self.__animation
+                and self.__animation.state() == QAbstractAnimation.State.Running):
             self.__animation.stop()
         self.__animation = QPropertyAnimation(self, b"scroll_offset")
         self.__animation.setDuration(ANIM_DURATION)
@@ -182,20 +234,36 @@ class CharacterCarousel(QWidget):
 
     def __ancorar_indice(self) -> None:
         """Fixa o indice na carta mais proxima apos deslize."""
+        if not self.__characters:
+            self.__scroll_offset = 0.0
+            self.update()
+            return
         if self.__scroll_offset < 0:
-            self.__index += 1
-        elif self.__scroll_offset > 0:
-            self.__index -= 1
+            self.__index = min(len(self.__characters) - 1, self.__index + 1)
+            self.__scroll_offset = 0.0
+            self.update()
+            self.index_changed.emit(self.__index)
+            return
+        if self.__scroll_offset > 0:
+            self.__index = max(0, self.__index - 1)
+            self.__scroll_offset = 0.0
+            self.update()
+            self.index_changed.emit(self.__index)
+            return
         self.__scroll_offset = 0.0
         self.update()
-        self.index_changed.emit(self.__index)
 
     def resizeEvent(self, event: QResizeEvent) -> None:
         """Reposiciona os botoes de navegacao ao redimensionar."""
-        cy = self.height() // 2 - NAV_BTN_SIZE // 2
-        self.__btn_prev.move(NAV_BTN_MARGIN, cy)
+        self.__scale = self.__compute_scale()
+        btn_size = self.__nav_btn_size()
+        btn_margin = self.__nav_btn_margin()
+        self.__btn_prev.setFixedSize(btn_size, btn_size)
+        self.__btn_next.setFixedSize(btn_size, btn_size)
+        cy = self.height() // 2 - btn_size // 2
+        self.__btn_prev.move(btn_margin, cy)
         self.__btn_next.move(
-            self.width() - NAV_BTN_SIZE - NAV_BTN_MARGIN, cy
+            self.width() - btn_size - btn_margin, cy
         )
         super().resizeEvent(event)
 
@@ -203,10 +271,11 @@ class CharacterCarousel(QWidget):
         """Navegacao por teclado: setas laterais."""
         if event.key() == Qt.Key.Key_Left:
             self.slide_previous()
-        elif event.key() == Qt.Key.Key_Right:
+            return
+        if event.key() == Qt.Key.Key_Right:
             self.slide_next()
-        else:
-            super().keyPressEvent(event)
+            return
+        super().keyPressEvent(event)
 
     def __draw_background(self, p: QPainter) -> None:
         """Fundo escuro com gradiente lateral."""
@@ -220,26 +289,45 @@ class CharacterCarousel(QWidget):
 
     def paintEvent(self, event: QPaintEvent) -> None:
         """Renderiza todas as cartas visiveis com escala e opacidade."""
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        self.__scale = self.__compute_scale()
+        with QPainter(self) as painter:
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+            painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform)
 
-        self.__draw_background(painter)
+            self.__draw_background(painter)
 
-        cx = self.width() / 2.0
-        cy = self.height() / 2.0
+            if not self.__characters:
+                return
 
+            cx = self.width() / 2.0
+            cy = self.height() / 2.0
+            cards = self.__build_cards_data(
+                cx, cy, self.__slot_spacing(),
+                self.__card_width(), self.__card_height(),
+            )
+            self.__render_cards(painter, cards)
+
+    def __build_cards_data(
+        self,
+        cx: float,
+        cy: float,
+        slot_spacing: float,
+        card_width: float,
+        card_height: float,
+    ) -> List[CardRenderData]:
+        """Constroi a lista de dados de renderizacao para cada carta visivel."""
         cards: List[CardRenderData] = []
         for i, ch in enumerate(self.__characters):
             offset_px = (
-                (i - self.__index) * SLOT_SPACING + self.__scroll_offset
+                (i - self.__index) * slot_spacing + self.__scroll_offset
             )
             dist = abs(offset_px)
 
-            if dist > SLOT_SPACING * 2.3:
+            if dist > slot_spacing * 2.3:
                 continue
 
-            t = min(1.0, dist / SLOT_SPACING)
-            scale = max(
+            t = min(1.0, dist / slot_spacing)
+            card_scale = max(
                 SCALE_MIN,
                 SCALE_AT_CENTRE - t * (SCALE_AT_CENTRE - SCALE_AT_SLOT),
             )
@@ -249,14 +337,14 @@ class CharacterCarousel(QWidget):
                 - t * (OPACITY_AT_CENTRE - OPACITY_AT_SLOT),
             )
 
-            card_w = CARD_WIDTH * scale
-            card_h = CARD_HEIGHT * scale
+            card_w = card_width * card_scale
+            card_h = card_height * card_scale
             x = cx + offset_px - card_w / 2.0
             y = cy - card_h / 2.0
 
             cards.append(CardRenderData(
                 rect=QRectF(x, y, card_w, card_h),
-                scale=scale,
+                scale=card_scale,
                 opacity=opacity,
                 character=ch,
                 is_centre=dist < 1.0,
@@ -266,33 +354,37 @@ class CharacterCarousel(QWidget):
             ))
 
         cards.sort(key=lambda c: c.z_order)
+        return cards
 
+    def __render_cards(
+        self,
+        p: QPainter,
+        cards: List[CardRenderData],
+    ) -> None:
+        """Itera pelas cartas ordenadas e delega o desenho."""
         for card in cards:
-            self.__draw_card(painter, card)
-
-        painter.end()
+            self.__draw_card(p, card)
 
     def __draw_card(self, p: QPainter, card: CardRenderData) -> None:
         """Orquestrador de desenho — chama cada etapa por ordem."""
         r = card.rect
-        radius = 12 * card.scale
+        radius = 12 * card.scale * self.__scale
 
-        self.__aplicar_perspectiva(p, card)
-        self.__desenhar_sombra(p, r, radius, card)
-        self.__desenhar_glow(p, r, radius, card)
-        self.__desenhar_fundo(p, r, radius, card)
-        self.__desenhar_vinheta(p, r, card)
-        self.__desenhar_retrato(p, r, card)
-        self.__desenhar_barra_nome(p, r, card)
-        self.__desenhar_badge(p, r, card)
-        p.restore()
+        with self.__aplicar_perspectiva(p, card):
+            self.__desenhar_sombra(p, r, radius, card)
+            self.__desenhar_glow(p, r, radius, card)
+            self.__desenhar_fundo(p, r, radius, card)
+            self.__desenhar_vinheta(p, r, card)
+            self.__desenhar_retrato(p, r, card)
+            self.__desenhar_barra_nome(p, r, card)
+            self.__desenhar_badge(p, r, card)
         self.__desenhar_borda(p, r, radius, card)
 
-    def __aplicar_perspectiva(self, p: QPainter, card: CardRenderData) -> None:
-        """Aplica transformacao 3D: translacao, escala e rotacao por profundidade."""
+    @contextmanager
+    def __aplicar_perspectiva(self, p: QPainter, card: CardRenderData):
+        """Contexto de transformacao 3D: garante save/restore simetricos."""
         r = card.rect
-        tilt = card.depth * 8.0
-        voff = card.depth * 30.0 * card.scale
+        voff = card.depth * 30.0 * card.scale * self.__scale
         squish = 1.0 - card.depth * 0.15
         cx = r.center().x()
         cy = r.center().y()
@@ -300,17 +392,20 @@ class CharacterCarousel(QWidget):
         p.save()
         p.translate(cx, cy + voff)
         p.scale(squish, 1.0)
-        if not card.is_centre:
-            rot = tilt if card.offset_px > 0 else -tilt
-            p.rotate(rot)
         p.translate(-cx, -cy - voff)
+        try:
+            yield
+        finally:
+            p.restore()
 
     def __desenhar_sombra(self, p: QPainter, r: QRectF, radius: float,
                           card: CardRenderData) -> None:
         """Sombra distante para cartas com profundidade > 0.1."""
         if card.depth <= 0.1:
             return
-        shadow = r.translated(15 * card.scale, 20 * card.scale)
+        shadow = r.translated(
+            15 * card.scale * self.__scale, 20 * card.scale * self.__scale
+        )
         alpha = int(35 * card.opacity * card.depth)
         p.setBrush(QColor(0, 0, 0, alpha))
         p.setPen(Qt.PenStyle.NoPen)
@@ -319,14 +414,16 @@ class CharacterCarousel(QWidget):
     def __desenhar_glow(self, p: QPainter, r: QRectF, radius: float,
                         card: CardRenderData) -> None:
         """Glow verde na carta central ou sombra lateral nas restantes."""
-        soff = 10 if card.is_centre else (6 + int(8 * card.depth))
-        sr = r.translated(soff, soff)
         if card.is_centre:
-            color = ACCENT_GLOW
-        else:
-            alpha = int(40 * card.opacity * (1.0 - card.depth * 0.5))
-            color = QColor(0, 0, 0, alpha)
-        p.setBrush(QBrush(color))
+            sr = r.translated(10, 10)
+            p.setBrush(QBrush(ACCENT_GLOW))
+            p.setPen(Qt.PenStyle.NoPen)
+            p.drawRoundedRect(sr, radius, radius)
+            return
+        soff = 6 + int(8 * card.depth)
+        sr = r.translated(soff, soff)
+        alpha = int(40 * card.opacity * (1.0 - card.depth * 0.5))
+        p.setBrush(QBrush(QColor(0, 0, 0, alpha)))
         p.setPen(Qt.PenStyle.NoPen)
         p.drawRoundedRect(sr, radius, radius)
 
@@ -338,15 +435,18 @@ class CharacterCarousel(QWidget):
         p.setClipPath(clip)
 
         d = card.depth
+        alpha = int(255 * card.opacity * (1.0 - d * 0.2))
         if d > 0:
             bg = QColor(
                 int(CARD_BG.red() * (1.0 - d * 0.3)),
                 int(CARD_BG.green() * (1.0 - d * 0.3)),
                 int(CARD_BG.blue() * (1.0 - d * 0.1)),
             )
-        else:
-            bg = QColor(CARD_BG)
-        bg.setAlpha(int(255 * card.opacity * (1.0 - d * 0.2)))
+            bg.setAlpha(alpha)
+            p.fillRect(r, bg)
+            return
+        bg = QColor(CARD_BG)
+        bg.setAlpha(alpha)
         p.fillRect(r, bg)
 
     def __desenhar_vinheta(self, p: QPainter, r: QRectF,
@@ -385,8 +485,11 @@ class CharacterCarousel(QWidget):
         grad.setColorAt(1.0, QColor(0, 0, 0, alpha))
         p.fillRect(bar, QBrush(grad))
 
-        name_rect = bar.adjusted(8, 4, -8, -2)
-        font = QFont("Segoe UI", int(14 * card.scale))
+        name_rect = bar.adjusted(
+            int(8 * card.scale), int(4 * card.scale),
+            int(-8 * card.scale), int(-2 * card.scale)
+        )
+        font = QFont("Segoe UI", int(14 * card.scale * self.__scale))
         font.setBold(True)
         p.setFont(font)
         name_alpha = int(255 * card.opacity * (1.0 - card.depth * 0.4))
@@ -398,47 +501,52 @@ class CharacterCarousel(QWidget):
     def __desenhar_badge(self, p: QPainter, r: QRectF,
                          card: CardRenderData) -> None:
         """Tag com #char_id no canto inferior direito."""
-        font = QFont("Segoe UI", int(7 * card.scale), QFont.Weight.Light)
+        font = QFont(
+            "Segoe UI", int(7 * card.scale * self.__scale), QFont.Weight.Light
+        )
         p.setFont(font)
         badge_alpha = int(160 * card.opacity * (1.0 - card.depth * 0.5))
         badge_text = f"#{card.character.char_id}"
         fm = QFontMetrics(font, self)
-        bw = fm.horizontalAdvance(badge_text) + 8
+        bw = fm.horizontalAdvance(badge_text) + int(8 * self.__scale)
         bh = fm.height()
-        bx = r.right() - bw - 6
-        by = r.bottom() - bh - 4
+        bx = r.right() - bw - int(6 * self.__scale)
+        by = r.bottom() - bh - int(4 * self.__scale)
 
         p.setPen(Qt.PenStyle.NoPen)
         bg_alpha = int(80 * card.opacity * (1.0 - card.depth * 0.3))
         p.setBrush(QColor(0, 0, 0, bg_alpha))
-        p.drawRoundedRect(QRectF(bx, by, bw, bh), 3, 3)
+        p.drawRoundedRect(
+            QRectF(bx, by, bw, bh),
+            max(1.0, 3 * self.__scale), max(1.0, 3 * self.__scale)
+        )
 
         p.setPen(QColor(130, 130, 170, badge_alpha))
         p.drawText(QRectF(bx, by, bw, bh),
                    Qt.AlignmentFlag.AlignCenter, badge_text)
 
     def __desenhar_borda(self, p: QPainter, r: QRectF, radius: float,
-                         card: CardRenderData) -> None:
+                          card: CardRenderData) -> None:
         """Borda accent na carta central ou edge nas restantes."""
-        self.__aplicar_perspectiva(p, card)
+        with self.__aplicar_perspectiva(p, card):
+            if not card.is_centre:
+                alpha = int(70 * card.opacity * (1.0 - card.depth * 0.4))
+                p.setPen(QPen(QColor(60, 60, 90, alpha), 1.0))
+                p.setBrush(Qt.BrushStyle.NoBrush)
+                p.drawRoundedRect(r, radius, radius)
+                return
 
-        if card.is_centre:
-            border = QPen(ACCENT_COLOR, max(2.0, 2.5 * card.scale))
+            border = QPen(ACCENT_COLOR, max(2.0, 2.5 * card.scale * self.__scale))
             p.setPen(border)
             p.setBrush(Qt.BrushStyle.NoBrush)
             p.drawRoundedRect(r, radius, radius)
 
-            inner = r.adjusted(3 * card.scale, 3 * card.scale,
-                               -3 * card.scale, -3 * card.scale)
-            glow = QPen(QColor(47, 158, 65, int(50 * card.opacity)),
-                        1.5 * card.scale)
+            offset = 3 * card.scale * self.__scale
+            inner = r.adjusted(offset, offset, -offset, -offset)
+            glow = QPen(
+                QColor(47, 158, 65, int(50 * card.opacity)),
+                1.5 * card.scale * self.__scale
+            )
             p.setPen(glow)
-            inner_rad = max(2.0, radius - 3 * card.scale)
+            inner_rad = max(2.0, radius - offset)
             p.drawRoundedRect(inner, inner_rad, inner_rad)
-        else:
-            alpha = int(70 * card.opacity * (1.0 - card.depth * 0.4))
-            p.setPen(QPen(QColor(60, 60, 90, alpha), 1.0))
-            p.setBrush(Qt.BrushStyle.NoBrush)
-            p.drawRoundedRect(r, radius, radius)
-
-        p.restore()

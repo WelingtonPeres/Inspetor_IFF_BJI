@@ -1,6 +1,6 @@
 import logging
 import time
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtWidgets import (
     QButtonGroup,
@@ -40,16 +40,33 @@ class PaginaInspecao(QWidget):
         self.__radio_decisao: QButtonGroup
         self.__btn_submeter: QPushButton
         self.__tempo_inicio_inspecao: float = 0.0
-        self.__gallery: AnexoGallery | None = None
-        self.__media_viewer: MediaViewer | None = None
-        self.__anexos_data: List[Dict] = []
-        self.__video_player_fullscreen: VideoPlayer | None = None
+        self.__gallery: Optional[AnexoGallery] = None
+        self.__media_viewer: Optional[MediaViewer] = None
+        self.__anexos_data: List[Dict[str, Any]] = []
+        self.__video_player_fullscreen: Optional[VideoPlayer] = None
 
         self.__setup_ui()
 
     def __setup_ui(self) -> None:
+        splitter = self.__build_splitter()
+
+        layout = QVBoxLayout(self)
+        layout.addWidget(splitter)
+
+    def __build_splitter(self) -> QSplitter:
         splitter = QSplitter(Qt.Orientation.Horizontal)
 
+        deck = self.__build_deck()
+        prancheta = self.__build_prancheta()
+
+        splitter.addWidget(deck)
+        splitter.addWidget(prancheta)
+        splitter.setStretchFactor(0, 60)
+        splitter.setStretchFactor(1, 40)
+        splitter.setHandleWidth(2)
+        return splitter
+
+    def __build_deck(self) -> QWidget:
         deck = QWidget(objectName="deck_observacao")
         deck_layout = QVBoxLayout(deck)
 
@@ -63,48 +80,18 @@ class PaginaInspecao(QWidget):
         deck_layout.addWidget(self.__anexo_preview)
 
         deck_layout.addStretch()
+        return deck
 
+    def __build_prancheta(self) -> QWidget:
         prancheta = QWidget(objectName="prancheta")
         prancheta_layout = QVBoxLayout(prancheta)
 
-        grupo_riscos = QGroupBox("Riscos Identificados")
-        grupo_riscos.setObjectName("group_riscos")
-        grupo_riscos.setProperty("class", "group_box")
-        layout_riscos = QVBoxLayout(grupo_riscos)
         self.__chk_riscos = {}
-        for risco in ["FISICO", "QUIMICO", "BIOLOGICO", "ERGONOMICO", "ACIDENTE"]:
-            chk = QCheckBox(risco)
-            chk.setObjectName(f"chk_risco_{risco}")
-            chk.setProperty("class", "chk_risco")
-            self.__chk_riscos[risco] = chk
-            layout_riscos.addWidget(chk)
-        prancheta_layout.addWidget(grupo_riscos)
-
-        grupo_fatores = QGroupBox("Fatores de Insegurança")
-        grupo_fatores.setObjectName("group_fatores")
-        grupo_fatores.setProperty("class", "group_box")
-        layout_fatores = QVBoxLayout(grupo_fatores)
         self.__chk_fatores = {}
-        for fator in ["ATO_INSEGURO", "CONDICAO_INSEGURA"]:
-            chk = QCheckBox(fator)
-            chk.setObjectName(f"chk_fator_{fator}")
-            chk.setProperty("class", "chk_fator")
-            self.__chk_fatores[fator] = chk
-            layout_fatores.addWidget(chk)
-        prancheta_layout.addWidget(grupo_fatores)
 
-        grupo_decisao = QGroupBox("Decisão Administrativa")
-        grupo_decisao.setObjectName("group_decisao")
-        grupo_decisao.setProperty("class", "group_box")
-        layout_decisao = QHBoxLayout(grupo_decisao)
-        self.__radio_decisao = QButtonGroup(grupo_decisao)
-        for decisao in ["ADVERTIR", "INTERDITAR", "IGNORAR"]:
-            radio = QRadioButton(decisao)
-            radio.setObjectName(f"radio_decisao_{decisao}")
-            radio.setProperty("class", "radio_decisao")
-            self.__radio_decisao.addButton(radio)
-            layout_decisao.addWidget(radio)
-        prancheta_layout.addWidget(grupo_decisao)
+        prancheta_layout.addWidget(self.__build_grupo_riscos())
+        prancheta_layout.addWidget(self.__build_grupo_fatores())
+        prancheta_layout.addWidget(self.__build_grupo_decisao())
 
         self.__btn_submeter = QPushButton("Submeter Respostas")
         self.__btn_submeter.setObjectName("btn_submeter")
@@ -113,20 +100,51 @@ class PaginaInspecao(QWidget):
         prancheta_layout.addWidget(self.__btn_submeter)
 
         prancheta_layout.addStretch()
+        return prancheta
 
-        splitter.addWidget(deck)
-        splitter.addWidget(prancheta)
-        splitter.setStretchFactor(0, 60)
-        splitter.setStretchFactor(1, 40)
-        splitter.setHandleWidth(2)
+    def __build_grupo_riscos(self) -> QGroupBox:
+        grupo = QGroupBox("Riscos Identificados")
+        grupo.setObjectName("group_riscos")
+        grupo.setProperty("class", "group_box")
+        layout = QVBoxLayout(grupo)
+        for risco in ["FISICO", "QUIMICO", "BIOLOGICO", "ERGONOMICO", "ACIDENTE"]:
+            chk = QCheckBox(risco)
+            chk.setObjectName(f"chk_risco_{risco}")
+            chk.setProperty("class", "chk_risco")
+            self.__chk_riscos[risco] = chk
+            layout.addWidget(chk)
+        return grupo
 
-        layout = QVBoxLayout(self)
-        layout.addWidget(splitter)
+    def __build_grupo_fatores(self) -> QGroupBox:
+        grupo = QGroupBox("Fatores de Insegurança")
+        grupo.setObjectName("group_fatores")
+        grupo.setProperty("class", "group_box")
+        layout = QVBoxLayout(grupo)
+        for fator in ["ATO_INSEGURO", "CONDICAO_INSEGURA"]:
+            chk = QCheckBox(fator)
+            chk.setObjectName(f"chk_fator_{fator}")
+            chk.setProperty("class", "chk_fator")
+            self.__chk_fatores[fator] = chk
+            layout.addWidget(chk)
+        return grupo
+
+    def __build_grupo_decisao(self) -> QGroupBox:
+        grupo = QGroupBox("Decisão Administrativa")
+        grupo.setObjectName("group_decisao")
+        grupo.setProperty("class", "group_box")
+        layout = QHBoxLayout(grupo)
+        self.__radio_decisao = QButtonGroup(grupo)
+        for decisao in ["ADVERTIR", "INTERDITAR", "IGNORAR"]:
+            radio = QRadioButton(decisao)
+            radio.setObjectName(f"radio_decisao_{decisao}")
+            radio.setProperty("class", "radio_decisao")
+            self.__radio_decisao.addButton(radio)
+            layout.addWidget(radio)
+        return grupo
 
     def renderizar_relatorio(self, dados_relatorio: Dict[str, Any]) -> None:
         """Preenche o label de titulo e reinicia o temporizador."""
         logger.info("Renderizando relatorio: %s", dados_relatorio.get("titulo", ""))
-        titulo = dados_relatorio.get("titulo", "Relatório")
         self.__label_titulo_relatorio.setText(
             f"Título: {dados_relatorio.get('titulo', '')}\n"
             f"Local: {dados_relatorio.get('local', '')}\n"
@@ -193,7 +211,7 @@ class PaginaInspecao(QWidget):
         if not self.__anexos_data:
             return
         self.__gallery.carregar_anexos(self.__anexos_data)
-        self.__gallery.setGeometry(self.window().rect())
+        self.__ancorar_overlay(self.__gallery)
         self.__gallery.show()
         self.__gallery.raise_()
 
@@ -208,7 +226,7 @@ class PaginaInspecao(QWidget):
         anexo = self.__anexos_data[indice]
         if anexo.get("tipo_midia") == "IMAGEM":
             self.__media_viewer.exibir_imagem(anexo)
-            self.__media_viewer.setGeometry(self.window().rect())
+            self.__ancorar_overlay(self.__media_viewer)
             self.__media_viewer.show()
             self.__media_viewer.raise_()
             return
@@ -216,7 +234,7 @@ class PaginaInspecao(QWidget):
             player = self.__gallery.obter_player_atual()
             if isinstance(player, VideoPlayer):
                 player.sair_fullscreen_solicitado.connect(self.__fechar_video_fullscreen, type=Qt.ConnectionType.UniqueConnection)
-                player.entrar_fullscreen(self.window())
+                player.entrar_fullscreen(self.__obter_anchor_ou_window())
                 self.__video_player_fullscreen = player
                 self.__gallery.hide()
 
@@ -228,5 +246,40 @@ class PaginaInspecao(QWidget):
     def __fechar_video_fullscreen(self) -> None:
         self.__video_player_fullscreen = None
         if self.__gallery:
-            self.__gallery.setGeometry(self.window().rect())
+            self.__ancorar_overlay(self.__gallery)
             self.__gallery.show()
+
+    def __obter_anchor_ou_window(self) -> QWidget:
+        """Retorna o _OverlayArea se existir; senao a top-level window.
+
+        O fallback mantem o comportamento historico em cenarios standalone
+        (testes), onde a galeria fica como janela top-level.
+        """
+        anchor = self.__obter_anchor_widget()
+        if anchor is not None:
+            return anchor
+        return self.window()
+
+    def __obter_anchor_widget(self) -> Optional[QWidget]:
+        """Sobe na arvore de pais ate achar o _OverlayArea; None se nao houver."""
+        parent: Optional[QWidget] = self.parentWidget()
+        while parent is not None:
+            if parent.objectName() == "overlay_area":
+                return parent
+            parent = parent.parentWidget()
+        return None
+
+    def __ancorar_overlay(self, overlay: QWidget) -> None:
+        """Aplica o rect util ao overlay, reparentando so quando ha _OverlayArea.
+
+        Com _OverlayArea real: reparenta para la e usa o rect acima da taskbar.
+        Sem ele (standalone/testes): so aplica o rect da window, sem reparentar,
+        preservando a galeria como top-level visivel.
+        """
+        anchor = self.__obter_anchor_widget()
+        if anchor is None:
+            overlay.setGeometry(self.window().rect())
+            return
+        if overlay.parent() is not anchor:
+            overlay.setParent(anchor)
+        overlay.setGeometry(anchor.rect())

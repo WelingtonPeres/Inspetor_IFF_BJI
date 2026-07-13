@@ -1,5 +1,6 @@
 import logging
-from PySide6.QtCore import Qt, QEvent, QPoint, Signal
+from typing import Optional, Tuple
+from PySide6.QtCore import Qt, QEvent, QPoint, Signal, Slot
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QWidget
 
@@ -13,13 +14,24 @@ class WindowTitleBar(QFrame):
     minimized_solicitado = Signal()
     maximized_solicitado = Signal()
 
-    def __init__(self, titulo: str = "Expediente", altura: int = 32, parent=None):
+    def __init__(
+        self,
+        titulo: str = "Expediente",
+        altura: int = 32,
+        altura_keys: Optional[Tuple[str, ...]] = None,
+        parent=None,
+    ):
         super().__init__(parent)
         self.setObjectName("window_title_bar")
         self.setProperty("class", "window_title_bar")
         self.__dragging = False
         self.__drag_offset = QPoint()
+        self.__altura_keys = altura_keys
+        self.__main_layout: Optional[QHBoxLayout] = None
+        self.__title_label: Optional[QLabel] = None
         self.__setup_ui(titulo, altura)
+        # Recalcula altura/margens/fonte quando o fator de escala muda.
+        LayoutLoader.instance().escala_atualizada.connect(self.__on_escala_atualizada)
 
     def __setup_ui(self, titulo: str, altura: int):
         self.setFixedHeight(altura)
@@ -27,11 +39,13 @@ class WindowTitleBar(QFrame):
         layout = QHBoxLayout(self)
         L = LayoutLoader.instance()
         layout.setContentsMargins(*L.scaled_margins("tela_de_expediente", "title_bar", "margens"))
+        self.__main_layout = layout
 
         font = L.scaled("fontes", "ocorrencias", "modal_titulo_janela", "size")
         title_label = QLabel(titulo)
         title_label.setObjectName("window_title_text")
         title_label.setFont(QFont("Courier New", font))
+        self.__title_label = title_label
         layout.addWidget(title_label)
 
         layout.addStretch()
@@ -61,6 +75,26 @@ class WindowTitleBar(QFrame):
         for child in self.findChildren(QWidget):
             if child is not self.__close_btn and child is not self.__btn_minimize and child is not self.__btn_maximize:
                 child.installEventFilter(self)
+
+    @Slot()
+    def __on_escala_atualizada(self) -> None:
+        if self.__altura_keys is not None:
+            L = LayoutLoader.instance()
+            self.reaplicar_dimensoes(L.scaled(*self.__altura_keys))
+        else:
+            self.reaplicar_dimensoes(self.height())
+
+    def reaplicar_dimensoes(self, altura: int) -> None:
+        """Re-aplica altura, margens e fonte do titulo (chamado em resize)."""
+        self.setFixedHeight(altura)
+        L = LayoutLoader.instance()
+        if self.__main_layout is not None:
+            self.__main_layout.setContentsMargins(
+                *L.scaled_margins("tela_de_expediente", "title_bar", "margens")
+            )
+        if self.__title_label is not None:
+            font = L.scaled("fontes", "ocorrencias", "modal_titulo_janela", "size")
+            self.__title_label.setFont(QFont("Courier New", font))
 
     def definir_titulo(self, titulo: str) -> None:
         label = self.findChild(QLabel, "window_title_text")

@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from PySide6.QtGui import QPixmap
 
@@ -19,7 +19,7 @@ def _load_pixmap(filename: str) -> Optional[QPixmap]:
     return None
 
 
-IFF_PROFILES: tuple[tuple[str, str, str], ...] = (
+IFF_PROFILES: Tuple[Tuple[str, str, str], ...] = (
     ("DEFAULT",         "Padr\u00E3o",            "DEFAULT.png"),
     ("T_QUIMICA",       "T. Qu\u00EDmica",        "T_QUIMICA.png"),
     ("T_INFORMATICA",   "T. Inform\u00E1tica",    "T_INFORMATICA.png"),

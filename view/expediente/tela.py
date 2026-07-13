@@ -1,6 +1,6 @@
 import logging
 from typing import Any, Dict
-from PySide6.QtCore import Qt, Signal, Slot
+from PySide6.QtCore import Qt, QRect, Signal, Slot
 from PySide6.QtWidgets import (
     QFrame,
     QHBoxLayout,
@@ -44,7 +44,6 @@ class TelaDeExpediente(QFrame):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
         self.__maximizado: bool = False
-        self.__inicializado: bool = False
         self.__tamanho_normal: Any = None
 
         self.__anexo_gallery: AnexoGallery
@@ -61,52 +60,78 @@ class TelaDeExpediente(QFrame):
         self.__setup_ui()
 
     def __setup_ui(self):
-        L = LayoutLoader.instance()
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        altura_bar = L.scaled("tela_de_expediente", "title_bar", "altura")
-        self.__title_bar = WindowTitleBar(titulo="Expediente", altura=altura_bar, parent=self)
-        self.__title_bar.close_requested.connect(self.__on_fechar)
-        self.__title_bar.minimized_solicitado.connect(self.__on_minimizar)
-        self.__title_bar.maximized_solicitado.connect(self.__on_maximizar_restaurar)
+        self.__title_bar = self.__build_title_bar()
         layout.addWidget(self.__title_bar)
 
+        body = self.__build_body()
+        layout.addLayout(body, stretch=1)
+
+        self.__build_overlays()
+
+    def __build_title_bar(self) -> WindowTitleBar:
+        L = LayoutLoader.instance()
+        altura_bar = L.scaled("tela_de_expediente", "title_bar", "altura")
+        title_bar = WindowTitleBar(
+            titulo="Expediente",
+            altura=altura_bar,
+            altura_keys=("tela_de_expediente", "title_bar", "altura"),
+            parent=self,
+        )
+        title_bar.close_requested.connect(self.__on_fechar)
+        title_bar.minimized_solicitado.connect(self.__on_minimizar)
+        title_bar.maximized_solicitado.connect(self.__on_maximizar_restaurar)
+        # Reage a mudancas de escala global (resize da janela pai).
+        L.escala_atualizada.connect(self.__reaplicar_dimensoes)
+        return title_bar
+
+    def __build_body(self) -> QHBoxLayout:
         body = QHBoxLayout()
         body.setContentsMargins(0, 0, 0, 0)
         body.setSpacing(0)
 
-        self.__sidebar = Sidebar()
+        self.__sidebar = self.__build_sidebar()
         body.addWidget(self.__sidebar)
 
+        self.__stack = self.__build_pages()
+        self.__stack.currentChanged.connect(self.__on_page_changed)
+        body.addWidget(self.__stack, stretch=1)
+
+        return body
+
+    def __build_sidebar(self) -> Sidebar:
+        sidebar = Sidebar()
+        sidebar.setVisible(False)
+        return sidebar
+
+    def __build_pages(self) -> QStackedWidget:
         self.__pagina_perfil = PaginaSelecaoPerfil()
         self.__pagina_perfil.perfil_confirmado.connect(self.__on_perfil_confirmado)
-        
+
         self.__pagina_loading = PaginaLoading()
+
         self.__pagina_diagnostico = PaginaDiagnostico()
-        
         self.__pagina_diagnostico.continuar_solicitado.connect(self.continuar_solicitado.emit)
+
         self.__pagina_endgame = PaginaEndgame()
-        
         self.__pagina_endgame.voltar_menu_solicitado.connect(self.voltar_menu_solicitado.emit)
+
         self.__pagina_inspecao = PaginaInspecao()
         self.__pagina_inspecao.submeter_respostas.connect(self.submeter_respostas.emit)
 
-        self.__stack = QStackedWidget()
-        self.__stack.addWidget(self.__pagina_perfil)
-        self.__stack.addWidget(self.__pagina_loading)
-        self.__stack.addWidget(self.__pagina_inspecao)
-        self.__stack.addWidget(self.__pagina_diagnostico)
-        self.__stack.addWidget(self.__pagina_endgame)
-        self.__stack.setCurrentIndex(self.IDX_SELECAO_PERFIL)
-        body.addWidget(self.__stack, stretch=1)
+        stack = QStackedWidget()
+        stack.addWidget(self.__pagina_perfil)
+        stack.addWidget(self.__pagina_loading)
+        stack.addWidget(self.__pagina_inspecao)
+        stack.addWidget(self.__pagina_diagnostico)
+        stack.addWidget(self.__pagina_endgame)
+        stack.setCurrentIndex(self.IDX_SELECAO_PERFIL)
+        return stack
 
-        layout.addLayout(body, stretch=1)
-
-        self.__stack.currentChanged.connect(self.__on_page_changed)
-        self.__sidebar.setVisible(False)
-
+    def __build_overlays(self) -> None:
         self.__anexo_gallery = AnexoGallery(self)
         self.__anexo_gallery.hide()
 
@@ -133,10 +158,12 @@ class TelaDeExpediente(QFrame):
     def __on_maximizar_restaurar(self) -> None:
         if self.__maximizado:
             self.__restaurar_tamanho()
-        else:
-            self.__maximizar()
-        self.__maximizado = not self.__maximizado
-        self.__title_bar.set_maximizado(self.__maximizado)
+            self.__maximizado = False
+            self.__title_bar.set_maximizado(False)
+            return
+        self.__maximizar()
+        self.__maximizado = True
+        self.__title_bar.set_maximizado(True)
 
     def __maximizar(self) -> None:
         parent = self.parentWidget()
@@ -153,6 +180,12 @@ class TelaDeExpediente(QFrame):
         self.hide()
         self.__maximizado = False
         self.__title_bar.set_maximizado(False)
+
+    @Slot()
+    def __reaplicar_dimensoes(self) -> None:
+        """Re-aplica dims dependentes de escala (title bar) apos resize."""
+        L = LayoutLoader.instance()
+        self.__title_bar.reaplicar_dimensoes(L.scaled("tela_de_expediente", "title_bar", "altura"))
 
     def exibir_selecao_perfil(self) -> None:
         self.__title_bar.definir_titulo("Seleção de Perfil")
@@ -182,15 +215,30 @@ class TelaDeExpediente(QFrame):
         self.__stack.setCurrentIndex(self.IDX_ENDGAME)
 
     def exibir_com_tamanho_inicial(self, parent_rect: Any) -> None:
-        if not self.__inicializado:
-            w = int(parent_rect.width() * 0.8)
-            h = int(parent_rect.height() * 0.8)
-            x = (parent_rect.width() - w) // 2
-            y = (parent_rect.height() - h) // 2
-            self.setGeometry(x, y, w, h)
-            self.__tamanho_normal = self.geometry()
-            self.__inicializado = True
+        # Recalcula a cada chamada: reabrir apos fechar+redimensionar nao pode
+        # manter geometria velha congelada (B4).
+        self.__reposicionar(parent_rect)
         self.show()
+
+    @Slot(QRect)
+    def redimensionar_com_overlay(self, rect: QRect) -> None:
+        """Hook acionado pelo _OverlayArea ao crescer (B5).
+
+        So reposiciona se o expediente ja esta visivel; nunca o exibe.
+        """
+        if self.isVisible():
+            self.__reposicionar(rect)
+
+    def __reposicionar(self, parent_rect: Any) -> None:
+        if self.__maximizado:
+            self.setGeometry(parent_rect)
+            return
+        w = int(parent_rect.width() * 0.8)
+        h = int(parent_rect.height() * 0.8)
+        x = (parent_rect.width() - w) // 2
+        y = (parent_rect.height() - h) // 2
+        self.setGeometry(x, y, w, h)
+        self.__tamanho_normal = self.geometry()
 
     def reiniciar(self) -> None:
         self.__pagina_inspecao.limpar_formulario()
@@ -201,7 +249,16 @@ class TelaDeExpediente(QFrame):
         super().resizeEvent(event)
         if self.__maximizado and self.parentWidget():
             self.setGeometry(self.parentWidget().rect())
+        # Overlays de midia ancoram no _OverlayArea (acima da taskbar), nao no
+        # rect do expediente nem da janela inteira (B7).
+        anchor_rect = self.__rect_do_overlay()
         if self.__anexo_gallery.isVisible():
-            self.__anexo_gallery.setGeometry(self.rect())
+            self.__anexo_gallery.setGeometry(anchor_rect)
         if self.__media_viewer.isVisible():
-            self.__media_viewer.setGeometry(self.rect())
+            self.__media_viewer.setGeometry(anchor_rect)
+
+    def __rect_do_overlay(self) -> QRect:
+        parent = self.parentWidget()
+        if parent is not None:
+            return parent.rect()
+        return self.rect()

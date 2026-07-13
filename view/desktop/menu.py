@@ -19,7 +19,10 @@ class TelaMenuPrincipal(QWidget):
         self.__layout = LayoutLoader.instance()
         self.__shortcuts: list[DesktopShortcut] = []
         self.__wallpaper_label: QLabel | None = None
+        self.__desktop_layout: QHBoxLayout | None = None
+        self.__shortcuts_layout: QVBoxLayout | None = None
         self.__setup_ui()
+        self.__layout.escala_atualizada.connect(self.__reaplicar_dimensoes)
 
     def __setup_ui(self):
         L = self.__layout
@@ -31,12 +34,21 @@ class TelaMenuPrincipal(QWidget):
         desktop.setObjectName("desktop_area")
         desktop_layout = QHBoxLayout(desktop)
         desktop_layout.setContentsMargins(*L.scaled_margins("tela", "margens", "desktop"))
+        self.__desktop_layout = desktop_layout
 
         self.__build_shortcuts(desktop_layout)
         desktop_layout.addStretch()
 
         main_layout.addWidget(desktop)
         self.__load_wallpaper()
+
+    @Slot()
+    def __reaplicar_dimensoes(self) -> None:
+        L = self.__layout
+        if self.__desktop_layout is not None:
+            self.__desktop_layout.setContentsMargins(*L.scaled_margins("tela", "margens", "desktop"))
+        if self.__shortcuts_layout is not None:
+            self.__shortcuts_layout.setSpacing(L.scaled("desktop_shortcut", "spacing", "entre_atalhos"))
 
     def __load_wallpaper(self) -> None:
         """Carrega o wallpaper: QSettings primeiro, fallback para layout.json."""
@@ -98,6 +110,7 @@ class TelaMenuPrincipal(QWidget):
         shortcuts_layout = QVBoxLayout()
         shortcuts_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         shortcuts_layout.setSpacing(L.scaled("desktop_shortcut", "spacing", "entre_atalhos"))
+        self.__shortcuts_layout = shortcuts_layout
 
         for item in L.get("atalhos_lista"):
             shortcut = DesktopShortcut(

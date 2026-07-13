@@ -1,5 +1,5 @@
 import logging
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QFrame, QLabel, QPushButton, QVBoxLayout
 
@@ -35,3 +35,9 @@ class Sidebar(QFrame):
             layout.addWidget(btn)
 
         layout.addStretch()
+        L.escala_atualizada.connect(self.__reaplicar_dimensoes)
+
+    @Slot()
+    def __reaplicar_dimensoes(self) -> None:
+        L = LayoutLoader.instance()
+        self.setFixedWidth(L.scaled("sidebar", "largura"))

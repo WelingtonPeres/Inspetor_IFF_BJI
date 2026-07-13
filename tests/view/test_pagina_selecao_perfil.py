@@ -7,7 +7,7 @@ via botao e teclado, e sincronizacao com o combo oculto.
 
 import pytest
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QComboBox, QLabel, QPushButton
+from PySide6.QtWidgets import QApplication, QComboBox, QLabel, QPushButton
 
 from view.expediente.paginas.selecao_perfil import PaginaSelecaoPerfil
 from view.expediente.widgets.character_carousel import CharacterCarousel
@@ -387,3 +387,34 @@ class TestCarouselIntegracao:
         # Assert
         assert texto_combo == perfil_actual
         assert texto_combo == "DEFAULT"
+
+
+class TestResponsividade:
+    """
+    Testes de dimensionamento responsivo do CharacterCarousel.
+
+    Verifica que os elementos visuais escalam conforme o tamanho
+    disponivel, evitando geometria fixa em pixels.
+    """
+
+    def test_botoes_navegacao_escalam_com_redimensionamento(self, pagina):
+        """
+        Ao redimensionar o widget pai, o carousel e os botoes de
+        navegacao devem ficar proporcionalmente menores.
+        """
+        # Arrange
+        carousel = pagina._PaginaSelecaoPerfil__carousel
+        pagina.show()
+        pagina.resize(1200, 800)
+        QApplication.processEvents()
+        btn_prev = carousel._CharacterCarousel__btn_prev
+        tamanho_grande = btn_prev.size()
+
+        # Act
+        pagina.resize(600, 400)
+        QApplication.processEvents()
+        tamanho_pequeno = btn_prev.size()
+
+        # Assert
+        assert tamanho_pequeno.width() < tamanho_grande.width()
+        assert tamanho_pequeno.height() < tamanho_grande.height()
