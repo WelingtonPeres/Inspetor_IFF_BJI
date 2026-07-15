@@ -143,12 +143,18 @@ class PaginaInspecao(QWidget):
         return grupo
 
     def renderizar_relatorio(self, dados_relatorio: Dict[str, Any]) -> None:
-        """Preenche o label de titulo e reinicia o temporizador."""
+        """Preenche o label do deck com titulo, local, atividade, envolvidos e descricao.
+
+        Carrega o preview do primeiro anexo e reinicia o temporizador de inspecao.
+        """
         logger.info("Renderizando relatorio: %s", dados_relatorio.get("titulo", ""))
+        envolvidos = dados_relatorio.get("envolvidos") or []
+        texto_envolvidos = ", ".join(envolvidos) if envolvidos else "Não informado"
         self.__label_titulo_relatorio.setText(
             f"Título: {dados_relatorio.get('titulo', '')}\n"
             f"Local: {dados_relatorio.get('local', '')}\n"
             f"Atividade: {dados_relatorio.get('atividade', '')}\n"
+            f"Envolvidos: {texto_envolvidos}\n"
             f"Descrição: {dados_relatorio.get('texto_descricao', '')}"
         )
         self.__anexos_data = dados_relatorio.get("anexos", [])

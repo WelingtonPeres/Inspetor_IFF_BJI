@@ -14,6 +14,7 @@ from view.expediente.overlays.media_viewer import MediaViewer
 
 @pytest.fixture(autouse=True)
 def qt_app(qapp):
+    """Fornece a QApplication do pytest-qt para todos os testes da view."""
     return qapp
 
 
@@ -160,16 +161,41 @@ class TestComportamento:
             "titulo": "Lab Quimico",
             "local": "Bloco A",
             "atividade": "teste",
+            "envolvidos": ["João", "Maria"],
             "texto_descricao": "descricao",
         })
         label = pagina.findChild(QLabel, "label_titulo_relatorio")
         assert "Lab Quimico" in label.text()
         assert "Bloco A" in label.text()
+        assert "João, Maria" in label.text()
 
     def test_submeter_sem_decisao_envia_string_vazia(self, pagina):
         """Se nenhum radio esta selecionado, decisao deve ser string vazia."""
         resultado = pagina._PaginaInspecao__coletar_respostas()
         assert resultado["decisao"] == ""
+
+    def test_renderizar_relatorio_sem_envolvidos_exibe_nao_informado(self, pagina):
+        """Se envolvidos estiver vazio ou ausente, o label deve exibir 'Não informado'."""
+        pagina.renderizar_relatorio({
+            "titulo": "Lab Quimico",
+            "local": "Bloco A",
+            "atividade": "teste",
+            "texto_descricao": "descricao",
+        })
+        label = pagina.findChild(QLabel, "label_titulo_relatorio")
+        assert "Não informado" in label.text()
+
+    def test_renderizar_relatorio_com_envolvidos_vazios_exibe_nao_informado(self, pagina):
+        """Lista vazia de envolvidos tambem deve renderizar 'Não informado'."""
+        pagina.renderizar_relatorio({
+            "titulo": "Lab Quimico",
+            "local": "Bloco A",
+            "atividade": "teste",
+            "envolvidos": [],
+            "texto_descricao": "descricao",
+        })
+        label = pagina.findChild(QLabel, "label_titulo_relatorio")
+        assert "Não informado" in label.text()
 
 
 @pytest.fixture
