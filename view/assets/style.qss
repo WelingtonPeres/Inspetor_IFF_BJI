@@ -31,41 +31,26 @@ QStackedWidget {
 }
 
 /* --- Bloco de Informações do Relatório (Inspeção) --- */
-PaginaInspecao #info_block_relatorio {
+#info_block_relatorio {
     background-color: transparent;
     border: none;
 }
 
-PaginaInspecao .info_field_box {
-    background-color: rgba(47, 158, 65, 0.06);
-    border: 1px solid #2F9E41;
-    border-radius: 4px;
-    color: #71dd77;
-    font-family: "Open Sans";
-    font-size: 12px;
-    font-weight: 700;
-    padding: 8px;
-    margin-top: 8px;
-}
-
-PaginaInspecao .info_field_box::title {
-    color: #71dd77;
-    padding: 2px 8px;
-    subcontrol-origin: margin;
-    left: 8px;
-}
-
-PaginaInspecao .label_info_valor {
-    color: #E6EDF3;
+#info_block_relatorio .label_info_valor {
+    color: #e2e2e2;
     font-family: "Open Sans";
     font-size: 14px;
     font-weight: 400;
     padding: 4px 0 0 0;
 }
 
-PaginaInspecao #label_info_titulo {
-    font-size: 16px;
+#label_info_titulo {
+    color: #71dd77;
+    font-family: "Open Sans";
+    font-size: 60px;
     font-weight: 700;
+    text-align: left;
+    text-transform: uppercase;
 }
 
 /* --- Labels de Feedback (Diagnóstico / Resultado) --- */

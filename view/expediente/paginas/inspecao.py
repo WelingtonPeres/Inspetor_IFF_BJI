@@ -80,38 +80,49 @@ class PaginaInspecao(QWidget):
         return deck
 
     def __build_info_block(self) -> QWidget:
-        """Cria o bloco de informacoes do relatorio com um QGroupBox por campo."""
+        """Cria o bloco de informacoes do relatorio.
+
+        O titulo e apresentado como texto puro (QLabel), enquanto os
+        demais campos (local, atividade, envolvidos, descricao) usam
+        QGroupBox com classe 'group_box'.
+        """
         block = QWidget(objectName="info_block_relatorio")
-        block.setProperty("class", "info_block_relatorio")
         layout = QVBoxLayout(block)
         layout.setSpacing(12)
 
         self.__labels_info = {}
+
+        titulo_label = self.__criar_label_info("titulo")
+        titulo_label.setProperty("class", "label_info_titulo")
+        layout.addWidget(titulo_label)
+
         campos = [
-            ("titulo", "Título"),
             ("local", "Local"),
             ("atividade", "Atividade"),
             ("envolvidos", "Envolvidos"),
             ("descricao", "Descrição"),
         ]
         for chave, rotulo in campos:
+            label = self.__criar_label_info(chave)
             grupo = QGroupBox(rotulo)
             grupo.setObjectName(f"group_info_{chave}")
-            grupo.setProperty("class", "info_field_box")
+            grupo.setProperty("class", "group_box")
             grupo_layout = QVBoxLayout(grupo)
             grupo_layout.setContentsMargins(8, 12, 8, 8)
-
-            label = QLabel("Aguardando relatório...")
-            label.setObjectName(f"label_info_{chave}")
-            label.setProperty("class", "label_info_valor")
-            label.setAlignment(Qt.AlignmentFlag.AlignTop)
-            label.setWordWrap(True)
-            self.__labels_info[chave] = label
             grupo_layout.addWidget(label)
-
             layout.addWidget(grupo)
 
         return block
+
+    def __criar_label_info(self, chave: str) -> QLabel:
+        """Cria um QLabel padrao para exibicao de informacoes do relatorio."""
+        label = QLabel("Aguardando relatório...")
+        label.setObjectName(f"label_info_{chave}")
+        label.setProperty("class", "label_info_valor")
+        label.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        label.setWordWrap(True)
+        self.__labels_info[chave] = label
+        return label
 
     def __build_prancheta(self) -> QWidget:
         prancheta = QWidget(objectName="prancheta")

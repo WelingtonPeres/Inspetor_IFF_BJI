@@ -4,7 +4,7 @@ Suite de testes para a PaginaInspecao.
 
 import pytest
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QCheckBox, QLabel, QPushButton, QRadioButton, QSplitter, QWidget
+from PySide6.QtWidgets import QCheckBox, QGroupBox, QLabel, QPushButton, QRadioButton, QSplitter, QWidget
 
 from view.expediente.paginas.inspecao import PaginaInspecao
 from view.expediente.widgets.anexo_preview import AnexoPreview
@@ -88,15 +88,21 @@ class TestEstrutura:
         preview = pagina.findChild(AnexoPreview)
         assert preview is not None
 
-    def test_labels_info_do_relatorio_existem(self, pagina):
-        """A pagina deve conter os QLabel e QGroupBox de informacoes do relatorio."""
-        from PySide6.QtWidgets import QGroupBox
+    def test_labels_info_e_groupboxes_do_relatorio_existem(self, pagina):
+        """A pagina deve conter os QLabel e QGroupBox de informacoes do relatorio.
+
+        O campo titulo e renderizado como QLabel isolado; os demais campos
+        usam QGroupBox como container.
+        """
         for chave in ["titulo", "local", "atividade", "envolvidos", "descricao"]:
-            grupo = pagina.findChild(QGroupBox, f"group_info_{chave}")
-            assert grupo is not None
             label = pagina.findChild(QLabel, f"label_info_{chave}")
             assert label is not None
             assert "Aguardando" in label.text()
+            if chave != "titulo":
+                grupo = pagina.findChild(QGroupBox, f"group_info_{chave}")
+                assert grupo is not None
+
+        assert pagina.findChild(QGroupBox, "group_info_titulo") is None
 
 
 class TestComportamento:
