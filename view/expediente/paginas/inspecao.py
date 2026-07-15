@@ -80,11 +80,11 @@ class PaginaInspecao(QWidget):
         return deck
 
     def __build_info_block(self) -> QWidget:
-        """Cria o bloco de informacoes do relatorio com um QLabel por campo."""
+        """Cria o bloco de informacoes do relatorio com um QGroupBox por campo."""
         block = QWidget(objectName="info_block_relatorio")
         block.setProperty("class", "info_block_relatorio")
         layout = QVBoxLayout(block)
-        layout.setSpacing(8)
+        layout.setSpacing(12)
 
         self.__labels_info = {}
         campos = [
@@ -95,13 +95,21 @@ class PaginaInspecao(QWidget):
             ("descricao", "Descrição"),
         ]
         for chave, rotulo in campos:
-            label = QLabel(f"{rotulo}: Aguardando relatório...")
+            grupo = QGroupBox(rotulo)
+            grupo.setObjectName(f"group_info_{chave}")
+            grupo.setProperty("class", "info_field_box")
+            grupo_layout = QVBoxLayout(grupo)
+            grupo_layout.setContentsMargins(8, 12, 8, 8)
+
+            label = QLabel("Aguardando relatório...")
             label.setObjectName(f"label_info_{chave}")
-            label.setProperty("class", "label_info")
+            label.setProperty("class", "label_info_valor")
             label.setAlignment(Qt.AlignmentFlag.AlignTop)
             label.setWordWrap(True)
             self.__labels_info[chave] = label
-            layout.addWidget(label)
+            grupo_layout.addWidget(label)
+
+            layout.addWidget(grupo)
 
         return block
 
@@ -174,11 +182,11 @@ class PaginaInspecao(QWidget):
         envolvidos = dados_relatorio.get("envolvidos") or []
         texto_envolvidos = ", ".join(envolvidos) if envolvidos else "Não informado"
 
-        self.__labels_info["titulo"].setText(f"Título: {dados_relatorio.get('titulo', '')}")
-        self.__labels_info["local"].setText(f"Local: {dados_relatorio.get('local', '')}")
-        self.__labels_info["atividade"].setText(f"Atividade: {dados_relatorio.get('atividade', '')}")
-        self.__labels_info["envolvidos"].setText(f"Envolvidos: {texto_envolvidos}")
-        self.__labels_info["descricao"].setText(f"Descrição: {dados_relatorio.get('texto_descricao', '')}")
+        self.__labels_info["titulo"].setText(dados_relatorio.get("titulo", ""))
+        self.__labels_info["local"].setText(dados_relatorio.get("local", ""))
+        self.__labels_info["atividade"].setText(dados_relatorio.get("atividade", ""))
+        self.__labels_info["envolvidos"].setText(texto_envolvidos)
+        self.__labels_info["descricao"].setText(dados_relatorio.get("texto_descricao", ""))
 
         self.__anexos_data = dados_relatorio.get("anexos", [])
         if self.__anexos_data:

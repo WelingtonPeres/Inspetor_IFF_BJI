@@ -89,8 +89,11 @@ class TestEstrutura:
         assert preview is not None
 
     def test_labels_info_do_relatorio_existem(self, pagina):
-        """A pagina deve conter os QLabel de informacoes do relatorio."""
+        """A pagina deve conter os QLabel e QGroupBox de informacoes do relatorio."""
+        from PySide6.QtWidgets import QGroupBox
         for chave in ["titulo", "local", "atividade", "envolvidos", "descricao"]:
+            grupo = pagina.findChild(QGroupBox, f"group_info_{chave}")
+            assert grupo is not None
             label = pagina.findChild(QLabel, f"label_info_{chave}")
             assert label is not None
             assert "Aguardando" in label.text()
@@ -165,11 +168,11 @@ class TestComportamento:
             "envolvidos": ["João", "Maria"],
             "texto_descricao": "descricao",
         })
-        assert "Lab Quimico" in pagina.findChild(QLabel, "label_info_titulo").text()
-        assert "Bloco A" in pagina.findChild(QLabel, "label_info_local").text()
-        assert "teste" in pagina.findChild(QLabel, "label_info_atividade").text()
-        assert "João, Maria" in pagina.findChild(QLabel, "label_info_envolvidos").text()
-        assert "descricao" in pagina.findChild(QLabel, "label_info_descricao").text()
+        assert pagina.findChild(QLabel, "label_info_titulo").text() == "Lab Quimico"
+        assert pagina.findChild(QLabel, "label_info_local").text() == "Bloco A"
+        assert pagina.findChild(QLabel, "label_info_atividade").text() == "teste"
+        assert pagina.findChild(QLabel, "label_info_envolvidos").text() == "João, Maria"
+        assert pagina.findChild(QLabel, "label_info_descricao").text() == "descricao"
 
     def test_submeter_sem_decisao_envia_string_vazia(self, pagina):
         """Se nenhum radio esta selecionado, decisao deve ser string vazia."""
@@ -184,8 +187,7 @@ class TestComportamento:
             "atividade": "teste",
             "texto_descricao": "descricao",
         })
-        label = pagina.findChild(QLabel, "label_info_envolvidos")
-        assert "Não informado" in label.text()
+        assert pagina.findChild(QLabel, "label_info_envolvidos").text() == "Não informado"
 
     def test_renderizar_relatorio_com_envolvidos_vazios_exibe_nao_informado(self, pagina):
         """Lista vazia de envolvidos tambem deve renderizar 'Não informado'."""
@@ -196,8 +198,7 @@ class TestComportamento:
             "envolvidos": [],
             "texto_descricao": "descricao",
         })
-        label = pagina.findChild(QLabel, "label_info_envolvidos")
-        assert "Não informado" in label.text()
+        assert pagina.findChild(QLabel, "label_info_envolvidos").text() == "Não informado"
 
 
 @pytest.fixture

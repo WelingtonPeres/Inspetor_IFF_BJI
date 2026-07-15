@@ -32,25 +32,40 @@ QStackedWidget {
 
 /* --- Bloco de Informações do Relatório (Inspeção) --- */
 PaginaInspecao #info_block_relatorio {
-    background-color: #1e2020;
-    border: 1px solid #3f4a3d;
-    border-radius: 4px;
-    padding: 12px;
+    background-color: transparent;
+    border: none;
 }
 
-PaginaInspecao .label_info {
-    color: #e2e2e2;
+PaginaInspecao .info_field_box {
+    background-color: rgba(47, 158, 65, 0.06);
+    border: 1px solid #2F9E41;
+    border-radius: 4px;
+    color: #71dd77;
+    font-family: "Open Sans";
+    font-size: 12px;
+    font-weight: 700;
+    padding: 8px;
+    margin-top: 8px;
+}
+
+PaginaInspecao .info_field_box::title {
+    color: #71dd77;
+    padding: 2px 8px;
+    subcontrol-origin: margin;
+    left: 8px;
+}
+
+PaginaInspecao .label_info_valor {
+    color: #E6EDF3;
     font-family: "Open Sans";
     font-size: 14px;
     font-weight: 400;
-    padding: 2px 0;
+    padding: 4px 0 0 0;
 }
 
 PaginaInspecao #label_info_titulo {
-    color: #71dd77;
     font-size: 16px;
     font-weight: 700;
-    padding-bottom: 8px;
 }
 
 /* --- Labels de Feedback (Diagnóstico / Resultado) --- */
@@ -550,15 +565,6 @@ PaginaLoading #loading_progress_bar::chunk {
 }
 
 /* --- PaginaInspecao: Split-Desk 60/40 --- */
-PaginaInspecao #label_info_local,
-PaginaInspecao #label_info_atividade,
-PaginaInspecao #label_info_envolvidos,
-PaginaInspecao #label_info_descricao {
-    color: #E6EDF3;
-    font-family: "Open Sans";
-    font-size: 14px;
-}
-
 PaginaInspecao #deck_observacao {
     background-color: #0D1117;
     border: 1px solid #30363D;
