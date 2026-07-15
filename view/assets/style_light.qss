@@ -30,16 +30,27 @@ QStackedWidget {
     font-weight: 700;
 }
 
-/* --- Label de Relatório (Inspeção) --- */
-#label_titulo_relatorio {
+/* --- Bloco de Informações do Relatório (Inspeção) --- */
+PaginaInspecao #info_block_relatorio {
+    background-color: #eeeeee;
+    border: 1px solid #becab9;
+    border-radius: 4px;
+    padding: 12px;
+}
+
+PaginaInspecao .label_info {
     color: #1a1c1c;
     font-family: "Open Sans";
     font-size: 14px;
     font-weight: 400;
-    padding: 16px;
-    background-color: #eeeeee;
-    border: 1px solid #becab9;
-    border-radius: 4px;
+    padding: 2px 0;
+}
+
+PaginaInspecao #label_info_titulo {
+    color: #006b21;
+    font-size: 16px;
+    font-weight: 700;
+    padding-bottom: 8px;
 }
 
 /* --- Labels de Feedback (Diagnóstico / Resultado) --- */
@@ -545,7 +556,10 @@ PaginaLoading #loading_progress_bar::chunk {
 }
 
 /* --- PaginaInspecao: Split-Desk 60/40 --- */
-PaginaInspecao #label_titulo_relatorio {
+PaginaInspecao #label_info_local,
+PaginaInspecao #label_info_atividade,
+PaginaInspecao #label_info_envolvidos,
+PaginaInspecao #label_info_descricao {
     color: #1a1c1c;
     font-family: "Open Sans";
     font-size: 14px;
