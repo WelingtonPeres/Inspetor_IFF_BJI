@@ -100,8 +100,10 @@ QStackedWidget {
 }
 
 .group_box::title {
-    color: #006b21;
-    padding: 4px 8px;
+    background-color: #09872d;
+    color: #f7fff1;
+    padding: 6px 14px;
+    border-radius: 4px;
     subcontrol-origin: margin;
     left: 12px;
 }
@@ -557,14 +559,14 @@ PaginaLoading #loading_progress_bar::chunk {
 
 /* --- PaginaInspecao: Split-Desk 60/40 --- */
 PaginaInspecao #deck_observacao {
-    background-color: #f5f5f5;
+    background-color: #f4f3f3;
     border: 1px solid #becab9;
     border-radius: 4px;
     padding: 8px;
 }
 
 PaginaInspecao #prancheta {
-    background-color: #ffffff;
+    background-color: #eeeeee;
     border: 1px solid #becab9;
     border-radius: 4px;
     padding: 8px;
