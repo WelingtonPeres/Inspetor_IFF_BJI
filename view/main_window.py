@@ -178,10 +178,6 @@ class _OverlayArea(QWidget):
     Area central que empilha widgets em z-order.
     O primeiro widget adicionado via add_desktop e o fundo (z=1);
     os overlays (z=2) sao posicionados por cima.
-
-    Emite ``overlay_resized`` a cada resize para que overlays com
-    ``auto_resize=False`` (ex.: expediente flutuante) possam recalcular
-    a propria geometria em vez de ficarem congelados.
     """
 
     overlay_resized = Signal(QRect)
