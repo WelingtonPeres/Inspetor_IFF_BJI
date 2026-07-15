@@ -33,7 +33,7 @@ class PaginaInspecao(QWidget):
         self.setObjectName("pagina_inspecao")
         self.setProperty("class", "pagina_inspecao")
 
-        self.__label_titulo_relatorio: QLabel
+        self.__labels_info: Dict[str, QLabel]
         self.__anexo_preview: AnexoPreview
         self.__chk_riscos: Dict[str, QCheckBox]
         self.__chk_fatores: Dict[str, QCheckBox]
@@ -70,17 +70,40 @@ class PaginaInspecao(QWidget):
         deck = QWidget(objectName="deck_observacao")
         deck_layout = QVBoxLayout(deck)
 
-        self.__label_titulo_relatorio = QLabel("Aguardando relatório...")
-        self.__label_titulo_relatorio.setObjectName("label_titulo_relatorio")
-        self.__label_titulo_relatorio.setAlignment(Qt.AlignmentFlag.AlignTop)
-        self.__label_titulo_relatorio.setWordWrap(True)
-        deck_layout.addWidget(self.__label_titulo_relatorio)
+        info_block = self.__build_info_block()
+        deck_layout.addWidget(info_block)
 
         self.__anexo_preview = AnexoPreview()
         deck_layout.addWidget(self.__anexo_preview)
 
         deck_layout.addStretch()
         return deck
+
+    def __build_info_block(self) -> QWidget:
+        """Cria o bloco de informacoes do relatorio com um QLabel por campo."""
+        block = QWidget(objectName="info_block_relatorio")
+        block.setProperty("class", "info_block_relatorio")
+        layout = QVBoxLayout(block)
+        layout.setSpacing(8)
+
+        self.__labels_info = {}
+        campos = [
+            ("titulo", "Título"),
+            ("local", "Local"),
+            ("atividade", "Atividade"),
+            ("envolvidos", "Envolvidos"),
+            ("descricao", "Descrição"),
+        ]
+        for chave, rotulo in campos:
+            label = QLabel(f"{rotulo}: Aguardando relatório...")
+            label.setObjectName(f"label_info_{chave}")
+            label.setProperty("class", "label_info")
+            label.setAlignment(Qt.AlignmentFlag.AlignTop)
+            label.setWordWrap(True)
+            self.__labels_info[chave] = label
+            layout.addWidget(label)
+
+        return block
 
     def __build_prancheta(self) -> QWidget:
         prancheta = QWidget(objectName="prancheta")
@@ -143,20 +166,20 @@ class PaginaInspecao(QWidget):
         return grupo
 
     def renderizar_relatorio(self, dados_relatorio: Dict[str, Any]) -> None:
-        """Preenche o label do deck com titulo, local, atividade, envolvidos e descricao.
+        """Preenche os labels do deck com titulo, local, atividade, envolvidos e descricao.
 
         Carrega o preview do primeiro anexo e reinicia o temporizador de inspecao.
         """
         logger.info("Renderizando relatorio: %s", dados_relatorio.get("titulo", ""))
         envolvidos = dados_relatorio.get("envolvidos") or []
         texto_envolvidos = ", ".join(envolvidos) if envolvidos else "Não informado"
-        self.__label_titulo_relatorio.setText(
-            f"Título: {dados_relatorio.get('titulo', '')}\n"
-            f"Local: {dados_relatorio.get('local', '')}\n"
-            f"Atividade: {dados_relatorio.get('atividade', '')}\n"
-            f"Envolvidos: {texto_envolvidos}\n"
-            f"Descrição: {dados_relatorio.get('texto_descricao', '')}"
-        )
+
+        self.__labels_info["titulo"].setText(f"Título: {dados_relatorio.get('titulo', '')}")
+        self.__labels_info["local"].setText(f"Local: {dados_relatorio.get('local', '')}")
+        self.__labels_info["atividade"].setText(f"Atividade: {dados_relatorio.get('atividade', '')}")
+        self.__labels_info["envolvidos"].setText(f"Envolvidos: {texto_envolvidos}")
+        self.__labels_info["descricao"].setText(f"Descrição: {dados_relatorio.get('texto_descricao', '')}")
+
         self.__anexos_data = dados_relatorio.get("anexos", [])
         if self.__anexos_data:
             primeiro = self.__anexos_data[0]

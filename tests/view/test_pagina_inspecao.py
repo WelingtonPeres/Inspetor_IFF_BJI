@@ -88,11 +88,12 @@ class TestEstrutura:
         preview = pagina.findChild(AnexoPreview)
         assert preview is not None
 
-    def test_label_titulo_relatorio_existe(self, pagina):
-        """A pagina deve conter um QLabel 'label_titulo_relatorio'."""
-        label = pagina.findChild(QLabel, "label_titulo_relatorio")
-        assert label is not None
-        assert "Aguardando" in label.text()
+    def test_labels_info_do_relatorio_existem(self, pagina):
+        """A pagina deve conter os QLabel de informacoes do relatorio."""
+        for chave in ["titulo", "local", "atividade", "envolvidos", "descricao"]:
+            label = pagina.findChild(QLabel, f"label_info_{chave}")
+            assert label is not None
+            assert "Aguardando" in label.text()
 
 
 class TestComportamento:
@@ -155,8 +156,8 @@ class TestComportamento:
         assert isinstance(dados, dict)
         assert "riscos" in dados
 
-    def test_renderizar_relatorio_atualiza_label(self, pagina):
-        """renderizar_relatorio deve atualizar o label de titulo."""
+    def test_renderizar_relatorio_atualiza_labels_info(self, pagina):
+        """renderizar_relatorio deve atualizar todos os labels de informacao."""
         pagina.renderizar_relatorio({
             "titulo": "Lab Quimico",
             "local": "Bloco A",
@@ -164,10 +165,11 @@ class TestComportamento:
             "envolvidos": ["João", "Maria"],
             "texto_descricao": "descricao",
         })
-        label = pagina.findChild(QLabel, "label_titulo_relatorio")
-        assert "Lab Quimico" in label.text()
-        assert "Bloco A" in label.text()
-        assert "João, Maria" in label.text()
+        assert "Lab Quimico" in pagina.findChild(QLabel, "label_info_titulo").text()
+        assert "Bloco A" in pagina.findChild(QLabel, "label_info_local").text()
+        assert "teste" in pagina.findChild(QLabel, "label_info_atividade").text()
+        assert "João, Maria" in pagina.findChild(QLabel, "label_info_envolvidos").text()
+        assert "descricao" in pagina.findChild(QLabel, "label_info_descricao").text()
 
     def test_submeter_sem_decisao_envia_string_vazia(self, pagina):
         """Se nenhum radio esta selecionado, decisao deve ser string vazia."""
@@ -182,7 +184,7 @@ class TestComportamento:
             "atividade": "teste",
             "texto_descricao": "descricao",
         })
-        label = pagina.findChild(QLabel, "label_titulo_relatorio")
+        label = pagina.findChild(QLabel, "label_info_envolvidos")
         assert "Não informado" in label.text()
 
     def test_renderizar_relatorio_com_envolvidos_vazios_exibe_nao_informado(self, pagina):
@@ -194,7 +196,7 @@ class TestComportamento:
             "envolvidos": [],
             "texto_descricao": "descricao",
         })
-        label = pagina.findChild(QLabel, "label_titulo_relatorio")
+        label = pagina.findChild(QLabel, "label_info_envolvidos")
         assert "Não informado" in label.text()
 
 
