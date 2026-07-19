@@ -12,7 +12,6 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QPushButton,
-    QRadioButton,
     QSizePolicy,
     QSplitter,
     QToolButton,
@@ -21,6 +20,7 @@ from PySide6.QtWidgets import (
 )
 
 from view.expediente.widgets.anexo_preview import AnexoPreview
+from view.expediente.widgets.stamp_button import StampButton
 from view.widgets.midia.video_player import VideoPlayer
 from view.expediente.overlays.anexo_gallery import AnexoGallery
 from view.expediente.overlays.media_viewer import MediaViewer
@@ -249,13 +249,14 @@ class PaginaInspecao(QWidget):
         grupo.setObjectName("group_decisao")
         grupo.setProperty("class", "group_box")
         layout = QHBoxLayout(grupo)
+        layout.setSpacing(12)
+        layout.addStretch()
         self.__radio_decisao = QButtonGroup(grupo)
         for decisao in ["ADVERTIR", "INTERDITAR", "IGNORAR"]:
-            radio = QRadioButton(decisao)
-            radio.setObjectName(f"radio_decisao_{decisao}")
-            radio.setProperty("class", "radio_decisao")
-            self.__radio_decisao.addButton(radio)
-            layout.addWidget(radio)
+            stamp = StampButton(decisao)
+            self.__radio_decisao.addButton(stamp)
+            layout.addWidget(stamp)
+        layout.addStretch()
         return grupo
 
     def renderizar_relatorio(self, dados_relatorio: Dict[str, Any]) -> None:

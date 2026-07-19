@@ -229,29 +229,6 @@ QToolButton[riscoTile="true"]:focus {
     border-style: dashed;
 }
 
-/* --- Radio Buttons (Decisão) --- */
-.radio_decisao {
-    color: #1a1c1c;
-    font-family: "Open Sans";
-    font-size: 14px;
-    font-weight: 700;
-    spacing: 8px;
-    padding: 8px;
-}
-
-.radio_decisao::indicator {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #becab9;
-    background-color: #f9f9f9;
-    border-radius: 9999px;
-}
-
-.radio_decisao::indicator:checked {
-    background-color: #CD191E;
-    border-color: #CD191E;
-}
-
 /* --- ComboBox (Seleção de Perfil) --- */
 .combo_padrao {
     background-color: #f9f9f9;

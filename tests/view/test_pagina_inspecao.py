@@ -4,10 +4,11 @@ Suite de testes para a PaginaInspecao.
 
 import pytest
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QCheckBox, QGroupBox, QLabel, QPushButton, QRadioButton, QSplitter, QToolButton, QWidget
+from PySide6.QtWidgets import QCheckBox, QGroupBox, QLabel, QPushButton, QSplitter, QToolButton, QWidget
 
 from view.expediente.paginas.inspecao import PaginaInspecao
 from view.expediente.widgets.anexo_preview import AnexoPreview
+from view.expediente.widgets.stamp_button import StampButton
 from view.expediente.overlays.anexo_gallery import AnexoGallery
 from view.expediente.overlays.media_viewer import MediaViewer
 
@@ -78,11 +79,11 @@ class TestEstrutura:
             assert chk.text() == fator
 
     def test_radio_decisao_3_itens(self, pagina):
-        """A pagina deve conter 3 radio buttons de decisao."""
+        """A pagina deve conter 3 stamps de decisao."""
         for decisao in ["ADVERTIR", "INTERDITAR", "IGNORAR"]:
-            radio = pagina.findChild(QRadioButton, f"radio_decisao_{decisao}")
-            assert radio is not None
-            assert radio.text() == decisao
+            stamp = pagina.findChild(StampButton, f"stamp_decisao_{decisao}")
+            assert stamp is not None
+            assert stamp.text() == decisao
 
     def test_btn_submeter_existe(self, pagina):
         """A pagina deve conter um QPushButton 'btn_submeter'."""
@@ -138,7 +139,7 @@ class TestComportamento:
         pagina.findChild(QToolButton, "tile_risco_FISICO").setChecked(True)
         pagina.findChild(QToolButton, "tile_risco_QUIMICO").setChecked(True)
         pagina.findChild(QCheckBox, "chk_fator_ATO_INSEGURO").setChecked(True)
-        pagina.findChild(QRadioButton, "radio_decisao_ADVERTIR").setChecked(True)
+        pagina.findChild(StampButton, "stamp_decisao_ADVERTIR").setChecked(True)
         resultado = pagina._PaginaInspecao__coletar_respostas()
         assert "FISICO" in resultado["riscos"]
         assert "QUIMICO" in resultado["riscos"]
@@ -150,12 +151,12 @@ class TestComportamento:
         """limpar_formulario deve desmarcar todos os campos."""
         pagina.findChild(QToolButton, "tile_risco_FISICO").setChecked(True)
         pagina.findChild(QCheckBox, "chk_fator_ATO_INSEGURO").setChecked(True)
-        pagina.findChild(QRadioButton, "radio_decisao_ADVERTIR").setChecked(True)
+        pagina.findChild(StampButton, "stamp_decisao_ADVERTIR").setChecked(True)
         pagina.limpar_formulario()
         assert not pagina.findChild(QToolButton, "tile_risco_FISICO").isChecked()
         assert not pagina.findChild(QCheckBox, "chk_fator_ATO_INSEGURO").isChecked()
-        checked_radio = pagina.findChild(QRadioButton, "radio_decisao_ADVERTIR")
-        assert not checked_radio.isChecked()
+        checked_stamp = pagina.findChild(StampButton, "stamp_decisao_ADVERTIR")
+        assert not checked_stamp.isChecked()
 
     def test_temporizador_reiniciado_em_renderizar(self, pagina):
         """renderizar_relatorio deve reiniciar o temporizador."""
