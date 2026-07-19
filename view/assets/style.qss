@@ -108,48 +108,49 @@ QStackedWidget {
     left: 12px;
 }
 
-/* --- Checkboxes (Riscos) --- */
-.chk_risco {
-    color: #e2e2e2;
+/* --- Tactile Toggle — Tag/Chip (Riscos + Fatores) --- */
+QCheckBox[class="chk_risco"],
+QCheckBox[class="chk_fator"] {
+    spacing: 0px;
+    padding: 8px 14px;
+    border: 2px solid #3f4a3d;
+    border-radius: 4px;
+    background-color: transparent;
+    color: #becab9;
     font-family: "Open Sans";
     font-size: 14px;
     font-weight: 400;
-    spacing: 8px;
 }
 
-.chk_risco::indicator {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #3f4a3d;
-    background-color: #121414;
-    border-radius: 4px;
+QCheckBox[class="chk_risco"]::indicator,
+QCheckBox[class="chk_fator"]::indicator {
+    width: 0px;
+    height: 0px;
 }
 
-.chk_risco::indicator:checked {
-    background-color: #2F9E41;
-    border-color: #2F9E41;
-}
-
-/* --- Checkboxes (Fatores) --- */
-.chk_fator {
+QCheckBox[class="chk_risco"]:hover,
+QCheckBox[class="chk_fator"]:hover {
+    border-color: #889484;
     color: #e2e2e2;
-    font-family: "Open Sans";
-    font-size: 14px;
-    font-weight: 400;
-    spacing: 8px;
 }
 
-.chk_fator::indicator {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #3f4a3d;
-    background-color: #121414;
-    border-radius: 4px;
+QCheckBox[class="chk_risco"]:checked,
+QCheckBox[class="chk_fator"]:checked {
+    background-color: #71dd77;
+    border-color: #71dd77;
+    color: #00390d;
+    font-weight: 700;
 }
 
-.chk_fator::indicator:checked {
-    background-color: #8dd2d8;
-    border-color: #8dd2d8;
+QCheckBox[class="chk_risco"]:checked:hover,
+QCheckBox[class="chk_fator"]:checked:hover {
+    background-color: #37a547;
+    border-color: #37a547;
+}
+
+QCheckBox[class="chk_risco"]:focus,
+QCheckBox[class="chk_fator"]:focus {
+    border-color: #71dd77;
 }
 
 /* --- Radio Buttons (Decisão) --- */
