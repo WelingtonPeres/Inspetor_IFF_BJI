@@ -156,6 +156,7 @@ class PaginaInspecao(QWidget):
 
         layout = QGridLayout(grupo)
         layout.setSpacing(10)
+        layout.setContentsMargins(0, 8, 0, 0)
 
         layout.setColumnStretch(0, 1)
         layout.setColumnStretch(1, 1)
@@ -200,7 +201,8 @@ class PaginaInspecao(QWidget):
         btn.setCheckable(True)
         btn.setText(label)
         btn.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
-        btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        btn.setMinimumSize(96, 96)
 
         icone = self.__resolver_icone_risco(risco)
         if icone is not None:
