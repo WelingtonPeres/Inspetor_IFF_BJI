@@ -110,35 +110,53 @@ QStackedWidget {
     left: 12px;
 }
 
-/* --- Tactile Tile — Fator (QToolButton horizontal) --- */
-QToolButton[class="fator_tile"] {
+/* --- Tactile Tile — Fator (QPushButton com layout interno) --- */
+QPushButton[class="fator_tile"] {
     border: 2px solid #8dd2d8;
     border-radius: 8px;
     padding: 12px 14px;
     background-color: transparent;
+    font-family: "Open Sans";
+}
+
+QPushButton[class="fator_tile"]:hover {
+    border-color: #a9eef4;
+}
+
+QPushButton[class="fator_tile"]:checked {
+    background-color: #569ba1;
+    border-color: #569ba1;
+}
+
+QPushButton[class="fator_tile"]:checked:hover {
+    background-color: #387f84;
+    border-color: #387f84;
+}
+
+QPushButton[class="fator_tile"]:focus {
+    border-color: #8dd2d8;
+}
+
+QLabel[class="fator_titulo"] {
     color: #e2e2e2;
     font-family: "Open Sans";
     font-size: 13px;
     font-weight: 700;
 }
 
-QToolButton[class="fator_tile"]:hover {
-    border-color: #a9eef4;
-}
-
-QToolButton[class="fator_tile"]:checked {
-    background-color: #569ba1;
-    border-color: #569ba1;
+QPushButton[class="fator_tile"]:checked QLabel[class="fator_titulo"] {
     color: #002f32;
 }
 
-QToolButton[class="fator_tile"]:checked:hover {
-    background-color: #387f84;
-    border-color: #387f84;
+QLabel[class="fator_subtitulo"] {
+    color: #889484;
+    font-family: "Open Sans";
+    font-size: 10px;
+    font-weight: 400;
 }
 
-QToolButton[class="fator_tile"]:focus {
-    border-color: #8dd2d8;
+QPushButton[class="fator_tile"]:checked QLabel[class="fator_subtitulo"] {
+    color: #002f32;
 }
 
 /* --- Tactile Tile — Risco (QToolButton grid) --- */

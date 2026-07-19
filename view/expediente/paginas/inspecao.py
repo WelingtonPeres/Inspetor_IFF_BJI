@@ -3,7 +3,7 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from PySide6.QtCore import Qt, QSize, Signal, Slot
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtWidgets import (
     QButtonGroup,
     QGridLayout,
@@ -238,41 +238,88 @@ class PaginaInspecao(QWidget):
         layout = QHBoxLayout(grupo)
         layout.setSpacing(12)
 
-        labels = {
-            "ATO_INSEGURO": "Ato Inseguro",
-            "CONDICAO_INSEGURA": "Condicao Insegura",
+        dados = {
+            "ATO_INSEGURO": ("Ato Inseguro", "falha humana"),
+            "CONDICAO_INSEGURA": ("Condicao Insegura", "falha do ambiente"),
         }
         icone_keys = {
             "ATO_INSEGURO": "ato",
             "CONDICAO_INSEGURA": "condicao",
         }
 
-        for fator in ["ATO_INSEGURO", "CONDICAO_INSEGURA"]:
-            btn = QToolButton()
+        for fator, (titulo, subtitulo) in dados.items():
+            chave = icone_keys[fator]
+            icone_color = self.__resolver_icone_fator(chave, "")
+            icone_check = self.__resolver_icone_fator(chave, "_dark")
+
+            btn = QPushButton()
             btn.setObjectName(f"tile_fator_{fator}")
             btn.setProperty("class", "fator_tile")
             btn.setCheckable(True)
-            btn.setText(labels[fator])
-            btn.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
             btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
-            chave = icone_keys[fator]
-            icone_color = self.__resolver_icone_risco(chave, "")
-            icone_check = self.__resolver_icone_risco(chave, "_dark")
+            inner = QHBoxLayout(btn)
+            inner.setContentsMargins(0, 0, 0, 0)
+            inner.setSpacing(10)
+
+            icon_label = QLabel()
+            icon_label.setObjectName(f"fator_icon_{fator}")
+            icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            if icone_color is not None:
+                icon_label.setPixmap(QPixmap(str(icone_color)).scaled(
+                    48, 48, Qt.AspectRatioMode.KeepAspectRatio,
+                    Qt.TransformationMode.SmoothTransformation,
+                ))
+            inner.addWidget(icon_label, 3)
+
+            texto_layout = QVBoxLayout()
+            texto_layout.setSpacing(2)
+
+            titulo_label = QLabel(titulo)
+            titulo_label.setObjectName(f"fator_titulo_{fator}")
+            titulo_label.setProperty("class", "fator_titulo")
+            texto_layout.addWidget(titulo_label)
+
+            subtitulo_label = QLabel(subtitulo)
+            subtitulo_label.setObjectName(f"fator_subtitulo_{fator}")
+            subtitulo_label.setProperty("class", "fator_subtitulo")
+            texto_layout.addWidget(subtitulo_label)
+
+            inner.addLayout(texto_layout, 7)
 
             if icone_color is not None:
                 btn.setProperty("icone_color", str(icone_color))
             if icone_check is not None:
-                btn.setProperty("icone_white", str(icone_check))
+                btn.setProperty("icone_check", str(icone_check))
+            btn.setProperty("icon_label", icon_label)
 
-            btn.setIconSize(QSize(28, 28))
-            self.__aplicar_icone_risco(btn, btn.isChecked())
-            btn.toggled.connect(lambda checked, b=btn: self.__aplicar_icone_risco(b, checked))
+            self.__aplicar_icone_fator(btn, btn.isChecked())
+            btn.toggled.connect(lambda checked, b=btn: self.__aplicar_icone_fator(b, checked))
 
             layout.addWidget(btn)
             self.__chk_fatores[fator] = btn
 
         return grupo
+
+    def __aplicar_icone_fator(self, btn: QPushButton, checked: bool) -> None:
+        icon_label = btn.property("icon_label")
+        if icon_label is None:
+            return
+        if checked:
+            caminho = btn.property("icone_check")
+        else:
+            caminho = btn.property("icone_color")
+        if caminho:
+            pixmap = QPixmap(caminho).scaled(
+                48, 48, Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation,
+            )
+            icon_label.setPixmap(pixmap)
+
+    def __resolver_icone_fator(self, chave: str, sufixo: str) -> Optional[Path]:
+        assets = Path(__file__).resolve().parent.parent.parent / "assets"
+        caminho = assets / "icons" / "riscos" / f"{chave}{sufixo}.png"
+        return caminho if caminho.exists() else None
 
     def __build_grupo_decisao(self) -> QGroupBox:
         grupo = QGroupBox("Decisão Administrativa")
