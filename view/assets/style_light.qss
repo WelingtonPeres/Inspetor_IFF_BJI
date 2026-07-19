@@ -90,6 +90,8 @@ QStackedWidget {
 .group_box {
     background-color: #eeeeee;
     border: 1px solid #becab9;
+    border-bottom: 3px solid #e2e2e2;
+    border-right: 3px solid #e2e2e2;
     border-radius: 4px;
     color: #006b21;
     font-family: "Open Sans";
