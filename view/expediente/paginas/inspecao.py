@@ -2,7 +2,7 @@ import logging
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from PySide6.QtCore import Qt, Signal, Slot
+from PySide6.QtCore import Qt, QSize, Signal, Slot
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QButtonGroup,
@@ -205,7 +205,7 @@ class PaginaInspecao(QWidget):
         icone = self.__resolver_icone_risco(risco)
         if icone is not None:
             btn.setIcon(QIcon(str(icone)))
-            btn.setIconSize(btn.iconSize() * 1.6)
+            btn.setIconSize(QSize(64, 64))
 
         return btn
 

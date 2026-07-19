@@ -155,7 +155,7 @@ QCheckBox[class="chk_fator"]:focus {
 /* --- Tactile Tile — Risco (QToolButton grid) --- */
 QToolButton[riscoTile="true"] {
     border-radius: 8px;
-    padding: 14px 4px;
+    padding: 8px 4px;
     min-width: 96px;
     min-height: 96px;
     font-family: "Open Sans";
