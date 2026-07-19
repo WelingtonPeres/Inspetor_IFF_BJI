@@ -5,12 +5,15 @@ from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtWidgets import (
     QButtonGroup,
     QCheckBox,
+    QGridLayout,
     QGroupBox,
     QHBoxLayout,
     QLabel,
     QPushButton,
     QRadioButton,
+    QSizePolicy,
     QSplitter,
+    QToolButton,
     QVBoxLayout,
     QWidget,
 )
@@ -35,7 +38,7 @@ class PaginaInspecao(QWidget):
 
         self.__labels_info: Dict[str, QLabel]
         self.__anexo_preview: AnexoPreview
-        self.__chk_riscos: Dict[str, QCheckBox]
+        self.__chk_riscos: Dict[str, QToolButton]
         self.__chk_fatores: Dict[str, QCheckBox]
         self.__radio_decisao: QButtonGroup
         self.__btn_submeter: QPushButton
@@ -148,13 +151,43 @@ class PaginaInspecao(QWidget):
         grupo = QGroupBox("Riscos Identificados")
         grupo.setObjectName("group_riscos")
         grupo.setProperty("class", "group_box")
-        layout = QVBoxLayout(grupo)
-        for risco in ["FISICO", "QUIMICO", "BIOLOGICO", "ERGONOMICO", "ACIDENTE"]:
-            chk = QCheckBox(risco)
-            chk.setObjectName(f"chk_risco_{risco}")
-            chk.setProperty("class", "chk_risco")
-            self.__chk_riscos[risco] = chk
-            layout.addWidget(chk)
+
+        layout = QGridLayout(grupo)
+        layout.setSpacing(10)
+
+        layout.setColumnStretch(0, 1)
+        layout.setColumnStretch(1, 1)
+        layout.setColumnStretch(2, 1)
+
+        labels = {
+            "FISICO": "Fisico",
+            "QUIMICO": "Quimico",
+            "BIOLOGICO": "Biologico",
+            "ERGONOMICO": "Ergonomico",
+            "ACIDENTE": "Acidente",
+        }
+        tiles = [
+            ("FISICO", 0, 0),
+            ("QUIMICO", 0, 1),
+            ("BIOLOGICO", 0, 2),
+            ("ERGONOMICO", 1, 0),
+            ("ACIDENTE", 1, 1),
+        ]
+
+        for risco, linha, coluna in tiles:
+            btn = QToolButton()
+            btn.setObjectName(f"tile_risco_{risco}")
+            btn.setProperty("riscoTile", True)
+            btn.setCheckable(True)
+            btn.setText(labels[risco])
+            btn.setToolButtonStyle(Qt.ToolButtonTextOnly)
+            btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+
+            col_real = coluna + 1 if linha == 1 else coluna
+            layout.addWidget(btn, linha, col_real)
+
+            self.__chk_riscos[risco] = btn
+
         return grupo
 
     def __build_grupo_fatores(self) -> QGroupBox:

@@ -4,7 +4,7 @@ Suite de testes para a PaginaInspecao.
 
 import pytest
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QCheckBox, QGroupBox, QLabel, QPushButton, QRadioButton, QSplitter, QWidget
+from PySide6.QtWidgets import QCheckBox, QGroupBox, QLabel, QPushButton, QRadioButton, QSplitter, QToolButton, QWidget
 
 from view.expediente.paginas.inspecao import PaginaInspecao
 from view.expediente.widgets.anexo_preview import AnexoPreview
@@ -57,11 +57,18 @@ class TestEstrutura:
         assert prancheta is not None
 
     def test_chk_riscos_5_itens(self, pagina):
-        """A pagina deve conter 5 checkboxes de riscos."""
-        for risco in ["FISICO", "QUIMICO", "BIOLOGICO", "ERGONOMICO", "ACIDENTE"]:
-            chk = pagina.findChild(QCheckBox, f"chk_risco_{risco}")
-            assert chk is not None
-            assert chk.text() == risco
+        """A pagina deve conter 5 tiles de riscos como QToolButton."""
+        labels = {
+            "FISICO": "Fisico",
+            "QUIMICO": "Quimico",
+            "BIOLOGICO": "Biologico",
+            "ERGONOMICO": "Ergonomico",
+            "ACIDENTE": "Acidente",
+        }
+        for risco, label in labels.items():
+            btn = pagina.findChild(QToolButton, f"tile_risco_{risco}")
+            assert btn is not None
+            assert btn.text() == label
 
     def test_chk_fatores_2_itens(self, pagina):
         """A pagina deve conter 2 checkboxes de fatores."""
@@ -111,12 +118,12 @@ class TestComportamento:
     """
 
     def test_marcar_desmarcar_risco(self, pagina):
-        """Marcar e desmarcar um checkbox de risco deve funcionar."""
-        chk = pagina.findChild(QCheckBox, "chk_risco_FISICO")
-        chk.setChecked(True)
-        assert chk.isChecked()
-        chk.setChecked(False)
-        assert not chk.isChecked()
+        """Marcar e desmarcar um tile de risco deve funcionar."""
+        btn = pagina.findChild(QToolButton, "tile_risco_FISICO")
+        btn.setChecked(True)
+        assert btn.isChecked()
+        btn.setChecked(False)
+        assert not btn.isChecked()
 
     def test_coletar_respostas_estrutura(self, pagina):
         """__coletar_respostas deve retornar dict com chaves esperadas."""
@@ -128,8 +135,8 @@ class TestComportamento:
 
     def test_coletar_respostas_com_valores(self, pagina):
         """Coletar respostas deve refletir selecoes."""
-        pagina.findChild(QCheckBox, "chk_risco_FISICO").setChecked(True)
-        pagina.findChild(QCheckBox, "chk_risco_QUIMICO").setChecked(True)
+        pagina.findChild(QToolButton, "tile_risco_FISICO").setChecked(True)
+        pagina.findChild(QToolButton, "tile_risco_QUIMICO").setChecked(True)
         pagina.findChild(QCheckBox, "chk_fator_ATO_INSEGURO").setChecked(True)
         pagina.findChild(QRadioButton, "radio_decisao_ADVERTIR").setChecked(True)
         resultado = pagina._PaginaInspecao__coletar_respostas()
@@ -141,11 +148,11 @@ class TestComportamento:
 
     def test_limpar_formulario_reseta_tudo(self, pagina):
         """limpar_formulario deve desmarcar todos os campos."""
-        pagina.findChild(QCheckBox, "chk_risco_FISICO").setChecked(True)
+        pagina.findChild(QToolButton, "tile_risco_FISICO").setChecked(True)
         pagina.findChild(QCheckBox, "chk_fator_ATO_INSEGURO").setChecked(True)
         pagina.findChild(QRadioButton, "radio_decisao_ADVERTIR").setChecked(True)
         pagina.limpar_formulario()
-        assert not pagina.findChild(QCheckBox, "chk_risco_FISICO").isChecked()
+        assert not pagina.findChild(QToolButton, "tile_risco_FISICO").isChecked()
         assert not pagina.findChild(QCheckBox, "chk_fator_ATO_INSEGURO").isChecked()
         checked_radio = pagina.findChild(QRadioButton, "radio_decisao_ADVERTIR")
         assert not checked_radio.isChecked()
@@ -157,7 +164,7 @@ class TestComportamento:
 
     def test_submeter_signal_emitido_com_payload(self, pagina, qtbot):
         """Clicar em submeter deve emitir submeter_respostas com dict."""
-        pagina.findChild(QCheckBox, "chk_risco_FISICO").setChecked(True)
+        pagina.findChild(QToolButton, "tile_risco_FISICO").setChecked(True)
         btn = pagina.findChild(QPushButton, "btn_submeter")
         with qtbot.waitSignal(pagina.submeter_respostas, timeout=1000) as blocker:
             qtbot.mouseClick(btn, Qt.MouseButton.LeftButton)

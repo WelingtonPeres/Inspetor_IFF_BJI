@@ -108,8 +108,7 @@ QStackedWidget {
     left: 12px;
 }
 
-/* --- Tactile Toggle — Tag/Chip (Riscos + Fatores) --- */
-QCheckBox[class="chk_risco"],
+/* --- Tactile Toggle — Tag/Chip (Fatores) --- */
 QCheckBox[class="chk_fator"] {
     spacing: 0px;
     padding: 8px 14px;
@@ -122,11 +121,8 @@ QCheckBox[class="chk_fator"] {
     font-weight: 400;
 }
 
-QCheckBox[class="chk_risco"]::indicator,
 QCheckBox[class="chk_fator"]::indicator,
-QCheckBox[class="chk_risco"]::indicator:checked,
 QCheckBox[class="chk_fator"]::indicator:checked,
-QCheckBox[class="chk_risco"]::indicator:unchecked,
 QCheckBox[class="chk_fator"]::indicator:unchecked {
     width: 0px;
     height: 0px;
@@ -135,13 +131,11 @@ QCheckBox[class="chk_fator"]::indicator:unchecked {
     image: none;
 }
 
-QCheckBox[class="chk_risco"]:hover,
 QCheckBox[class="chk_fator"]:hover {
     border-color: #889484;
     color: #e2e2e2;
 }
 
-QCheckBox[class="chk_risco"]:checked,
 QCheckBox[class="chk_fator"]:checked {
     background-color: #71dd77;
     border-color: #71dd77;
@@ -149,15 +143,90 @@ QCheckBox[class="chk_fator"]:checked {
     font-weight: 700;
 }
 
-QCheckBox[class="chk_risco"]:checked:hover,
 QCheckBox[class="chk_fator"]:checked:hover {
     background-color: #37a547;
     border-color: #37a547;
 }
 
-QCheckBox[class="chk_risco"]:focus,
 QCheckBox[class="chk_fator"]:focus {
     border-color: #71dd77;
+}
+
+/* --- Tactile Tile — Risco (QToolButton grid) --- */
+QToolButton[riscoTile="true"] {
+    border-radius: 8px;
+    padding: 14px 4px;
+    min-width: 96px;
+    min-height: 96px;
+    font-family: "Open Sans";
+    font-size: 11px;
+    font-weight: 700;
+    background-color: transparent;
+}
+
+QToolButton[objectName="tile_risco_FISICO"] {
+    border: 2px solid #37a547;
+    color: #71dd77;
+}
+QToolButton[objectName="tile_risco_FISICO"]:checked {
+    background-color: #37a547;
+    color: #ffffff;
+}
+QToolButton[objectName="tile_risco_FISICO"]:hover {
+    border-color: #71dd77;
+}
+
+QToolButton[objectName="tile_risco_QUIMICO"] {
+    border: 2px solid #bb0213;
+    color: #ffb4ab;
+}
+QToolButton[objectName="tile_risco_QUIMICO"]:checked {
+    background-color: #bb0213;
+    color: #ffffff;
+}
+QToolButton[objectName="tile_risco_QUIMICO"]:hover {
+    border-color: #ffb4ab;
+}
+
+QToolButton[objectName="tile_risco_BIOLOGICO"] {
+    border: 2px solid #6d4c41;
+    color: #d7ccc8;
+}
+QToolButton[objectName="tile_risco_BIOLOGICO"]:checked {
+    background-color: #6d4c41;
+    color: #ffffff;
+}
+QToolButton[objectName="tile_risco_BIOLOGICO"]:hover {
+    border-color: #d7ccc8;
+}
+
+QToolButton[objectName="tile_risco_ERGONOMICO"] {
+    border: 2px solid #d9a824;
+    color: #f3d78a;
+}
+QToolButton[objectName="tile_risco_ERGONOMICO"]:checked {
+    background-color: #d9a824;
+    color: #1a1c1c;
+}
+QToolButton[objectName="tile_risco_ERGONOMICO"]:hover {
+    border-color: #f3d78a;
+}
+
+QToolButton[objectName="tile_risco_ACIDENTE"] {
+    border: 2px solid #1565c0;
+    color: #8dd2d8;
+}
+QToolButton[objectName="tile_risco_ACIDENTE"]:checked {
+    background-color: #1565c0;
+    color: #ffffff;
+}
+QToolButton[objectName="tile_risco_ACIDENTE"]:hover {
+    border-color: #8dd2d8;
+}
+
+QToolButton[riscoTile="true"]:focus {
+    outline: none;
+    border-style: dashed;
 }
 
 /* --- Radio Buttons (Decisão) --- */
