@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt, QRectF, QSize
-from PySide6.QtGui import QColor, QFont, QPainter, QPen
+from PySide6.QtGui import QColor, QFont, QFontMetrics, QPainter, QPen
 from PySide6.QtWidgets import QPushButton, QSizePolicy
 
 
@@ -47,9 +47,7 @@ class StampButton(QPushButton):
         painter.setPen(pen)
         painter.drawRect(border_rect)
 
-        fonte = QFont("Open Sans", 18)
-        fonte.setWeight(QFont.Weight.ExtraBold)
-        fonte.setLetterSpacing(QFont.SpacingType.AbsoluteSpacing, 1.8)
+        fonte, altura_fonte = self.__criar_fonte_adaptado()
         painter.setFont(fonte)
         painter.setPen(texto_cor)
 
@@ -58,7 +56,6 @@ class StampButton(QPushButton):
         painter.translate(center)
         painter.rotate(self.__angulo)
 
-        altura_fonte = 28
         text_rect = QRectF(
             -self.rect().width() / 2.0 + 4,
             -altura_fonte / 2.0,
@@ -67,3 +64,27 @@ class StampButton(QPushButton):
         )
         painter.drawText(text_rect, Qt.AlignmentFlag.AlignCenter, self.text())
         painter.restore()
+
+    def __criar_fonte_adaptado(self):
+        tamanho_base = 20
+        margem = 16
+        disponivel = self.rect().width() - margem
+
+        fonte = QFont("Open Sans", tamanho_base)
+        fonte.setWeight(QFont.Weight.ExtraBold)
+        fonte.setLetterSpacing(QFont.SpacingType.AbsoluteSpacing, tamanho_base * 0.1)
+
+        fm = QFontMetrics(fonte)
+        largura_texto = fm.horizontalAdvance(self.text())
+
+        if largura_texto > disponivel:
+            proporcao = disponivel / largura_texto
+            tamanho = max(12, int(tamanho_base * proporcao))
+        else:
+            tamanho = tamanho_base
+
+        fonte.setPointSize(tamanho)
+        fonte.setLetterSpacing(QFont.SpacingType.AbsoluteSpacing, tamanho * 0.1)
+
+        altura_fonte = int(tamanho * 1.55)
+        return fonte, altura_fonte
