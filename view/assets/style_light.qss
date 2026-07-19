@@ -95,7 +95,7 @@ QStackedWidget {
     font-family: "Open Sans";
     font-size: 14px;
     font-weight: 700;
-    padding: 12px;
+    padding: 20px 12px 12px 12px;
     margin: 8px 0;
 }
 
