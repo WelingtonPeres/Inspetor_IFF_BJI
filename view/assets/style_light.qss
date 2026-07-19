@@ -117,6 +117,7 @@ QPushButton[class="fator_tile"] {
     padding: 10px 14px;
     min-height: 80px;
     background-color: transparent;
+    color: #1a1c1c;
     font-family: "Open Sans";
 }
 
@@ -127,11 +128,13 @@ QPushButton[class="fator_tile"]:hover {
 QPushButton[class="fator_tile"]:checked {
     background-color: #387f84;
     border-color: #387f84;
+    color: #f4feff;
 }
 
 QPushButton[class="fator_tile"]:checked:hover {
     background-color: #17666b;
     border-color: #17666b;
+    color: #f4feff;
 }
 
 QPushButton[class="fator_tile"]:focus {
