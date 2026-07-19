@@ -204,16 +204,31 @@ class PaginaInspecao(QWidget):
         btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         btn.setMinimumSize(96, 96)
 
-        icone = self.__resolver_icone_risco(risco)
-        if icone is not None:
-            btn.setIcon(QIcon(str(icone)))
-            btn.setIconSize(QSize(64, 64))
+        icone_color = self.__resolver_icone_risco(risco, "_color")
+        icone_white = self.__resolver_icone_risco(risco, "_dark")
+
+        if icone_color is not None:
+            btn.setProperty("icone_color", str(icone_color))
+        if icone_white is not None:
+            btn.setProperty("icone_white", str(icone_white))
+
+        btn.setIconSize(QSize(64, 64))
+        self.__aplicar_icone_risco(btn, btn.isChecked())
+        btn.toggled.connect(lambda checked, b=btn: self.__aplicar_icone_risco(b, checked))
 
         return btn
 
-    def __resolver_icone_risco(self, risco: str) -> Optional[Path]:
+    def __aplicar_icone_risco(self, btn: QToolButton, checked: bool) -> None:
+        if checked:
+            caminho = btn.property("icone_white")
+        else:
+            caminho = btn.property("icone_color")
+        if caminho:
+            btn.setIcon(QIcon(caminho))
+
+    def __resolver_icone_risco(self, risco: str, sufixo: str) -> Optional[Path]:
         assets = Path(__file__).resolve().parent.parent.parent / "assets"
-        caminho = assets / "icons" / "riscos" / f"risco_{risco.lower()}_dark.png"
+        caminho = assets / "icons" / "riscos" / f"risco_{risco.lower()}{sufixo}.png"
         return caminho if caminho.exists() else None
 
     def __build_grupo_fatores(self) -> QGroupBox:
