@@ -1,7 +1,9 @@
 import logging
 import time
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 from PySide6.QtCore import Qt, Signal, Slot
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QButtonGroup,
     QCheckBox,
@@ -197,9 +199,20 @@ class PaginaInspecao(QWidget):
         btn.setProperty("riscoTile", True)
         btn.setCheckable(True)
         btn.setText(label)
-        btn.setToolButtonStyle(Qt.ToolButtonTextOnly)
+        btn.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
         btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+
+        icone = self.__resolver_icone_risco(risco)
+        if icone is not None:
+            btn.setIcon(QIcon(str(icone)))
+            btn.setIconSize(btn.iconSize() * 1.6)
+
         return btn
+
+    def __resolver_icone_risco(self, risco: str) -> Optional[Path]:
+        assets = Path(__file__).resolve().parent.parent.parent / "assets"
+        caminho = assets / "icons" / "riscos" / f"risco_{risco.lower()}_dark.png"
+        return caminho if caminho.exists() else None
 
     def __build_grupo_fatores(self) -> QGroupBox:
         grupo = QGroupBox("Fatores de Insegurança")
