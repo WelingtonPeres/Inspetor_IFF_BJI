@@ -495,8 +495,8 @@ QFrame#anexo_preview {
 }
 
 QLabel#anexo_thumbnail {
-    background-color: #f9f9f9;
-    border: 1px solid #becab9;
+    background-color: #000000;
+    border: 4px solid #6f7a6b;
     border-radius: 4px;
 }
 
