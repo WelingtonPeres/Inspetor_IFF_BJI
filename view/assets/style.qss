@@ -138,7 +138,8 @@ QPushButton[class="fator_tile"]:checked:hover {
 }
 
 QPushButton[class="fator_tile"]:focus {
-    border-color: #8dd2d8;
+    border-color: #ffffff;
+    outline: none;
 }
 
 QLabel[class="fator_titulo"] {

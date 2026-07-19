@@ -256,6 +256,8 @@ class PaginaInspecao(QWidget):
             btn.setObjectName(f"tile_fator_{fator}")
             btn.setProperty("class", "fator_tile")
             btn.setCheckable(True)
+            btn.setFlat(True)
+            btn.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
             btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
             inner = QHBoxLayout(btn)
