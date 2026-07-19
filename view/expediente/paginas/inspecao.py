@@ -282,11 +282,13 @@ class PaginaInspecao(QWidget):
             titulo_label = QLabel(titulo)
             titulo_label.setObjectName(f"fator_titulo_{fator}")
             titulo_label.setProperty("class", "fator_titulo")
+            titulo_label.setStyleSheet("color: #ffffff; font-size: 16px; font-weight: 700;")
             texto_layout.addWidget(titulo_label)
 
             subtitulo_label = QLabel(subtitulo)
             subtitulo_label.setObjectName(f"fator_subtitulo_{fator}")
             subtitulo_label.setProperty("class", "fator_subtitulo")
+            subtitulo_label.setStyleSheet("color: #ffffff; font-size: 13px;")
             texto_layout.addWidget(subtitulo_label)
 
             inner.addLayout(texto_layout, 7)
@@ -296,6 +298,8 @@ class PaginaInspecao(QWidget):
             if icone_check is not None:
                 btn.setProperty("icone_check", str(icone_check))
             btn.setProperty("icon_label", icon_label)
+            btn.setProperty("titulo_label", titulo_label)
+            btn.setProperty("subtitulo_label", subtitulo_label)
 
             self.__aplicar_icone_fator(btn, btn.isChecked())
             btn.toggled.connect(lambda checked, b=btn: self.__aplicar_icone_fator(b, checked))
@@ -307,18 +311,31 @@ class PaginaInspecao(QWidget):
 
     def __aplicar_icone_fator(self, btn: QPushButton, checked: bool) -> None:
         icon_label = btn.property("icon_label")
-        if icon_label is None:
-            return
+        titulo_label = btn.property("titulo_label")
+        subtitulo_label = btn.property("subtitulo_label")
+
         if checked:
             caminho = btn.property("icone_check")
+            cor_texto = "#002f32"
         else:
             caminho = btn.property("icone_color")
-        if caminho:
+            cor_texto = "#ffffff"
+
+        if icon_label is not None and caminho:
             pixmap = QPixmap(caminho).scaled(
                 48, 48, Qt.AspectRatioMode.KeepAspectRatio,
                 Qt.TransformationMode.SmoothTransformation,
             )
             icon_label.setPixmap(pixmap)
+
+        if titulo_label is not None:
+            titulo_label.setStyleSheet(
+                f"color: {cor_texto}; font-size: 16px; font-weight: 700;"
+            )
+        if subtitulo_label is not None:
+            subtitulo_label.setStyleSheet(
+                f"color: {cor_texto}; font-size: 13px;"
+            )
 
     def __resolver_icone_fator(self, chave: str, sufixo: str) -> Optional[Path]:
         assets = Path(__file__).resolve().parent.parent.parent / "assets"
