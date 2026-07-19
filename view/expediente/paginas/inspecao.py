@@ -6,7 +6,6 @@ from PySide6.QtCore import Qt, QSize, Signal, Slot
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QButtonGroup,
-    QCheckBox,
     QGridLayout,
     QGroupBox,
     QHBoxLayout,
@@ -41,7 +40,7 @@ class PaginaInspecao(QWidget):
         self.__labels_info: Dict[str, QLabel]
         self.__anexo_preview: AnexoPreview
         self.__chk_riscos: Dict[str, QToolButton]
-        self.__chk_fatores: Dict[str, QCheckBox]
+        self.__chk_fatores: Dict[str, QToolButton]
         self.__radio_decisao: QButtonGroup
         self.__btn_submeter: QPushButton
         self.__tempo_inicio_inspecao: float = 0.0
@@ -232,16 +231,47 @@ class PaginaInspecao(QWidget):
         return caminho if caminho.exists() else None
 
     def __build_grupo_fatores(self) -> QGroupBox:
-        grupo = QGroupBox("Fatores de Insegurança")
+        grupo = QGroupBox("Fatores de Inseguranca")
         grupo.setObjectName("group_fatores")
         grupo.setProperty("class", "group_box")
-        layout = QVBoxLayout(grupo)
+
+        layout = QHBoxLayout(grupo)
+        layout.setSpacing(12)
+
+        labels = {
+            "ATO_INSEGURO": "Ato Inseguro",
+            "CONDICAO_INSEGURA": "Condicao Insegura",
+        }
+        icone_keys = {
+            "ATO_INSEGURO": "ato",
+            "CONDICAO_INSEGURA": "condicao",
+        }
+
         for fator in ["ATO_INSEGURO", "CONDICAO_INSEGURA"]:
-            chk = QCheckBox(fator)
-            chk.setObjectName(f"chk_fator_{fator}")
-            chk.setProperty("class", "chk_fator")
-            self.__chk_fatores[fator] = chk
-            layout.addWidget(chk)
+            btn = QToolButton()
+            btn.setObjectName(f"tile_fator_{fator}")
+            btn.setProperty("class", "fator_tile")
+            btn.setCheckable(True)
+            btn.setText(labels[fator])
+            btn.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+            btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+
+            chave = icone_keys[fator]
+            icone_color = self.__resolver_icone_risco(chave, "")
+            icone_check = self.__resolver_icone_risco(chave, "_dark")
+
+            if icone_color is not None:
+                btn.setProperty("icone_color", str(icone_color))
+            if icone_check is not None:
+                btn.setProperty("icone_white", str(icone_check))
+
+            btn.setIconSize(QSize(28, 28))
+            self.__aplicar_icone_risco(btn, btn.isChecked())
+            btn.toggled.connect(lambda checked, b=btn: self.__aplicar_icone_risco(b, checked))
+
+            layout.addWidget(btn)
+            self.__chk_fatores[fator] = btn
+
         return grupo
 
     def __build_grupo_decisao(self) -> QGroupBox:

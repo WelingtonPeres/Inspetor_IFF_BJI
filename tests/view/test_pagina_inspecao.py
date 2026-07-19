@@ -4,7 +4,7 @@ Suite de testes para a PaginaInspecao.
 
 import pytest
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QCheckBox, QGroupBox, QLabel, QPushButton, QSplitter, QToolButton, QWidget
+from PySide6.QtWidgets import QGroupBox, QLabel, QPushButton, QSplitter, QToolButton, QWidget
 
 from view.expediente.paginas.inspecao import PaginaInspecao
 from view.expediente.widgets.anexo_preview import AnexoPreview
@@ -72,11 +72,15 @@ class TestEstrutura:
             assert btn.text() == label
 
     def test_chk_fatores_2_itens(self, pagina):
-        """A pagina deve conter 2 checkboxes de fatores."""
-        for fator in ["ATO_INSEGURO", "CONDICAO_INSEGURA"]:
-            chk = pagina.findChild(QCheckBox, f"chk_fator_{fator}")
-            assert chk is not None
-            assert chk.text() == fator
+        """A pagina deve conter 2 tiles de fatores como QToolButton."""
+        labels = {
+            "ATO_INSEGURO": "Ato Inseguro",
+            "CONDICAO_INSEGURA": "Condicao Insegura",
+        }
+        for fator, label in labels.items():
+            btn = pagina.findChild(QToolButton, f"tile_fator_{fator}")
+            assert btn is not None
+            assert btn.text() == label
 
     def test_radio_decisao_3_itens(self, pagina):
         """A pagina deve conter 3 stamps de decisao."""
@@ -138,7 +142,7 @@ class TestComportamento:
         """Coletar respostas deve refletir selecoes."""
         pagina.findChild(QToolButton, "tile_risco_FISICO").setChecked(True)
         pagina.findChild(QToolButton, "tile_risco_QUIMICO").setChecked(True)
-        pagina.findChild(QCheckBox, "chk_fator_ATO_INSEGURO").setChecked(True)
+        pagina.findChild(QToolButton, "tile_fator_ATO_INSEGURO").setChecked(True)
         pagina.findChild(StampButton, "stamp_decisao_ADVERTIR").setChecked(True)
         resultado = pagina._PaginaInspecao__coletar_respostas()
         assert "FISICO" in resultado["riscos"]
@@ -150,11 +154,11 @@ class TestComportamento:
     def test_limpar_formulario_reseta_tudo(self, pagina):
         """limpar_formulario deve desmarcar todos os campos."""
         pagina.findChild(QToolButton, "tile_risco_FISICO").setChecked(True)
-        pagina.findChild(QCheckBox, "chk_fator_ATO_INSEGURO").setChecked(True)
+        pagina.findChild(QToolButton, "tile_fator_ATO_INSEGURO").setChecked(True)
         pagina.findChild(StampButton, "stamp_decisao_ADVERTIR").setChecked(True)
         pagina.limpar_formulario()
         assert not pagina.findChild(QToolButton, "tile_risco_FISICO").isChecked()
-        assert not pagina.findChild(QCheckBox, "chk_fator_ATO_INSEGURO").isChecked()
+        assert not pagina.findChild(QToolButton, "tile_fator_ATO_INSEGURO").isChecked()
         checked_stamp = pagina.findChild(StampButton, "stamp_decisao_ADVERTIR")
         assert not checked_stamp.isChecked()
 

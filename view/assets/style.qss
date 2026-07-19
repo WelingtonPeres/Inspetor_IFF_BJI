@@ -110,48 +110,35 @@ QStackedWidget {
     left: 12px;
 }
 
-/* --- Tactile Toggle — Tag/Chip (Fatores) --- */
-QCheckBox[class="chk_fator"] {
-    spacing: 0px;
-    padding: 8px 14px;
-    border: 2px solid #3f4a3d;
-    border-radius: 4px;
+/* --- Tactile Tile — Fator (QToolButton horizontal) --- */
+QToolButton[class="fator_tile"] {
+    border: 2px solid #8dd2d8;
+    border-radius: 8px;
+    padding: 12px 14px;
     background-color: transparent;
-    color: #becab9;
-    font-family: "Open Sans";
-    font-size: 14px;
-    font-weight: 400;
-}
-
-QCheckBox[class="chk_fator"]::indicator,
-QCheckBox[class="chk_fator"]::indicator:checked,
-QCheckBox[class="chk_fator"]::indicator:unchecked {
-    width: 0px;
-    height: 0px;
-    border: none;
-    background: transparent;
-    image: none;
-}
-
-QCheckBox[class="chk_fator"]:hover {
-    border-color: #889484;
     color: #e2e2e2;
-}
-
-QCheckBox[class="chk_fator"]:checked {
-    background-color: #71dd77;
-    border-color: #71dd77;
-    color: #00390d;
+    font-family: "Open Sans";
+    font-size: 13px;
     font-weight: 700;
 }
 
-QCheckBox[class="chk_fator"]:checked:hover {
-    background-color: #37a547;
-    border-color: #37a547;
+QToolButton[class="fator_tile"]:hover {
+    border-color: #a9eef4;
 }
 
-QCheckBox[class="chk_fator"]:focus {
-    border-color: #71dd77;
+QToolButton[class="fator_tile"]:checked {
+    background-color: #569ba1;
+    border-color: #569ba1;
+    color: #002f32;
+}
+
+QToolButton[class="fator_tile"]:checked:hover {
+    background-color: #387f84;
+    border-color: #387f84;
+}
+
+QToolButton[class="fator_tile"]:focus {
+    border-color: #8dd2d8;
 }
 
 /* --- Tactile Tile — Risco (QToolButton grid) --- */
