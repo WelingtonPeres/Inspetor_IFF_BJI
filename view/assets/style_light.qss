@@ -114,7 +114,8 @@ QStackedWidget {
 QPushButton[class="fator_tile"] {
     border: 2px solid #17666b;
     border-radius: 8px;
-    padding: 12px 14px;
+    padding: 10px 14px;
+    min-height: 72px;
     background-color: transparent;
     font-family: "Open Sans";
 }
@@ -140,7 +141,7 @@ QPushButton[class="fator_tile"]:focus {
 QLabel[class="fator_titulo"] {
     color: #1a1c1c;
     font-family: "Open Sans";
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
 }
 
@@ -151,7 +152,7 @@ QPushButton[class="fator_tile"]:checked QLabel[class="fator_titulo"] {
 QLabel[class="fator_subtitulo"] {
     color: #6f7a6b;
     font-family: "Open Sans";
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 400;
 }
 

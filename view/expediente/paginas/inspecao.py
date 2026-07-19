@@ -259,8 +259,9 @@ class PaginaInspecao(QWidget):
             btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
             inner = QHBoxLayout(btn)
-            inner.setContentsMargins(0, 0, 0, 0)
+            inner.setContentsMargins(6, 8, 6, 8)
             inner.setSpacing(10)
+            inner.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
             icon_label = QLabel()
             icon_label.setObjectName(f"fator_icon_{fator}")
@@ -273,7 +274,8 @@ class PaginaInspecao(QWidget):
             inner.addWidget(icon_label, 3)
 
             texto_layout = QVBoxLayout()
-            texto_layout.setSpacing(2)
+            texto_layout.setSpacing(0)
+            texto_layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
             titulo_label = QLabel(titulo)
             titulo_label.setObjectName(f"fator_titulo_{fator}")
