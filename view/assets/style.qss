@@ -123,9 +123,16 @@ QCheckBox[class="chk_fator"] {
 }
 
 QCheckBox[class="chk_risco"]::indicator,
-QCheckBox[class="chk_fator"]::indicator {
+QCheckBox[class="chk_fator"]::indicator,
+QCheckBox[class="chk_risco"]::indicator:checked,
+QCheckBox[class="chk_fator"]::indicator:checked,
+QCheckBox[class="chk_risco"]::indicator:unchecked,
+QCheckBox[class="chk_fator"]::indicator:unchecked {
     width: 0px;
     height: 0px;
+    border: none;
+    background: transparent;
+    image: none;
 }
 
 QCheckBox[class="chk_risco"]:hover,
