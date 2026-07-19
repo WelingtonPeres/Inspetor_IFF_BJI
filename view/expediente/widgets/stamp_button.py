@@ -4,7 +4,7 @@ from PySide6.QtWidgets import QPushButton, QSizePolicy
 
 
 STAMP_COLORS = {
-    "ADVERTIR": QColor("#F3997B"),
+    "ADVERTIR": QColor("#E6A800"),
     "INTERDITAR": QColor("#CD191E"),
     "IGNORAR": QColor("#889484"),
 }
@@ -28,7 +28,7 @@ class StampButton(QPushButton):
         self.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
 
     def sizeHint(self) -> QSize:
-        return QSize(140, 52)
+        return QSize(160, 52)
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -47,9 +47,9 @@ class StampButton(QPushButton):
         painter.setPen(pen)
         painter.drawRect(border_rect)
 
-        fonte = QFont("Open Sans", 24)
+        fonte = QFont("Open Sans", 18)
         fonte.setWeight(QFont.Weight.ExtraBold)
-        fonte.setLetterSpacing(QFont.SpacingType.AbsoluteSpacing, 2.4)
+        fonte.setLetterSpacing(QFont.SpacingType.AbsoluteSpacing, 1.8)
         painter.setFont(fonte)
         painter.setPen(texto_cor)
 
@@ -58,7 +58,7 @@ class StampButton(QPushButton):
         painter.translate(center)
         painter.rotate(self.__angulo)
 
-        altura_fonte = 36
+        altura_fonte = 28
         text_rect = QRectF(
             -self.rect().width() / 2.0 + 4,
             -altura_fonte / 2.0,
