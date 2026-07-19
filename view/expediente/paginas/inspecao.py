@@ -175,20 +175,22 @@ class PaginaInspecao(QWidget):
             ("QUIMICO", 1),
             ("BIOLOGICO", 2),
         ]
-        linha_1 = [
-            ("ERGONOMICO", 0),
-            ("ACIDENTE", 2),
-        ]
+        linha_1 = ["ERGONOMICO", "ACIDENTE"]
 
         for risco, col in linha_0:
             btn = self.__criar_tile_risco(risco, labels[risco])
             layout.addWidget(btn, 0, col)
             self.__chk_riscos[risco] = btn
 
-        for risco, col in linha_1:
+        inner = QHBoxLayout()
+        inner.setSpacing(10)
+        inner.addStretch()
+        for risco in linha_1:
             btn = self.__criar_tile_risco(risco, labels[risco])
-            layout.addWidget(btn, 1, col)
+            inner.addWidget(btn)
             self.__chk_riscos[risco] = btn
+        inner.addStretch()
+        layout.addLayout(inner, 1, 0, 1, 3)
 
         return grupo
 
