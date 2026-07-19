@@ -112,7 +112,7 @@ QStackedWidget {
 
 /* --- Tactile Tile — Fator (QPushButton com layout interno) --- */
 QPushButton[class="fator_tile"] {
-    border: 2px solid #8dd2d8;
+    border: 2px solid #ffffff;
     border-radius: 8px;
     padding: 10px 14px;
     min-height: 80px;
@@ -122,7 +122,7 @@ QPushButton[class="fator_tile"] {
 }
 
 QPushButton[class="fator_tile"]:hover {
-    border-color: #a9eef4;
+    border-color: #ffffff;
 }
 
 QPushButton[class="fator_tile"]:checked {
@@ -153,7 +153,7 @@ QPushButton[class="fator_tile"]:checked QLabel[class="fator_titulo"] {
 }
 
 QLabel[class="fator_subtitulo"] {
-    color: #becab9;
+    color: #ffffff;
     font-family: "Open Sans";
     font-size: 13px;
     font-weight: 400;

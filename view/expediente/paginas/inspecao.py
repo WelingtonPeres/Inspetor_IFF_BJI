@@ -249,7 +249,7 @@ class PaginaInspecao(QWidget):
 
         for fator, (titulo, subtitulo) in dados.items():
             chave = icone_keys[fator]
-            icone_color = self.__resolver_icone_fator(chave, "")
+            icone_color = self.__resolver_icone_fator(chave, "_white")
             icone_check = self.__resolver_icone_fator(chave, "_dark")
 
             btn = QPushButton()
