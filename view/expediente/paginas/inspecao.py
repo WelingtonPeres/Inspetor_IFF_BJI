@@ -166,29 +166,40 @@ class PaginaInspecao(QWidget):
             "ERGONOMICO": "Ergonomico",
             "ACIDENTE": "Acidente",
         }
-        tiles = [
-            ("FISICO", 0, 0),
-            ("QUIMICO", 0, 1),
-            ("BIOLOGICO", 0, 2),
-            ("ERGONOMICO", 1, 0),
-            ("ACIDENTE", 1, 1),
+
+        linha_0 = [
+            ("FISICO", 0),
+            ("QUIMICO", 1),
+            ("BIOLOGICO", 2),
         ]
+        linha_1 = ["ERGONOMICO", "ACIDENTE"]
 
-        for risco, linha, coluna in tiles:
-            btn = QToolButton()
-            btn.setObjectName(f"tile_risco_{risco}")
-            btn.setProperty("riscoTile", True)
-            btn.setCheckable(True)
-            btn.setText(labels[risco])
-            btn.setToolButtonStyle(Qt.ToolButtonTextOnly)
-            btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-
-            col_real = coluna + 1 if linha == 1 else coluna
-            layout.addWidget(btn, linha, col_real)
-
+        for risco, col in linha_0:
+            btn = self.__criar_tile_risco(risco, labels[risco])
+            layout.addWidget(btn, 0, col)
             self.__chk_riscos[risco] = btn
 
+        inner = QHBoxLayout()
+        inner.setSpacing(10)
+        inner.addStretch()
+        for risco in linha_1:
+            btn = self.__criar_tile_risco(risco, labels[risco])
+            inner.addWidget(btn)
+            self.__chk_riscos[risco] = btn
+        inner.addStretch()
+        layout.addLayout(inner, 1, 0, 1, 3)
+
         return grupo
+
+    def __criar_tile_risco(self, risco: str, label: str) -> QToolButton:
+        btn = QToolButton()
+        btn.setObjectName(f"tile_risco_{risco}")
+        btn.setProperty("riscoTile", True)
+        btn.setCheckable(True)
+        btn.setText(label)
+        btn.setToolButtonStyle(Qt.ToolButtonTextOnly)
+        btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        return btn
 
     def __build_grupo_fatores(self) -> QGroupBox:
         grupo = QGroupBox("Fatores de Insegurança")
