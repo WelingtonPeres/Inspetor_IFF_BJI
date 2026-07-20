@@ -457,19 +457,50 @@ QFrame#sidebar {
     border-right: 1px solid #3f4a3d;
 }
 
-.sidebar_item {
-    background-color: transparent;
-    color: #e2e2e2;
-    border: none;
+#sidebar_header {
     border-bottom: 1px solid #3f4a3d;
+}
+
+#sidebar_titulo {
+    color: #becab9;
     font-family: "Open Sans";
     font-size: 12px;
-    font-weight: 400;
-    padding: 8px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+#sidebar_divider {
+    border: none;
+    border-top: 1px solid #3f4a3d;
+    margin: 0 12px;
+}
+
+.sidebar_item {
+    background-color: transparent;
+    color: #becab9;
+    border: none;
+    border-left: 3px solid transparent;
+    font-family: "Open Sans";
+    font-size: 13px;
+    font-weight: 500;
+    padding: 12px 16px;
+    text-align: left;
 }
 
 .sidebar_item:hover {
     background-color: #1e2020;
+    border-left-color: #3f4a3d;
+    color: #e2e2e2;
+}
+
+.sidebar_item[active="true"] {
+    background-color: #282a2b;
+    border-left-color: #71dd77;
+    color: #71dd77;
+}
+
+.sidebar_item[active="true"]:hover {
+    border-left-color: #71dd77;
 }
 
 .sidebar_item:disabled {
