@@ -1,21 +1,25 @@
 import logging
 import time
+from pathlib import Path
 from typing import Any, Dict, List, Optional
-from PySide6.QtCore import Qt, Signal, Slot
+from PySide6.QtCore import Qt, QSize, Signal, Slot
+from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtWidgets import (
     QButtonGroup,
-    QCheckBox,
+    QGridLayout,
     QGroupBox,
     QHBoxLayout,
     QLabel,
     QPushButton,
-    QRadioButton,
+    QSizePolicy,
     QSplitter,
+    QToolButton,
     QVBoxLayout,
     QWidget,
 )
 
 from view.expediente.widgets.anexo_preview import AnexoPreview
+from view.expediente.widgets.stamp_button import StampButton
 from view.widgets.midia.video_player import VideoPlayer
 from view.expediente.overlays.anexo_gallery import AnexoGallery
 from view.expediente.overlays.media_viewer import MediaViewer
@@ -33,10 +37,10 @@ class PaginaInspecao(QWidget):
         self.setObjectName("pagina_inspecao")
         self.setProperty("class", "pagina_inspecao")
 
-        self.__label_titulo_relatorio: QLabel
+        self.__labels_info: Dict[str, QLabel]
         self.__anexo_preview: AnexoPreview
-        self.__chk_riscos: Dict[str, QCheckBox]
-        self.__chk_fatores: Dict[str, QCheckBox]
+        self.__chk_riscos: Dict[str, QToolButton]
+        self.__chk_fatores: Dict[str, QToolButton]
         self.__radio_decisao: QButtonGroup
         self.__btn_submeter: QPushButton
         self.__tempo_inicio_inspecao: float = 0.0
@@ -70,17 +74,76 @@ class PaginaInspecao(QWidget):
         deck = QWidget(objectName="deck_observacao")
         deck_layout = QVBoxLayout(deck)
 
-        self.__label_titulo_relatorio = QLabel("Aguardando relatório...")
-        self.__label_titulo_relatorio.setObjectName("label_titulo_relatorio")
-        self.__label_titulo_relatorio.setAlignment(Qt.AlignmentFlag.AlignTop)
-        self.__label_titulo_relatorio.setWordWrap(True)
-        deck_layout.addWidget(self.__label_titulo_relatorio)
+        info_block = self.__build_info_block()
+        deck_layout.addWidget(info_block)
 
         self.__anexo_preview = AnexoPreview()
         deck_layout.addWidget(self.__anexo_preview)
 
         deck_layout.addStretch()
         return deck
+
+    def __build_info_block(self) -> QWidget:
+        """Cria o bloco de informacoes do relatorio.
+
+        O titulo e apresentado como texto puro (QLabel), enquanto os
+        demais campos (local, atividade, envolvidos, descricao) usam
+        QGroupBox com classe 'group_box'.
+        """
+        block = QWidget(objectName="info_block_relatorio")
+        layout = QVBoxLayout(block)
+        layout.setSpacing(12)
+
+        self.__labels_info = {}
+
+        titulo_label = self.__criar_label_info("titulo")
+        titulo_label.setProperty("class", "label_info_titulo")
+        layout.addWidget(titulo_label)
+
+        linha_local_ativ = QHBoxLayout()
+        linha_local_ativ.setSpacing(12)
+
+        campos_linha = [
+            ("local", "Local"),
+            ("atividade", "Atividade"),
+        ]
+        campos_abaixo = [
+            ("envolvidos", "Envolvidos"),
+            ("descricao", "Descricao"),
+        ]
+
+        for chave, rotulo in campos_linha:
+            grupo = self.__criar_grupo_info(chave, rotulo)
+            grupo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+            linha_local_ativ.addWidget(grupo)
+
+        layout.addLayout(linha_local_ativ)
+
+        for chave, rotulo in campos_abaixo:
+            grupo = self.__criar_grupo_info(chave, rotulo)
+            layout.addWidget(grupo)
+
+        return block
+
+    def __criar_grupo_info(self, chave: str, rotulo: str) -> QGroupBox:
+        label = self.__criar_label_info(chave)
+        grupo = QGroupBox(rotulo)
+        grupo.setObjectName(f"group_info_{chave}")
+        grupo.setProperty("class", "group_box")
+        grupo_layout = QVBoxLayout(grupo)
+        grupo_layout.setContentsMargins(8, 12, 8, 8)
+        grupo_layout.addWidget(label)
+        return grupo
+
+    def __criar_label_info(self, chave: str) -> QLabel:
+        """Cria um QLabel padrao para exibicao de informacoes do relatorio."""
+        label = QLabel("Aguardando relatório...")
+        label.setObjectName(f"label_info_{chave}")
+        label.setProperty("class", "label_info_valor")
+        label.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        label.setWordWrap(True)
+        self.__labels_info[chave] = label
+        return label
 
     def __build_prancheta(self) -> QWidget:
         prancheta = QWidget(objectName="prancheta")
@@ -106,51 +169,226 @@ class PaginaInspecao(QWidget):
         grupo = QGroupBox("Riscos Identificados")
         grupo.setObjectName("group_riscos")
         grupo.setProperty("class", "group_box")
-        layout = QVBoxLayout(grupo)
-        for risco in ["FISICO", "QUIMICO", "BIOLOGICO", "ERGONOMICO", "ACIDENTE"]:
-            chk = QCheckBox(risco)
-            chk.setObjectName(f"chk_risco_{risco}")
-            chk.setProperty("class", "chk_risco")
-            self.__chk_riscos[risco] = chk
-            layout.addWidget(chk)
+
+        layout = QGridLayout(grupo)
+        layout.setSpacing(10)
+        layout.setContentsMargins(0, 8, 0, 0)
+
+        layout.setColumnStretch(0, 1)
+        layout.setColumnStretch(1, 1)
+        layout.setColumnStretch(2, 1)
+
+        labels = {
+            "FISICO": "Fisico",
+            "QUIMICO": "Quimico",
+            "BIOLOGICO": "Biologico",
+            "ERGONOMICO": "Ergonomico",
+            "ACIDENTE": "Acidente",
+        }
+
+        linha_0 = [
+            ("FISICO", 0),
+            ("QUIMICO", 1),
+            ("BIOLOGICO", 2),
+        ]
+        linha_1 = ["ERGONOMICO", "ACIDENTE"]
+
+        for risco, col in linha_0:
+            btn = self.__criar_tile_risco(risco, labels[risco])
+            layout.addWidget(btn, 0, col)
+            self.__chk_riscos[risco] = btn
+
+        inner = QHBoxLayout()
+        inner.setSpacing(10)
+        inner.addStretch()
+        for risco in linha_1:
+            btn = self.__criar_tile_risco(risco, labels[risco])
+            inner.addWidget(btn)
+            self.__chk_riscos[risco] = btn
+        inner.addStretch()
+        layout.addLayout(inner, 1, 0, 1, 3)
+
         return grupo
 
+    def __criar_tile_risco(self, risco: str, label: str) -> QToolButton:
+        btn = QToolButton()
+        btn.setObjectName(f"tile_risco_{risco}")
+        btn.setProperty("riscoTile", True)
+        btn.setCheckable(True)
+        btn.setText(label)
+        btn.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+        btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        btn.setMinimumSize(96, 96)
+
+        icone_color = self.__resolver_icone_risco(risco, "_color")
+        icone_white = self.__resolver_icone_risco(risco, "_dark")
+
+        if icone_color is not None:
+            btn.setProperty("icone_color", str(icone_color))
+        if icone_white is not None:
+            btn.setProperty("icone_white", str(icone_white))
+
+        btn.setIconSize(QSize(64, 64))
+        self.__aplicar_icone_risco(btn, btn.isChecked())
+        btn.toggled.connect(lambda checked, b=btn: self.__aplicar_icone_risco(b, checked))
+
+        return btn
+
+    def __aplicar_icone_risco(self, btn: QToolButton, checked: bool) -> None:
+        if checked:
+            caminho = btn.property("icone_white")
+        else:
+            caminho = btn.property("icone_color")
+        if caminho:
+            btn.setIcon(QIcon(caminho))
+
+    def __resolver_icone_risco(self, risco: str, sufixo: str) -> Optional[Path]:
+        assets = Path(__file__).resolve().parent.parent.parent / "assets"
+        caminho = assets / "icons" / "riscos" / f"risco_{risco.lower()}{sufixo}.png"
+        return caminho if caminho.exists() else None
+
     def __build_grupo_fatores(self) -> QGroupBox:
-        grupo = QGroupBox("Fatores de Insegurança")
+        grupo = QGroupBox("Fatores de Inseguranca")
         grupo.setObjectName("group_fatores")
         grupo.setProperty("class", "group_box")
-        layout = QVBoxLayout(grupo)
-        for fator in ["ATO_INSEGURO", "CONDICAO_INSEGURA"]:
-            chk = QCheckBox(fator)
-            chk.setObjectName(f"chk_fator_{fator}")
-            chk.setProperty("class", "chk_fator")
-            self.__chk_fatores[fator] = chk
-            layout.addWidget(chk)
+
+        layout = QHBoxLayout(grupo)
+        layout.setSpacing(12)
+
+        dados = {
+            "ATO_INSEGURO": ("Ato Inseguro", "falha humana"),
+            "CONDICAO_INSEGURA": ("Condicao Insegura", "falha do ambiente"),
+        }
+        icone_keys = {
+            "ATO_INSEGURO": "ato",
+            "CONDICAO_INSEGURA": "condicao",
+        }
+
+        for fator, (titulo, subtitulo) in dados.items():
+            chave = icone_keys[fator]
+            icone_color = self.__resolver_icone_fator(chave, "_white")
+            icone_check = self.__resolver_icone_fator(chave, "_dark")
+
+            btn = QPushButton()
+            btn.setObjectName(f"tile_fator_{fator}")
+            btn.setProperty("class", "fator_tile")
+            btn.setCheckable(True)
+            btn.setFlat(True)
+            btn.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+            btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+
+            inner = QHBoxLayout(btn)
+            inner.setContentsMargins(6, 8, 6, 8)
+            inner.setSpacing(10)
+            inner.setAlignment(Qt.AlignmentFlag.AlignVCenter)
+
+            icon_label = QLabel()
+            icon_label.setObjectName(f"fator_icon_{fator}")
+            icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            if icone_color is not None:
+                icon_label.setPixmap(QPixmap(str(icone_color)).scaled(
+                    48, 48, Qt.AspectRatioMode.KeepAspectRatio,
+                    Qt.TransformationMode.SmoothTransformation,
+                ))
+            inner.addWidget(icon_label, 3)
+
+            texto_layout = QVBoxLayout()
+            texto_layout.setSpacing(0)
+            texto_layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
+
+            titulo_label = QLabel(titulo)
+            titulo_label.setObjectName(f"fator_titulo_{fator}")
+            titulo_label.setProperty("class", "fator_titulo")
+            titulo_label.setStyleSheet("color: #ffffff; font-size: 16px; font-weight: 700;")
+            texto_layout.addWidget(titulo_label)
+
+            subtitulo_label = QLabel(subtitulo)
+            subtitulo_label.setObjectName(f"fator_subtitulo_{fator}")
+            subtitulo_label.setProperty("class", "fator_subtitulo")
+            subtitulo_label.setStyleSheet("color: #ffffff; font-size: 13px;")
+            texto_layout.addWidget(subtitulo_label)
+
+            inner.addLayout(texto_layout, 7)
+
+            if icone_color is not None:
+                btn.setProperty("icone_color", str(icone_color))
+            if icone_check is not None:
+                btn.setProperty("icone_check", str(icone_check))
+            btn.setProperty("icon_label", icon_label)
+            btn.setProperty("titulo_label", titulo_label)
+            btn.setProperty("subtitulo_label", subtitulo_label)
+
+            self.__aplicar_icone_fator(btn, btn.isChecked())
+            btn.toggled.connect(lambda checked, b=btn: self.__aplicar_icone_fator(b, checked))
+
+            layout.addWidget(btn)
+            self.__chk_fatores[fator] = btn
+
         return grupo
+
+    def __aplicar_icone_fator(self, btn: QPushButton, checked: bool) -> None:
+        icon_label = btn.property("icon_label")
+        titulo_label = btn.property("titulo_label")
+        subtitulo_label = btn.property("subtitulo_label")
+
+        if checked:
+            caminho = btn.property("icone_check")
+            cor_texto = "#002f32"
+        else:
+            caminho = btn.property("icone_color")
+            cor_texto = "#ffffff"
+
+        if icon_label is not None and caminho:
+            pixmap = QPixmap(caminho).scaled(
+                48, 48, Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation,
+            )
+            icon_label.setPixmap(pixmap)
+
+        if titulo_label is not None:
+            titulo_label.setStyleSheet(
+                f"color: {cor_texto}; font-size: 16px; font-weight: 700;"
+            )
+        if subtitulo_label is not None:
+            subtitulo_label.setStyleSheet(
+                f"color: {cor_texto}; font-size: 13px;"
+            )
+
+    def __resolver_icone_fator(self, chave: str, sufixo: str) -> Optional[Path]:
+        assets = Path(__file__).resolve().parent.parent.parent / "assets"
+        caminho = assets / "icons" / "riscos" / f"{chave}{sufixo}.png"
+        return caminho if caminho.exists() else None
 
     def __build_grupo_decisao(self) -> QGroupBox:
         grupo = QGroupBox("Decisão Administrativa")
         grupo.setObjectName("group_decisao")
         grupo.setProperty("class", "group_box")
         layout = QHBoxLayout(grupo)
+        layout.setSpacing(12)
+        layout.addStretch()
         self.__radio_decisao = QButtonGroup(grupo)
         for decisao in ["ADVERTIR", "INTERDITAR", "IGNORAR"]:
-            radio = QRadioButton(decisao)
-            radio.setObjectName(f"radio_decisao_{decisao}")
-            radio.setProperty("class", "radio_decisao")
-            self.__radio_decisao.addButton(radio)
-            layout.addWidget(radio)
+            stamp = StampButton(decisao)
+            self.__radio_decisao.addButton(stamp)
+            layout.addWidget(stamp)
+        layout.addStretch()
         return grupo
 
     def renderizar_relatorio(self, dados_relatorio: Dict[str, Any]) -> None:
-        """Preenche o label de titulo e reinicia o temporizador."""
+        """Preenche os labels do deck com titulo, local, atividade, envolvidos e descricao.
+
+        Carrega o preview do primeiro anexo e reinicia o temporizador de inspecao.
+        """
         logger.info("Renderizando relatorio: %s", dados_relatorio.get("titulo", ""))
-        self.__label_titulo_relatorio.setText(
-            f"Título: {dados_relatorio.get('titulo', '')}\n"
-            f"Local: {dados_relatorio.get('local', '')}\n"
-            f"Atividade: {dados_relatorio.get('atividade', '')}\n"
-            f"Descrição: {dados_relatorio.get('texto_descricao', '')}"
-        )
+        envolvidos = dados_relatorio.get("envolvidos") or []
+        texto_envolvidos = ", ".join(envolvidos) if envolvidos else "Não informado"
+
+        self.__labels_info["titulo"].setText(dados_relatorio.get("titulo", ""))
+        self.__labels_info["local"].setText(dados_relatorio.get("local", ""))
+        self.__labels_info["atividade"].setText(dados_relatorio.get("atividade", ""))
+        self.__labels_info["envolvidos"].setText(texto_envolvidos)
+        self.__labels_info["descricao"].setText(dados_relatorio.get("texto_descricao", ""))
+
         self.__anexos_data = dados_relatorio.get("anexos", [])
         if self.__anexos_data:
             primeiro = self.__anexos_data[0]

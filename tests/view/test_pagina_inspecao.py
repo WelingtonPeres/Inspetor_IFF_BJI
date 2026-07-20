@@ -4,16 +4,18 @@ Suite de testes para a PaginaInspecao.
 
 import pytest
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QCheckBox, QLabel, QPushButton, QRadioButton, QSplitter, QWidget
+from PySide6.QtWidgets import QGroupBox, QLabel, QPushButton, QSplitter, QToolButton, QWidget
 
 from view.expediente.paginas.inspecao import PaginaInspecao
 from view.expediente.widgets.anexo_preview import AnexoPreview
+from view.expediente.widgets.stamp_button import StampButton
 from view.expediente.overlays.anexo_gallery import AnexoGallery
 from view.expediente.overlays.media_viewer import MediaViewer
 
 
 @pytest.fixture(autouse=True)
 def qt_app(qapp):
+    """Fornece a QApplication do pytest-qt para todos os testes da view."""
     return qapp
 
 
@@ -56,25 +58,38 @@ class TestEstrutura:
         assert prancheta is not None
 
     def test_chk_riscos_5_itens(self, pagina):
-        """A pagina deve conter 5 checkboxes de riscos."""
-        for risco in ["FISICO", "QUIMICO", "BIOLOGICO", "ERGONOMICO", "ACIDENTE"]:
-            chk = pagina.findChild(QCheckBox, f"chk_risco_{risco}")
-            assert chk is not None
-            assert chk.text() == risco
+        """A pagina deve conter 5 tiles de riscos como QToolButton."""
+        labels = {
+            "FISICO": "Fisico",
+            "QUIMICO": "Quimico",
+            "BIOLOGICO": "Biologico",
+            "ERGONOMICO": "Ergonomico",
+            "ACIDENTE": "Acidente",
+        }
+        for risco, label in labels.items():
+            btn = pagina.findChild(QToolButton, f"tile_risco_{risco}")
+            assert btn is not None
+            assert btn.text() == label
 
     def test_chk_fatores_2_itens(self, pagina):
-        """A pagina deve conter 2 checkboxes de fatores."""
-        for fator in ["ATO_INSEGURO", "CONDICAO_INSEGURA"]:
-            chk = pagina.findChild(QCheckBox, f"chk_fator_{fator}")
-            assert chk is not None
-            assert chk.text() == fator
+        """A pagina deve conter 2 tiles de fatores como QPushButton com layout interno."""
+        labels = {
+            "ATO_INSEGURO": "Ato Inseguro",
+            "CONDICAO_INSEGURA": "Condicao Insegura",
+        }
+        for fator, label in labels.items():
+            btn = pagina.findChild(QPushButton, f"tile_fator_{fator}")
+            assert btn is not None
+            titulo = btn.findChild(QLabel, f"fator_titulo_{fator}")
+            assert titulo is not None
+            assert titulo.text() == label
 
     def test_radio_decisao_3_itens(self, pagina):
-        """A pagina deve conter 3 radio buttons de decisao."""
+        """A pagina deve conter 3 stamps de decisao."""
         for decisao in ["ADVERTIR", "INTERDITAR", "IGNORAR"]:
-            radio = pagina.findChild(QRadioButton, f"radio_decisao_{decisao}")
-            assert radio is not None
-            assert radio.text() == decisao
+            stamp = pagina.findChild(StampButton, f"stamp_decisao_{decisao}")
+            assert stamp is not None
+            assert stamp.text() == decisao
 
     def test_btn_submeter_existe(self, pagina):
         """A pagina deve conter um QPushButton 'btn_submeter'."""
@@ -87,11 +102,21 @@ class TestEstrutura:
         preview = pagina.findChild(AnexoPreview)
         assert preview is not None
 
-    def test_label_titulo_relatorio_existe(self, pagina):
-        """A pagina deve conter um QLabel 'label_titulo_relatorio'."""
-        label = pagina.findChild(QLabel, "label_titulo_relatorio")
-        assert label is not None
-        assert "Aguardando" in label.text()
+    def test_labels_info_e_groupboxes_do_relatorio_existem(self, pagina):
+        """A pagina deve conter os QLabel e QGroupBox de informacoes do relatorio.
+
+        O campo titulo e renderizado como QLabel isolado; os demais campos
+        usam QGroupBox como container.
+        """
+        for chave in ["titulo", "local", "atividade", "envolvidos", "descricao"]:
+            label = pagina.findChild(QLabel, f"label_info_{chave}")
+            assert label is not None
+            assert "Aguardando" in label.text()
+            if chave != "titulo":
+                grupo = pagina.findChild(QGroupBox, f"group_info_{chave}")
+                assert grupo is not None
+
+        assert pagina.findChild(QGroupBox, "group_info_titulo") is None
 
 
 class TestComportamento:
@@ -100,12 +125,12 @@ class TestComportamento:
     """
 
     def test_marcar_desmarcar_risco(self, pagina):
-        """Marcar e desmarcar um checkbox de risco deve funcionar."""
-        chk = pagina.findChild(QCheckBox, "chk_risco_FISICO")
-        chk.setChecked(True)
-        assert chk.isChecked()
-        chk.setChecked(False)
-        assert not chk.isChecked()
+        """Marcar e desmarcar um tile de risco deve funcionar."""
+        btn = pagina.findChild(QToolButton, "tile_risco_FISICO")
+        btn.setChecked(True)
+        assert btn.isChecked()
+        btn.setChecked(False)
+        assert not btn.isChecked()
 
     def test_coletar_respostas_estrutura(self, pagina):
         """__coletar_respostas deve retornar dict com chaves esperadas."""
@@ -117,10 +142,10 @@ class TestComportamento:
 
     def test_coletar_respostas_com_valores(self, pagina):
         """Coletar respostas deve refletir selecoes."""
-        pagina.findChild(QCheckBox, "chk_risco_FISICO").setChecked(True)
-        pagina.findChild(QCheckBox, "chk_risco_QUIMICO").setChecked(True)
-        pagina.findChild(QCheckBox, "chk_fator_ATO_INSEGURO").setChecked(True)
-        pagina.findChild(QRadioButton, "radio_decisao_ADVERTIR").setChecked(True)
+        pagina.findChild(QToolButton, "tile_risco_FISICO").setChecked(True)
+        pagina.findChild(QToolButton, "tile_risco_QUIMICO").setChecked(True)
+        pagina.findChild(QPushButton, "tile_fator_ATO_INSEGURO").setChecked(True)
+        pagina.findChild(StampButton, "stamp_decisao_ADVERTIR").setChecked(True)
         resultado = pagina._PaginaInspecao__coletar_respostas()
         assert "FISICO" in resultado["riscos"]
         assert "QUIMICO" in resultado["riscos"]
@@ -130,14 +155,14 @@ class TestComportamento:
 
     def test_limpar_formulario_reseta_tudo(self, pagina):
         """limpar_formulario deve desmarcar todos os campos."""
-        pagina.findChild(QCheckBox, "chk_risco_FISICO").setChecked(True)
-        pagina.findChild(QCheckBox, "chk_fator_ATO_INSEGURO").setChecked(True)
-        pagina.findChild(QRadioButton, "radio_decisao_ADVERTIR").setChecked(True)
+        pagina.findChild(QToolButton, "tile_risco_FISICO").setChecked(True)
+        pagina.findChild(QPushButton, "tile_fator_ATO_INSEGURO").setChecked(True)
+        pagina.findChild(StampButton, "stamp_decisao_ADVERTIR").setChecked(True)
         pagina.limpar_formulario()
-        assert not pagina.findChild(QCheckBox, "chk_risco_FISICO").isChecked()
-        assert not pagina.findChild(QCheckBox, "chk_fator_ATO_INSEGURO").isChecked()
-        checked_radio = pagina.findChild(QRadioButton, "radio_decisao_ADVERTIR")
-        assert not checked_radio.isChecked()
+        assert not pagina.findChild(QToolButton, "tile_risco_FISICO").isChecked()
+        assert not pagina.findChild(QPushButton, "tile_fator_ATO_INSEGURO").isChecked()
+        checked_stamp = pagina.findChild(StampButton, "stamp_decisao_ADVERTIR")
+        assert not checked_stamp.isChecked()
 
     def test_temporizador_reiniciado_em_renderizar(self, pagina):
         """renderizar_relatorio deve reiniciar o temporizador."""
@@ -146,7 +171,7 @@ class TestComportamento:
 
     def test_submeter_signal_emitido_com_payload(self, pagina, qtbot):
         """Clicar em submeter deve emitir submeter_respostas com dict."""
-        pagina.findChild(QCheckBox, "chk_risco_FISICO").setChecked(True)
+        pagina.findChild(QToolButton, "tile_risco_FISICO").setChecked(True)
         btn = pagina.findChild(QPushButton, "btn_submeter")
         with qtbot.waitSignal(pagina.submeter_respostas, timeout=1000) as blocker:
             qtbot.mouseClick(btn, Qt.MouseButton.LeftButton)
@@ -154,22 +179,46 @@ class TestComportamento:
         assert isinstance(dados, dict)
         assert "riscos" in dados
 
-    def test_renderizar_relatorio_atualiza_label(self, pagina):
-        """renderizar_relatorio deve atualizar o label de titulo."""
+    def test_renderizar_relatorio_atualiza_labels_info(self, pagina):
+        """renderizar_relatorio deve atualizar todos os labels de informacao."""
+        pagina.renderizar_relatorio({
+            "titulo": "Lab Quimico",
+            "local": "Bloco A",
+            "atividade": "teste",
+            "envolvidos": ["João", "Maria"],
+            "texto_descricao": "descricao",
+        })
+        assert pagina.findChild(QLabel, "label_info_titulo").text() == "Lab Quimico"
+        assert pagina.findChild(QLabel, "label_info_local").text() == "Bloco A"
+        assert pagina.findChild(QLabel, "label_info_atividade").text() == "teste"
+        assert pagina.findChild(QLabel, "label_info_envolvidos").text() == "João, Maria"
+        assert pagina.findChild(QLabel, "label_info_descricao").text() == "descricao"
+
+    def test_submeter_sem_decisao_envia_string_vazia(self, pagina):
+        """Se nenhum radio esta selecionado, decisao deve ser string vazia."""
+        resultado = pagina._PaginaInspecao__coletar_respostas()
+        assert resultado["decisao"] == ""
+
+    def test_renderizar_relatorio_sem_envolvidos_exibe_nao_informado(self, pagina):
+        """Se envolvidos estiver vazio ou ausente, o label deve exibir 'Não informado'."""
         pagina.renderizar_relatorio({
             "titulo": "Lab Quimico",
             "local": "Bloco A",
             "atividade": "teste",
             "texto_descricao": "descricao",
         })
-        label = pagina.findChild(QLabel, "label_titulo_relatorio")
-        assert "Lab Quimico" in label.text()
-        assert "Bloco A" in label.text()
+        assert pagina.findChild(QLabel, "label_info_envolvidos").text() == "Não informado"
 
-    def test_submeter_sem_decisao_envia_string_vazia(self, pagina):
-        """Se nenhum radio esta selecionado, decisao deve ser string vazia."""
-        resultado = pagina._PaginaInspecao__coletar_respostas()
-        assert resultado["decisao"] == ""
+    def test_renderizar_relatorio_com_envolvidos_vazios_exibe_nao_informado(self, pagina):
+        """Lista vazia de envolvidos tambem deve renderizar 'Não informado'."""
+        pagina.renderizar_relatorio({
+            "titulo": "Lab Quimico",
+            "local": "Bloco A",
+            "atividade": "teste",
+            "envolvidos": [],
+            "texto_descricao": "descricao",
+        })
+        assert pagina.findChild(QLabel, "label_info_envolvidos").text() == "Não informado"
 
 
 @pytest.fixture

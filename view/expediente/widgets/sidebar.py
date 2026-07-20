@@ -1,11 +1,29 @@
 import logging
-from PySide6.QtCore import Qt, Signal, Slot
-from PySide6.QtGui import QFont
-from PySide6.QtWidgets import QFrame, QLabel, QPushButton, QVBoxLayout
+from pathlib import Path
+from typing import Dict, Optional
+from PySide6.QtCore import Qt, QSize, Signal, Slot
+from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtWidgets import (
+    QFrame,
+    QLabel,
+    QPushButton,
+    QVBoxLayout,
+)
 
 from view.infrastructure.layout_loader import LayoutLoader
 
 logger = logging.getLogger(__name__)
+
+_ICONE_MAP = {
+    "dashboard": "dashboard",
+    "reports": "Reports",
+    "logs": "Logs",
+    "settings": "Settings",
+}
+
+
+def _resolver_assets() -> Path:
+    return Path(__file__).resolve().parent.parent.parent / "assets"
 
 
 class Sidebar(QFrame):
@@ -19,23 +37,105 @@ class Sidebar(QFrame):
         L = LayoutLoader.instance()
         self.setFixedWidth(L.scaled("sidebar", "largura"))
 
+        self.__botoes: Dict[str, QPushButton] = {}
+        self.__ativo: Optional[str] = None
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        for item in L.get("sidebar", "itens"):
-            btn = QPushButton(item["label"])
-            btn.setObjectName(f"sidebar_{item['id']}")
-            btn.setProperty("class", "sidebar_item")
-            btn.setFixedHeight(64)
-            if item.get("inativo", False):
-                btn.setEnabled(False)
-            else:
-                btn.clicked.connect(lambda _, i=item["id"]: self.item_selecionado.emit(i))
+        layout.addWidget(self.__build_header())
+
+        nav_items = [i for i in L.get("sidebar", "itens") if i["id"] != "settings"]
+        for item in nav_items:
+            btn = self.__criar_item(item)
             layout.addWidget(btn)
+            self.__botoes[item["id"]] = btn
 
         layout.addStretch()
+
+        divider = QFrame(objectName="sidebar_divider")
+        divider.setFixedHeight(1)
+        layout.addWidget(divider)
+
+        settings_item = next((i for i in L.get("sidebar", "itens") if i["id"] == "settings"), None)
+        if settings_item is not None:
+            btn = self.__criar_item(settings_item)
+            layout.addWidget(btn)
+            self.__botoes[settings_item["id"]] = btn
+
+        self.definir_ativo("reports")
+
         L.escala_atualizada.connect(self.__reaplicar_dimensoes)
+
+    def __build_header(self) -> QFrame:
+        header = QFrame(objectName="sidebar_header")
+        inner = QVBoxLayout(header)
+        inner.setContentsMargins(0, 20, 0, 16)
+        inner.setSpacing(8)
+        inner.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        assets = _resolver_assets()
+        logo_path = assets / "icons" / "iff_Icons" / "logo_iff_branco.png"
+        logo_label = QLabel()
+        logo_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        if logo_path.exists():
+            pixmap = QPixmap(str(logo_path)).scaled(
+                40, 40, Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation,
+            )
+            logo_label.setPixmap(pixmap)
+        inner.addWidget(logo_label)
+
+        titulo = QLabel("IFF-BJI · Inspetor")
+        titulo.setObjectName("sidebar_titulo")
+        titulo.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        inner.addWidget(titulo)
+
+        return header
+
+    def __criar_item(self, item: dict) -> QPushButton:
+        btn = QPushButton(item["label"])
+        btn.setObjectName(f"sidebar_{item['id']}")
+        btn.setProperty("class", "sidebar_item")
+        btn.setFixedHeight(48)
+        btn.setCursor(Qt.CursorShape.PointingHandCursor)
+
+        icone_nome = _ICONE_MAP.get(item["id"], item["id"])
+        assets = _resolver_assets()
+        icone_normal = assets / "icons" / "sidebar" / f"{icone_nome}.png"
+        icone_green = assets / "icons" / "sidebar" / f"{icone_nome}_green.png"
+
+        if icone_normal.exists():
+            btn.setProperty("icone_normal", str(icone_normal))
+            btn.setIcon(QIcon(str(icone_normal)))
+            btn.setIconSize(QSize(20, 20))
+        if icone_green.exists():
+            btn.setProperty("icone_green", str(icone_green))
+
+        if item.get("inativo", False):
+            btn.setEnabled(False)
+        else:
+            btn.clicked.connect(lambda _, i=item["id"]: self._on_item_clicked(i))
+
+        return btn
+
+    def _on_item_clicked(self, item_id: str) -> None:
+        self.definir_ativo(item_id)
+        self.item_selecionado.emit(item_id)
+
+    def definir_ativo(self, item_id: str) -> None:
+        for key, btn in self.__botoes.items():
+            active = key == item_id
+            btn.setProperty("active", active)
+            btn.style().unpolish(btn)
+            btn.style().polish(btn)
+
+            icone_path = btn.property("icone_green") if active else btn.property("icone_normal")
+            if icone_path:
+                btn.setIcon(QIcon(icone_path))
+
+        self.__ativo = item_id
 
     @Slot()
     def __reaplicar_dimensoes(self) -> None:

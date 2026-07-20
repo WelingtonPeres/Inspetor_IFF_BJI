@@ -30,16 +30,32 @@ QStackedWidget {
     font-weight: 700;
 }
 
-/* --- Label de Relatório (Inspeção) --- */
-#label_titulo_relatorio {
+/* --- Bloco de Informações do Relatório (Inspeção) --- */
+#info_block_relatorio {
+    background-color: transparent;
+    border: none;
+}
+
+#info_block_relatorio .label_info_valor {
     color: #1a1c1c;
     font-family: "Open Sans";
     font-size: 14px;
     font-weight: 400;
-    padding: 16px;
-    background-color: #eeeeee;
-    border: 1px solid #becab9;
-    border-radius: 4px;
+    padding: 4px 0 0 0;
+}
+
+#label_info_descricao {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+#label_info_titulo {
+    color: #006b21;
+    font-family: "Open Sans";
+    font-size: 60px;
+    font-weight: 700;
+    text-align: left;
+    text-transform: uppercase;
 }
 
 /* --- Labels de Feedback (Diagnóstico / Resultado) --- */
@@ -79,87 +95,155 @@ QStackedWidget {
 .group_box {
     background-color: #eeeeee;
     border: 1px solid #becab9;
+    border-bottom: 3px solid #e2e2e2;
+    border-right: 3px solid #e2e2e2;
     border-radius: 4px;
     color: #006b21;
     font-family: "Open Sans";
     font-size: 14px;
     font-weight: 700;
-    padding: 12px;
+    padding: 20px 12px 12px 12px;
     margin: 8px 0;
 }
 
 .group_box::title {
-    color: #006b21;
-    padding: 4px 8px;
+    background-color: #09872d;
+    color: #f7fff1;
+    padding: 6px 14px;
+    border-radius: 4px;
     subcontrol-origin: margin;
     left: 12px;
 }
 
-/* --- Checkboxes (Riscos) --- */
-.chk_risco {
+/* --- Tactile Tile — Fator (QPushButton com layout interno) --- */
+QPushButton[class="fator_tile"] {
+    border: 2px solid #1a1c1c;
+    border-radius: 8px;
+    padding: 10px 14px;
+    min-height: 80px;
+    background-color: transparent;
     color: #1a1c1c;
     font-family: "Open Sans";
-    font-size: 14px;
-    font-weight: 400;
-    spacing: 8px;
 }
 
-.chk_risco::indicator {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #becab9;
-    background-color: #f9f9f9;
-    border-radius: 4px;
+QPushButton[class="fator_tile"]:hover {
+    border-color: #1a1c1c;
 }
 
-.chk_risco::indicator:checked {
-    background-color: #2F9E41;
-    border-color: #2F9E41;
+QPushButton[class="fator_tile"]:checked {
+    background-color: #387f84;
+    border-color: #387f84;
+    color: #f4feff;
 }
 
-/* --- Checkboxes (Fatores) --- */
-.chk_fator {
-    color: #1a1c1c;
-    font-family: "Open Sans";
-    font-size: 14px;
-    font-weight: 400;
-    spacing: 8px;
-}
-
-.chk_fator::indicator {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #becab9;
-    background-color: #f9f9f9;
-    border-radius: 4px;
-}
-
-.chk_fator::indicator:checked {
+QPushButton[class="fator_tile"]:checked:hover {
     background-color: #17666b;
     border-color: #17666b;
+    color: #f4feff;
 }
 
-/* --- Radio Buttons (Decisão) --- */
-.radio_decisao {
+QPushButton[class="fator_tile"]:focus {
+    border-color: #1a1c1c;
+    outline: none;
+}
+
+QLabel[class="fator_titulo"] {
     color: #1a1c1c;
     font-family: "Open Sans";
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
-    spacing: 8px;
-    padding: 8px;
 }
 
-.radio_decisao::indicator {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #becab9;
-    background-color: #f9f9f9;
-    border-radius: 9999px;
+QPushButton[class="fator_tile"]:checked QLabel[class="fator_titulo"] {
+    color: #f4feff;
 }
 
-.radio_decisao::indicator:checked {
-    background-color: #CD191E;
-    border-color: #CD191E;
+QLabel[class="fator_subtitulo"] {
+    color: #1a1c1c;
+    font-family: "Open Sans";
+    font-size: 13px;
+    font-weight: 400;
+}
+
+QPushButton[class="fator_tile"]:checked QLabel[class="fator_subtitulo"] {
+    color: #f4feff;
+}
+
+/* --- Tactile Tile — Risco (QToolButton grid) --- */
+QToolButton[riscoTile="true"] {
+    border-radius: 8px;
+    padding: 8px 4px;
+    min-width: 96px;
+    min-height: 96px;
+    font-family: "Open Sans";
+    font-size: 12px;
+    font-weight: 700;
+    background-color: transparent;
+}
+
+QToolButton[objectName="tile_risco_FISICO"] {
+    border: 2px solid #37a547;
+    color: #71dd77;
+}
+QToolButton[objectName="tile_risco_FISICO"]:checked {
+    background-color: #37a547;
+    color: #ffffff;
+}
+QToolButton[objectName="tile_risco_FISICO"]:hover {
+    border-color: #71dd77;
+}
+
+QToolButton[objectName="tile_risco_QUIMICO"] {
+    border: 2px solid #bb0213;
+    color: #ffb4ab;
+}
+QToolButton[objectName="tile_risco_QUIMICO"]:checked {
+    background-color: #bb0213;
+    color: #ffffff;
+}
+QToolButton[objectName="tile_risco_QUIMICO"]:hover {
+    border-color: #ffb4ab;
+}
+
+QToolButton[objectName="tile_risco_BIOLOGICO"] {
+    border: 2px solid #6d4c41;
+    color: #d7ccc8;
+}
+QToolButton[objectName="tile_risco_BIOLOGICO"]:checked {
+    background-color: #6d4c41;
+    color: #ffffff;
+}
+QToolButton[objectName="tile_risco_BIOLOGICO"]:hover {
+    border-color: #d7ccc8;
+}
+
+QToolButton[objectName="tile_risco_ERGONOMICO"] {
+    border: 2px solid #d9a824;
+    color: #f3d78a;
+}
+QToolButton[objectName="tile_risco_ERGONOMICO"]:checked {
+    background-color: #d9a824;
+    color: #1a1c1c;
+}
+QToolButton[objectName="tile_risco_ERGONOMICO"]:hover {
+    border-color: #f3d78a;
+}
+
+QToolButton[objectName="tile_risco_ACIDENTE"] {
+    border: 2px solid #1565c0;
+    color: #8dd2d8;
+}
+QToolButton[objectName="tile_risco_ACIDENTE"]:checked {
+    background-color: #1565c0;
+    color: #ffffff;
+}
+QToolButton[objectName="tile_risco_ACIDENTE"]:hover {
+    border-color: #8dd2d8;
+}
+
+QToolButton[riscoTile="true"]:focus {
+    outline: none;
+    border-style: dashed;
 }
 
 /* --- ComboBox (Seleção de Perfil) --- */
@@ -378,19 +462,50 @@ QFrame#sidebar {
     border-right: 1px solid #becab9;
 }
 
+#sidebar_header {
+    border-bottom: 1px solid #becab9;
+}
+
+#sidebar_titulo {
+    color: #6f7a6b;
+    font-family: "Open Sans";
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+#sidebar_divider {
+    border: none;
+    border-top: 1px solid #becab9;
+    margin: 0 12px;
+}
+
 .sidebar_item {
     background-color: transparent;
-    color: #1a1c1c;
+    color: #6f7a6b;
     border: none;
-    border-bottom: 1px solid #becab9;
+    border-left: 3px solid transparent;
     font-family: "Open Sans";
-    font-size: 12px;
-    font-weight: 400;
-    padding: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 12px 16px;
+    text-align: left;
 }
 
 .sidebar_item:hover {
     background-color: #eeeeee;
+    border-left-color: #becab9;
+    color: #1a1c1c;
+}
+
+.sidebar_item[active="true"] {
+    background-color: #e8e8e8;
+    border-left-color: #006b21;
+    color: #006b21;
+}
+
+.sidebar_item[active="true"]:hover {
+    border-left-color: #006b21;
 }
 
 .sidebar_item:disabled {
@@ -405,8 +520,8 @@ QFrame#anexo_preview {
 }
 
 QLabel#anexo_thumbnail {
-    background-color: #f9f9f9;
-    border: 1px solid #becab9;
+    background-color: #000000;
+    border: 4px solid #6f7a6b;
     border-radius: 4px;
 }
 
@@ -545,21 +660,15 @@ PaginaLoading #loading_progress_bar::chunk {
 }
 
 /* --- PaginaInspecao: Split-Desk 60/40 --- */
-PaginaInspecao #label_titulo_relatorio {
-    color: #1a1c1c;
-    font-family: "Open Sans";
-    font-size: 14px;
-}
-
 PaginaInspecao #deck_observacao {
-    background-color: #f5f5f5;
+    background-color: #f4f3f3;
     border: 1px solid #becab9;
     border-radius: 4px;
     padding: 8px;
 }
 
 PaginaInspecao #prancheta {
-    background-color: #ffffff;
+    background-color: #eeeeee;
     border: 1px solid #becab9;
     border-radius: 4px;
     padding: 8px;

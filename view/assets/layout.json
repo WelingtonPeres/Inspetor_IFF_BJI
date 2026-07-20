@@ -58,7 +58,7 @@
     "largura_maxima": 300
   },
   "sidebar": {
-    "largura": 80,
+    "largura": 200,
     "itens": [
       { "id": "dashboard", "label": "Dashboard", "inativo": true },
       { "id": "reports",   "label": "Reports",   "inativo": false },
