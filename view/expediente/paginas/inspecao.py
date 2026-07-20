@@ -100,23 +100,40 @@ class PaginaInspecao(QWidget):
         titulo_label.setProperty("class", "label_info_titulo")
         layout.addWidget(titulo_label)
 
-        campos = [
+        linha_local_ativ = QHBoxLayout()
+        linha_local_ativ.setSpacing(12)
+
+        campos_linha = [
             ("local", "Local"),
             ("atividade", "Atividade"),
-            ("envolvidos", "Envolvidos"),
-            ("descricao", "Descrição"),
         ]
-        for chave, rotulo in campos:
-            label = self.__criar_label_info(chave)
-            grupo = QGroupBox(rotulo)
-            grupo.setObjectName(f"group_info_{chave}")
-            grupo.setProperty("class", "group_box")
-            grupo_layout = QVBoxLayout(grupo)
-            grupo_layout.setContentsMargins(8, 12, 8, 8)
-            grupo_layout.addWidget(label)
+        campos_abaixo = [
+            ("envolvidos", "Envolvidos"),
+            ("descricao", "Descricao"),
+        ]
+
+        for chave, rotulo in campos_linha:
+            grupo = self.__criar_grupo_info(chave, rotulo)
+            grupo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+            linha_local_ativ.addWidget(grupo)
+
+        layout.addLayout(linha_local_ativ)
+
+        for chave, rotulo in campos_abaixo:
+            grupo = self.__criar_grupo_info(chave, rotulo)
             layout.addWidget(grupo)
 
         return block
+
+    def __criar_grupo_info(self, chave: str, rotulo: str) -> QGroupBox:
+        label = self.__criar_label_info(chave)
+        grupo = QGroupBox(rotulo)
+        grupo.setObjectName(f"group_info_{chave}")
+        grupo.setProperty("class", "group_box")
+        grupo_layout = QVBoxLayout(grupo)
+        grupo_layout.setContentsMargins(8, 12, 8, 8)
+        grupo_layout.addWidget(label)
+        return grupo
 
     def __criar_label_info(self, chave: str) -> QLabel:
         """Cria um QLabel padrao para exibicao de informacoes do relatorio."""
