@@ -5,7 +5,6 @@ from PySide6.QtCore import Qt, QSize, Signal, Slot
 from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtWidgets import (
     QFrame,
-    QHBoxLayout,
     QLabel,
     QPushButton,
     QVBoxLayout,
@@ -69,25 +68,27 @@ class Sidebar(QFrame):
 
     def __build_header(self) -> QFrame:
         header = QFrame(objectName="sidebar_header")
-        inner = QHBoxLayout(header)
-        inner.setContentsMargins(12, 12, 12, 12)
+        inner = QVBoxLayout(header)
+        inner.setContentsMargins(0, 20, 0, 16)
         inner.setSpacing(8)
+        inner.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         assets = _resolver_assets()
         logo_path = assets / "icons" / "iff_Icons" / "logo_iff_branco.png"
         logo_label = QLabel()
+        logo_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         if logo_path.exists():
             pixmap = QPixmap(str(logo_path)).scaled(
-                24, 24, Qt.AspectRatioMode.KeepAspectRatio,
+                40, 40, Qt.AspectRatioMode.KeepAspectRatio,
                 Qt.TransformationMode.SmoothTransformation,
             )
             logo_label.setPixmap(pixmap)
         inner.addWidget(logo_label)
 
-        titulo = QLabel("IFF-BJI")
+        titulo = QLabel("IFF-BJI · Inspetor")
         titulo.setObjectName("sidebar_titulo")
+        titulo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         inner.addWidget(titulo)
-        inner.addStretch()
 
         return header
 
@@ -100,10 +101,15 @@ class Sidebar(QFrame):
 
         icone_nome = _ICONE_MAP.get(item["id"], item["id"])
         assets = _resolver_assets()
-        icone_path = assets / "icons" / "sidebar" / f"{icone_nome}.png"
-        if icone_path.exists():
-            btn.setIcon(QIcon(str(icone_path)))
+        icone_normal = assets / "icons" / "sidebar" / f"{icone_nome}.png"
+        icone_green = assets / "icons" / "sidebar" / f"{icone_nome}_green.png"
+
+        if icone_normal.exists():
+            btn.setProperty("icone_normal", str(icone_normal))
+            btn.setIcon(QIcon(str(icone_normal)))
             btn.setIconSize(QSize(20, 20))
+        if icone_green.exists():
+            btn.setProperty("icone_green", str(icone_green))
 
         if item.get("inativo", False):
             btn.setEnabled(False)
@@ -118,9 +124,14 @@ class Sidebar(QFrame):
 
     def definir_ativo(self, item_id: str) -> None:
         for key, btn in self.__botoes.items():
-            btn.setProperty("active", key == item_id)
+            active = key == item_id
+            btn.setProperty("active", active)
             btn.style().unpolish(btn)
             btn.style().polish(btn)
+
+            icone_path = btn.property("icone_green") if active else btn.property("icone_normal")
+            if icone_path:
+                btn.setIcon(QIcon(icone_path))
 
         self.__ativo = item_id
 

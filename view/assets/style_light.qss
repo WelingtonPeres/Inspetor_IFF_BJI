@@ -469,7 +469,7 @@ QFrame#sidebar {
 #sidebar_titulo {
     color: #6f7a6b;
     font-family: "Open Sans";
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.05em;
 }
