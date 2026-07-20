@@ -64,6 +64,8 @@ class Sidebar(QFrame):
             layout.addWidget(btn)
             self.__botoes[settings_item["id"]] = btn
 
+        self.definir_ativo("reports")
+
         L.escala_atualizada.connect(self.__reaplicar_dimensoes)
 
     def __build_header(self) -> QFrame:
