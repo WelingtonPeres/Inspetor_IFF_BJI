@@ -488,17 +488,19 @@ class TestAvancarFilaOuDia:
         view_mock.renderizar_relatorio.assert_called_once_with(dados_esperados)
 
     @patch("application.controllers.game_manager.GerenciadorDeTurno")
-    def test_avancar_ultimo_dia_encerra_campanha(
+    def test_avancar_ultimo_dia_encerra_campanha_vitoria(
         self, mock_turno_cls, gm, view_mock
     ):
         """
-        Avançar no Último Dia Encerra Campanha
+        Avançar no Último Dia com Vitória
 
-        Com CAMPANHA_DURACAO_DIAS=1, ao finalizar o expediente do
-        primeiro dia a campanha deve encerrar e exibir o resultado.
+        Com pilha vazia e CAMPANHA_DURACAO_DIAS=1, o GameManager deve
+        delegar a verificacao de vitoria ao GerenciadorDeTurno. Quando
+        verificar_vitoria_do_turno retorna True, a View recebe venceu=True.
         """
         mock_turno = MagicMock()
         mock_turno.qnt_relatorios.return_value = 0
+        mock_turno.verificar_vitoria_do_turno.return_value = True
         mock_turno_cls.return_value = mock_turno
 
         gm._GameManager__gerenciador_turno = mock_turno
@@ -509,7 +511,35 @@ class TestAvancarFilaOuDia:
 
         assert gm._GameManager__dias_concluidos == 1
         assert gm._GameManager__estado_atual == GameManager.ESTADO_RESULTADO
+        mock_turno.verificar_vitoria_do_turno.assert_called_once_with()
         view_mock.exibir_resultado.assert_called_once_with(8500.0, 1, True)
+
+    @patch("application.controllers.game_manager.GerenciadorDeTurno")
+    def test_avancar_ultimo_dia_encerra_campanha_derrota(
+        self, mock_turno_cls, gm, view_mock
+    ):
+        """
+        Avançar no Último Dia com Derrota
+
+        Quando verificar_vitoria_do_turno retorna False, a View deve
+        receber venceu=False, para que o PaginaEndgame renderize o
+        status de derrota no lugar de vitoria.
+        """
+        mock_turno = MagicMock()
+        mock_turno.qnt_relatorios.return_value = 0
+        mock_turno.verificar_vitoria_do_turno.return_value = False
+        mock_turno_cls.return_value = mock_turno
+
+        gm._GameManager__gerenciador_turno = mock_turno
+        gm._GameManager__dias_concluidos = 0
+        gm._GameManager__pontuacao_global = 3000.0
+
+        gm.avancar_fila_ou_dia()
+
+        assert gm._GameManager__dias_concluidos == 1
+        assert gm._GameManager__estado_atual == GameManager.ESTADO_RESULTADO
+        mock_turno.verificar_vitoria_do_turno.assert_called_once_with()
+        view_mock.exibir_resultado.assert_called_once_with(3000.0, 1, False)
 
     def test_avancar_sem_turno_lanca_erro(self, gm):
         """
@@ -520,3 +550,29 @@ class TestAvancarFilaOuDia:
         """
         with pytest.raises(RuntimeError, match="\\[Erro - GameManager\\] Nenhum turno"):
             gm.avancar_fila_ou_dia()
+
+
+class TestReiniciarExpediente:
+    """
+    Testes do metodo reiniciar_expediente.
+    """
+
+    def test_reiniciar_expediente_chama_carregar_menu_e_iniciar(self, gm, view_mock):
+        """
+        Reiniciar Expediente Deve Chamar Menu e Iniciar
+
+        reiniciar_expediente() deve guardar o perfil, chamar
+        carregar_menu_principal() e depois iniciar_expediente()
+        com o perfil guardado.
+        """
+        from unittest.mock import patch
+
+        gm._GameManager__perfil_selecionado = "DEFAULT"
+        gm._GameManager__estado_atual = GameManager.ESTADO_RESULTADO
+
+        with patch.object(gm, "carregar_menu_principal") as mock_menu, \
+             patch.object(gm, "iniciar_expediente") as mock_iniciar:
+            gm.reiniciar_expediente()
+
+            mock_menu.assert_called_once()
+            mock_iniciar.assert_called_once_with("DEFAULT")

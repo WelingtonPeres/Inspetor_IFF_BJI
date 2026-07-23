@@ -674,8 +674,14 @@ PaginaDiagnostico #label_diagnostico {
     font-size: 16px;
 }
 
-/* --- PaginaEndgame --- */
-PaginaEndgame #label_endgame_titulo {
+/* --- GameWin / GameOver --- */
+GameWin, GameOver {
+    background-color: #1a1d21;
+    border: 2px solid #3a3f47;
+    border-radius: 8px;
+}
+
+GameWin #label_endgame_titulo, GameOver #label_endgame_titulo {
     font-family: "Courier New", Consolas, monospace;
     font-size: 24px;
     font-weight: bold;
@@ -684,19 +690,19 @@ PaginaEndgame #label_endgame_titulo {
     padding: 16px;
 }
 
-PaginaEndgame #label_endgame_titulo[status="vitoria"] {
+GameWin #label_endgame_titulo {
     color: #2F9E41;
     border-color: #2F9E41;
     background-color: #0a1a0a;
 }
 
-PaginaEndgame #label_endgame_titulo[status="derrota"] {
+GameOver #label_endgame_titulo {
     color: #CD191E;
     border-color: #CD191E;
     background-color: #1a0a0a;
 }
 
-PaginaEndgame #label_endgame_pontuacao {
+GameWin #label_endgame_pontuacao, GameOver #label_endgame_pontuacao {
     color: #E6EDF3;
     font-family: "Courier New", Consolas, monospace;
     font-size: 16px;
