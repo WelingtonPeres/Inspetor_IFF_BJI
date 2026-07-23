@@ -52,11 +52,11 @@ class TestEstrutura:
         bar = expediente.findChild(WindowTitleBar)
         assert bar is not None
 
-    def test_stacked_com_cinco_paginas(self, expediente):
-        """O QStackedWidget interno deve conter 5 paginas."""
+    def test_stacked_com_quatro_paginas(self, expediente):
+        """O QStackedWidget interno deve conter 4 paginas."""
         stack = expediente.findChild(QStackedWidget)
         assert stack is not None
-        assert stack.count() == 5
+        assert stack.count() == 4
 
     def test_sidebar_integrada(self, expediente):
         """TelaDeExpediente deve conter uma Sidebar."""
@@ -137,24 +137,6 @@ class TestPaginas:
         btn = pagina.findChild(QPushButton, "btn_continuar")
         assert btn is not None
 
-    @pytest.mark.parametrize("venceu,status_texto,status_prop", [
-        (True, "EXPEDIENTE CONCLUÍDO", "vitoria"),
-        (False, "EXPEDIENTE INTERROMPIDO", "derrota"),
-    ])
-    def test_pagina_4_endgame_win_lose(self, expediente, venceu, status_texto, status_prop):
-        """A pagina 4 deve exibir status correto para vitoria/derrota."""
-        expediente.exibir_tela_endgame(pontuacao_global=5000.0, dias_concluidos=1, venceu=venceu)
-        stack = expediente.findChild(QStackedWidget)
-        pagina = stack.widget(4)
-        titulo = pagina.findChild(QLabel, "label_endgame_titulo")
-        assert titulo is not None
-        assert titulo.text() == status_texto
-        assert titulo.property("status") == status_prop
-        pont = pagina.findChild(QLabel, "label_endgame_pontuacao")
-        assert pont is not None
-        btn = pagina.findChild(QPushButton, "btn_voltar_menu")
-        assert btn is not None
-
     def test_navegacao_ciclo_completo(self, expediente):
         """Navegar por todas as paginas sequencialmente deve funcionar."""
         expediente.exibir_selecao_perfil()
@@ -171,13 +153,11 @@ class TestPaginas:
         )
         expediente.exibir_tela_diagnostico(dto)
         assert expediente._TelaDeExpediente__stack.currentIndex() == 3
-        expediente.exibir_tela_endgame(5000.0, 1, True)
-        assert expediente._TelaDeExpediente__stack.currentIndex() == 4
 
 
 class TestSignals:
     """
-    Testes dos 6 sinais emitidos pela TelaDeExpediente.
+    Testes dos 4 sinais emitidos pela TelaDeExpediente.
     """
 
     def test_perfil_confirmado_signal(self, expediente, qtbot):
@@ -207,13 +187,6 @@ class TestSignals:
         expediente.exibir_tela_diagnostico(dto)
         btn = expediente.findChild(QPushButton, "btn_continuar")
         with qtbot.waitSignal(expediente.continuar_solicitado, timeout=1000):
-            qtbot.mouseClick(btn, Qt.MouseButton.LeftButton)
-
-    def test_voltar_menu_signal(self, expediente, qtbot):
-        """Clicar em voltar ao menu deve emitir voltar_menu_solicitado."""
-        expediente.exibir_tela_endgame(5000.0, 1, True)
-        btn = expediente.findChild(QPushButton, "btn_voltar_menu")
-        with qtbot.waitSignal(expediente.voltar_menu_solicitado, timeout=1000):
             qtbot.mouseClick(btn, Qt.MouseButton.LeftButton)
 
     def test_minimized_signal(self, expediente, qtbot):
@@ -308,12 +281,6 @@ class TestSidebar:
         expediente.exibir_tela_diagnostico(dto)
         sidebar = expediente.findChild(Sidebar)
         assert not sidebar.isHidden()
-
-    def test_sidebar_oculta_no_endgame(self, expediente):
-        """Sidebar deve estar oculta na pagina 4."""
-        expediente.exibir_tela_endgame(5000.0, 1, True)
-        sidebar = expediente.findChild(Sidebar)
-        assert sidebar.isHidden()
 
 
 class TestTituloDinamico:

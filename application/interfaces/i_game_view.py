@@ -42,9 +42,5 @@ class IGameView(ABC):
         pass
 
     @abstractmethod
-    def exibir_tela_endgame(self, pontuacao_global: float, dias_concluidos: int, venceu: bool) -> None:
-        pass
-
-    @abstractmethod
     def exibir_popup_erro(self, mensagem: str) -> None:
         pass

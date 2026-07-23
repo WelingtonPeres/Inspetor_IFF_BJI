@@ -10,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 class GameManager:
     """
-    State Machine global e Presenter principal (MVP).
     Orquestra a troca de telas, campanhas multi-dia,
     instancia/destrói GerenciadorDeTurno e faz a ponte
     entre a View e os controladores de domínio.
@@ -19,12 +18,11 @@ class GameManager:
     ESTADO_MENU = "ESTADO_MENU"
     ESTADO_EXPEDIENTE = "ESTADO_EXPEDIENTE"
     ESTADO_RESULTADO = "ESTADO_RESULTADO"
-    CAMPANHA_DURACAO_DIAS = 1
+    CAMPANHA_DURACAO_DIAS = 1 # Vai virar configuração depois.
 
     def __init__(self, view: IGameView):
         """
-        Injeta a View (deve implementar IGameView) e inicializa
-        o estado da campanha.
+        Injeta a View  IGameView e inicializa o estado da campanha.
         """
 
         self.__view = view
@@ -38,7 +36,6 @@ class GameManager:
 
     def iniciar_aplicacao(self) -> None:
         """
-        Ponto de entrada da aplicação.
         Instrui a View a inicializar a janela e carregar o menu principal.
         """
         self.__view.inicializar()
@@ -49,6 +46,15 @@ class GameManager:
         Instrui a View a fechar a janela e encerrar o processo.
         """
         self.__view.fechar()
+
+    def reiniciar_expediente(self) -> None:
+        """
+        Reinicia a campanha com o mesmo perfil, passando pelo
+        fluxo publico de verificacao de estado.
+        """
+        perfil = self.__perfil_selecionado
+        self.carregar_menu_principal()
+        self.iniciar_expediente(perfil)
 
     def carregar_menu_principal(self) -> None:
         """
@@ -82,10 +88,10 @@ class GameManager:
 
     def processar_submissao(self, respostas_jogador: Dict[str, Any]) -> None:
         """
-        Ponte MVP: recebe as respostas do jogador, delega a avaliação
+        Recebe as respostas do jogador, delega a avaliação
         e envia o diagnóstico (feedback) para a View.
 
-        O fluxo PAUSA aqui — a View exibe a tela de diagnóstico.
+        O fluxo PAUSA aqui, a View exibe a tela de diagnóstico.
         O avanço para o próximo relatório ou dia só acontece quando
         a View chamar ``avancar_fila_ou_dia()`` (botão "Continuar").
 
@@ -128,15 +134,29 @@ class GameManager:
             raise RuntimeError("[Erro - GameManager] Nenhum turno ativo.")
 
         if self.__gerenciador_turno.qnt_relatorios() == 0:
-            self.__dias_concluidos += 1
-            if self.__dias_concluidos >= self.CAMPANHA_DURACAO_DIAS:
-                self.__encerrar_campanha()
-            else:
-                self.__iniciar_dia(self.__dias_concluidos + 1)
+            self.__avancar_dia()
         else:
-            self.__view.trocar_para_tela_inspecao()
-            dados = self.__requisitar_dados_relatorio_atual()
-            self.__view.renderizar_relatorio(dados)
+            self.__avancar_fila()
+
+    def __avancar_fila(self) -> None:
+        """
+        Puxa o proximo relatorio da pilha e instrui a View a
+        renderiza-lo na tela de inspecao.
+        """
+        self.__view.trocar_para_tela_inspecao()
+        dados = self.__requisitar_dados_relatorio_atual()
+        self.__view.renderizar_relatorio(dados)
+
+    def __avancar_dia(self) -> None:
+        """
+        Incrementa o contador de dias concluidos e decide entre
+        iniciar um novo dia ou encerrar a campanha.
+        """
+        self.__dias_concluidos += 1
+        if self.__dias_concluidos >= self.CAMPANHA_DURACAO_DIAS:
+            self.__encerrar_campanha()
+        else:
+            self.__iniciar_dia(self.__dias_concluidos + 1)
             
     def __requisitar_dados_relatorio_atual(self) -> Dict[str, Any]:
         """
@@ -182,7 +202,7 @@ class GameManager:
         if self.__estado_atual != self.ESTADO_MENU:
             raise RuntimeError("[Erro - GameManager] Campanha so pode ser iniciada pelo menu.")
 
-        perfil = self.__mascarar_perfil(perfil)
+        perfil = self.__mascarar_perfil(perfil) # Temp
         self.__perfil_selecionado = perfil
         self.__dias_concluidos = 0
         self.__pontuacao_global = 0.0
@@ -191,9 +211,12 @@ class GameManager:
     def __encerrar_campanha(self) -> None:
         """
         Finaliza a campanha e instrui a View a exibir a tela de resultados.
+        Delega a verificacao de vitoria ao GerenciadorDeTurno.
         """
         self.__estado_atual = self.ESTADO_RESULTADO
-        venceu = self.__pontuacao_global > 0
+        
+        venceu = self.__gerenciador_turno.verificar_vitoria_do_turno()
+       
         self.__view.exibir_resultado(self.__pontuacao_global, self.__dias_concluidos, venceu)
 
     def __iniciar_dia(self, dia: int) -> None:
@@ -202,10 +225,11 @@ class GameManager:
         e prepara o expediente com o primeiro relatório já renderizado.
         """
         try:
+            self.__estado_atual = self.ESTADO_EXPEDIENTE
+            
             self.__gerenciador_turno = GerenciadorDeTurno(self.__perfil_selecionado)
             self.__gerenciador_turno.iniciar_turno()
 
-            self.__estado_atual = self.ESTADO_EXPEDIENTE
             self.__view.trocar_para_tela_inspecao()
 
             dados = self.__requisitar_dados_relatorio_atual()

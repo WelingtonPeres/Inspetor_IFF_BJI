@@ -15,7 +15,6 @@ from view.infrastructure.layout_loader import LayoutLoader
 from view.expediente.overlays.anexo_gallery import AnexoGallery
 from view.expediente.overlays.media_viewer import MediaViewer
 from view.expediente.paginas.diagnostico import PaginaDiagnostico
-from view.expediente.paginas.endgame import PaginaEndgame
 from view.expediente.paginas.inspecao import PaginaInspecao
 from view.expediente.paginas.loading import PaginaLoading
 from view.expediente.paginas.selecao_perfil import PaginaSelecaoPerfil
@@ -27,14 +26,12 @@ class TelaDeExpediente(QFrame):
     perfil_confirmado = Signal(str)
     submeter_respostas = Signal(dict)
     continuar_solicitado = Signal()
-    voltar_menu_solicitado = Signal()
     minimized_solicitado = Signal()
 
     IDX_SELECAO_PERFIL = 0
     IDX_LOADING = 1
     IDX_INSPECAO = 2
     IDX_DIAGNOSTICO = 3
-    IDX_ENDGAME = 4
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -54,7 +51,6 @@ class TelaDeExpediente(QFrame):
         self.__pagina_perfil: PaginaSelecaoPerfil
         self.__pagina_loading: PaginaLoading
         self.__pagina_diagnostico: PaginaDiagnostico
-        self.__pagina_endgame: PaginaEndgame
         self.__pagina_inspecao: PaginaInspecao
 
         self.__setup_ui()
@@ -116,9 +112,6 @@ class TelaDeExpediente(QFrame):
         self.__pagina_diagnostico = PaginaDiagnostico()
         self.__pagina_diagnostico.continuar_solicitado.connect(self.continuar_solicitado.emit)
 
-        self.__pagina_endgame = PaginaEndgame()
-        self.__pagina_endgame.voltar_menu_solicitado.connect(self.voltar_menu_solicitado.emit)
-
         self.__pagina_inspecao = PaginaInspecao()
         self.__pagina_inspecao.submeter_respostas.connect(self.submeter_respostas.emit)
 
@@ -127,7 +120,6 @@ class TelaDeExpediente(QFrame):
         stack.addWidget(self.__pagina_loading)
         stack.addWidget(self.__pagina_inspecao)
         stack.addWidget(self.__pagina_diagnostico)
-        stack.addWidget(self.__pagina_endgame)
         stack.setCurrentIndex(self.IDX_SELECAO_PERFIL)
         return stack
 
@@ -207,12 +199,6 @@ class TelaDeExpediente(QFrame):
         self.__title_bar.definir_titulo("Resultado da Inspeção")
         self.__pagina_diagnostico.exibir_diagnostico(diagnostico)
         self.__stack.setCurrentIndex(self.IDX_DIAGNOSTICO)
-
-    def exibir_tela_endgame(self, pontuacao_global: float, dias_concluidos: int, venceu: bool) -> None:
-        logger.info("Exibindo endgame: %.1f pts em %d dia(s), venceu=%s", pontuacao_global, dias_concluidos, venceu)
-        self.__title_bar.definir_titulo("Fim do Expediente")
-        self.__pagina_endgame.exibir_resultado(pontuacao_global, dias_concluidos, venceu)
-        self.__stack.setCurrentIndex(self.IDX_ENDGAME)
 
     def exibir_com_tamanho_inicial(self, parent_rect: Any) -> None:
         # Recalcula a cada chamada: reabrir apos fechar+redimensionar nao pode

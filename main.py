@@ -51,6 +51,7 @@ def main():
     janela.submeter_respostas.connect(gm.processar_submissao)
     janela.continuar_solicitado.connect(gm.avancar_fila_ou_dia)
     janela.voltar_menu_solicitado.connect(gm.carregar_menu_principal)
+    janela.jogar_novamente_solicitado.connect(gm.reiniciar_expediente)
 
     app.aboutToQuit.connect(gm.encerrar_aplicacao)
 
