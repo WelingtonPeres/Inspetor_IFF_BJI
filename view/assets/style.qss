@@ -708,3 +708,117 @@ GameWin #label_endgame_pontuacao, GameOver #label_endgame_pontuacao {
     font-size: 16px;
     padding: 8px;
 }
+
+/* ——— CRT GameOver ——— */
+GameOver {
+    background-color: #0a0a0a;
+    border: 6px solid #1a1c1c;
+    border-radius: 14px;
+}
+
+GameOver #gameover_header {
+    color: #71dd77;
+}
+
+GameOver #gameover_timestamp {
+    color: #889484;
+}
+
+GameOver #gameover_titulo {
+    color: #CD191E;
+}
+
+GameOver #gameover_subtitulo {
+    color: #ffb4ab;
+}
+
+GameOver #gameover_card {
+    background-color: #eeeae2;
+    border-radius: 2px;
+}
+
+GameOver #gameover_card_cabecalho {
+    color: #5f5e5a;
+}
+
+GameOver #gameover_card_subcabecalho {
+    color: #1a1c1c;
+}
+
+GameOver #gameover_card_divider {
+    background-color: #1a1c1c;
+}
+
+GameOver #gameover_card_parecer_num {
+    color: #5f5e5a;
+}
+
+GameOver #gameover_card_parecer_texto {
+    color: #1a1c1c;
+}
+
+GameOver #gameover_score_label {
+    color: #889484;
+}
+
+GameOver #gameover_score_valor {
+    color: #ffb4ab;
+}
+
+GameOver #gameover_btn_retry {
+    background-color: #2F9E41;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: none;
+}
+
+GameOver #gameover_btn_retry:hover {
+    background-color: #3cb350;
+}
+
+GameOver #gameover_btn_menu {
+    background-color: transparent;
+    color: #889484;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: 1px solid #3f4a3d;
+}
+
+GameOver #gameover_btn_menu:hover {
+    border-color: #6f7a6d;
+    color: #c0c4c0;
+}
+
+GameOver #gameover_btn_quit {
+    background-color: transparent;
+    color: #664444;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: 1px solid #3f3434;
+}
+
+GameOver #gameover_btn_quit:hover {
+    border-color: #6f4a4a;
+    color: #996666;
+}
+
+GameOver #gameover_footer {
+    background-color: #1a0708;
+    border: 1px solid #4a0709;
+    border-radius: 4px;
+}
+
+GameOver #gameover_footer_indicator {
+    background-color: #CD191E;
+}
+
+GameOver #gameover_footer_label {
+    color: #ffb4ab;
+}

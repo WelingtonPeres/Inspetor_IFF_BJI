@@ -114,5 +114,14 @@
     { "icone_arquivo": "pasta_verde.png", "legenda": "Arquivos", "action": "info" },
     { "icone_arquivo": "help.png", "legenda": "Help", "action": "info" },
     { "icone_arquivo": "image.png", "legenda": "Wallpapers", "action": "wallpaper" }
-  ]
+  ],
+  "gameover": {
+    "card": {
+      "largura_min": 330,
+      "largura_max": 620,
+      "fator_largura": 0.58,
+      "altura_minima": 270,
+      "parecer_max_height": 150
+    }
+  }
 }

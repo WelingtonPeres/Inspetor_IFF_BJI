@@ -52,7 +52,11 @@ def main():
     janela.continuar_solicitado.connect(gm.avancar_fila_ou_dia)
     janela.voltar_menu_solicitado.connect(gm.carregar_menu_principal)
     janela.jogar_novamente_solicitado.connect(gm.reiniciar_expediente)
+    janela.sair_solicitado.connect(gm.encerrar_aplicacao)
 
+    # Redundancia defensiva: se o utilizador fechar a janela pela X do SO
+    # em vez de usar o botao "Sair do Jogo", aboutToQuit garante que o
+    # presenter ainda e notificado para libertar recursos.
     app.aboutToQuit.connect(gm.encerrar_aplicacao)
 
     gm.iniciar_aplicacao()

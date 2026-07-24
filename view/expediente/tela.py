@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
 )
 
 from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
+from infrastructure.repository.repositorio_pareceres_cipa import RepositorioDePareceresCIPA
 from view.expediente.widgets.sidebar import Sidebar
 from view.expediente.widgets.window_title_bar import WindowTitleBar
 from view.infrastructure.layout_loader import LayoutLoader
@@ -30,6 +31,7 @@ class TelaDeExpediente(QFrame):
     continuar_solicitado = Signal()
     voltar_menu_solicitado = Signal()
     jogar_novamente_solicitado = Signal()
+    sair_solicitado = Signal()
     minimized_solicitado = Signal()
 
     IDX_SELECAO_PERFIL = 0
@@ -48,11 +50,14 @@ class TelaDeExpediente(QFrame):
 
         self.__maximizado: bool = False
         self.__tamanho_normal: Any = None
+        self.__perfil_selecionado: str = ""
+
+        self.__repositorio_pareceres: RepositorioDePareceresCIPA = RepositorioDePareceresCIPA()
 
         self.__anexo_gallery: AnexoGallery
         self.__media_viewer: MediaViewer
         self.__sidebar: Sidebar
-        
+
         # Paginas Filhas
         self.__pagina_perfil: PaginaSelecaoPerfil
         self.__pagina_loading: PaginaLoading
@@ -127,9 +132,13 @@ class TelaDeExpediente(QFrame):
         self.__pagina_game_win.voltar_menu_solicitado.connect(self.voltar_menu_solicitado.emit)
         self.__pagina_game_win.jogar_novamente_solicitado.connect(self.jogar_novamente_solicitado.emit)
 
-        self.__pagina_game_over = GameOver(pontuacao_global=0.0)
+        self.__pagina_game_over = GameOver(
+            pontuacao_global=0.0,
+            repositorio=self.__repositorio_pareceres,
+        )
         self.__pagina_game_over.voltar_menu_solicitado.connect(self.voltar_menu_solicitado.emit)
         self.__pagina_game_over.jogar_novamente_solicitado.connect(self.jogar_novamente_solicitado.emit)
+        self.__pagina_game_over.sair_solicitado.connect(self.sair_solicitado.emit)
 
         stack = QStackedWidget()
         stack.addWidget(self.__pagina_perfil)
@@ -152,6 +161,7 @@ class TelaDeExpediente(QFrame):
 
     @Slot(str)
     def __on_perfil_confirmado(self, perfil: str) -> None:
+        self.__perfil_selecionado = perfil
         self.exibir_tela_carregamento()
         self.perfil_confirmado.emit(perfil)
 
@@ -226,6 +236,7 @@ class TelaDeExpediente(QFrame):
             self.__stack.setCurrentIndex(self.IDX_GAME_WIN)
             return
         self.__pagina_game_over.atualizar_pontuacao(pontuacao_global)
+        self.__pagina_game_over.definir_parecer(self.__perfil_selecionado)
         self.__stack.setCurrentIndex(self.IDX_GAME_OVER)
 
     def exibir_com_tamanho_inicial(self, parent_rect: Any) -> None:
