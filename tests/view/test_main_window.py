@@ -89,7 +89,7 @@ class TestJanelaPrincipal:
         })
 
     def test_exibir_resultado(self, janela):
-        """exibir_resultado deve criar overlay GameWin/GameOver sem erros."""
+        """exibir_resultado deve delegar para TelaDeExpediente sem erros."""
         janela.exibir_resultado(pontuacao_global=5000.0, dias_concluidos=1, venceu=True)
 
     # Desabilitado: QMessageBox.critical bloqueia a execução até clique do

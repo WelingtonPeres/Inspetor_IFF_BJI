@@ -15,6 +15,8 @@ from view.infrastructure.layout_loader import LayoutLoader
 from view.expediente.overlays.anexo_gallery import AnexoGallery
 from view.expediente.overlays.media_viewer import MediaViewer
 from view.expediente.paginas.diagnostico import PaginaDiagnostico
+from view.expediente.paginas.game_win import GameWin
+from view.expediente.paginas.game_over import GameOver
 from view.expediente.paginas.inspecao import PaginaInspecao
 from view.expediente.paginas.loading import PaginaLoading
 from view.expediente.paginas.selecao_perfil import PaginaSelecaoPerfil
@@ -26,12 +28,16 @@ class TelaDeExpediente(QFrame):
     perfil_confirmado = Signal(str)
     submeter_respostas = Signal(dict)
     continuar_solicitado = Signal()
+    voltar_menu_solicitado = Signal()
+    jogar_novamente_solicitado = Signal()
     minimized_solicitado = Signal()
 
     IDX_SELECAO_PERFIL = 0
     IDX_LOADING = 1
     IDX_INSPECAO = 2
     IDX_DIAGNOSTICO = 3
+    IDX_GAME_WIN = 4
+    IDX_GAME_OVER = 5
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -51,6 +57,8 @@ class TelaDeExpediente(QFrame):
         self.__pagina_perfil: PaginaSelecaoPerfil
         self.__pagina_loading: PaginaLoading
         self.__pagina_diagnostico: PaginaDiagnostico
+        self.__pagina_game_win: GameWin
+        self.__pagina_game_over: GameOver
         self.__pagina_inspecao: PaginaInspecao
 
         self.__setup_ui()
@@ -115,11 +123,21 @@ class TelaDeExpediente(QFrame):
         self.__pagina_inspecao = PaginaInspecao()
         self.__pagina_inspecao.submeter_respostas.connect(self.submeter_respostas.emit)
 
+        self.__pagina_game_win = GameWin(pontuacao_global=0.0)
+        self.__pagina_game_win.voltar_menu_solicitado.connect(self.voltar_menu_solicitado.emit)
+        self.__pagina_game_win.jogar_novamente_solicitado.connect(self.jogar_novamente_solicitado.emit)
+
+        self.__pagina_game_over = GameOver(pontuacao_global=0.0)
+        self.__pagina_game_over.voltar_menu_solicitado.connect(self.voltar_menu_solicitado.emit)
+        self.__pagina_game_over.jogar_novamente_solicitado.connect(self.jogar_novamente_solicitado.emit)
+
         stack = QStackedWidget()
         stack.addWidget(self.__pagina_perfil)
         stack.addWidget(self.__pagina_loading)
         stack.addWidget(self.__pagina_inspecao)
         stack.addWidget(self.__pagina_diagnostico)
+        stack.addWidget(self.__pagina_game_win)
+        stack.addWidget(self.__pagina_game_over)
         stack.setCurrentIndex(self.IDX_SELECAO_PERFIL)
         return stack
 
@@ -199,6 +217,16 @@ class TelaDeExpediente(QFrame):
         self.__title_bar.definir_titulo("Resultado da Inspeção")
         self.__pagina_diagnostico.exibir_diagnostico(diagnostico)
         self.__stack.setCurrentIndex(self.IDX_DIAGNOSTICO)
+
+    def exibir_tela_endgame(self, pontuacao_global: float, dias_concluidos: int, venceu: bool) -> None:
+        logger.info("Exibindo endgame: %.1f pts, venceu=%s", pontuacao_global, venceu)
+        self.__title_bar.definir_titulo("Fim do Expediente")
+        if venceu:
+            self.__pagina_game_win.atualizar_pontuacao(pontuacao_global)
+            self.__stack.setCurrentIndex(self.IDX_GAME_WIN)
+            return
+        self.__pagina_game_over.atualizar_pontuacao(pontuacao_global)
+        self.__stack.setCurrentIndex(self.IDX_GAME_OVER)
 
     def exibir_com_tamanho_inicial(self, parent_rect: Any) -> None:
         # Recalcula a cada chamada: reabrir apos fechar+redimensionar nao pode

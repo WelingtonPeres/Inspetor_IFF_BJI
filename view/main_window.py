@@ -9,8 +9,6 @@ from application.interfaces.i_game_view import IGameView
 from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
 from view.desktop.taskbar import Taskbar
 from view.expediente.tela import TelaDeExpediente
-from view.expediente.paginas.game_win import GameWin
-from view.expediente.paginas.game_over import GameOver
 from view.desktop.menu import TelaMenuPrincipal
 from view.infrastructure.layout_loader import LayoutLoader
 
@@ -70,8 +68,6 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
         self.__tela_expediente = self.__build_tela_expediente()
         self.__overlay_area.add_overlay(self.__tela_expediente, auto_resize=False)
 
-        self.__endgame_atual: Optional[QWidget] = None
-
     def __build_container(self) -> QWidget:
         container = QWidget()
         container.setObjectName("container_area")
@@ -94,6 +90,8 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
         tela_expediente.perfil_confirmado.connect(self.perfil_confirmado.emit)
         tela_expediente.submeter_respostas.connect(self.submeter_respostas.emit)
         tela_expediente.continuar_solicitado.connect(self.continuar_solicitado.emit)
+        tela_expediente.voltar_menu_solicitado.connect(self.voltar_menu_solicitado.emit)
+        tela_expediente.jogar_novamente_solicitado.connect(self.jogar_novamente_solicitado.emit)
         tela_expediente.minimized_solicitado.connect(self.__on_minimizar_expediente)
         # O expediente flutua a 80% e nao preenche o overlay, mas ainda precisa
         # reagir quando o overlay cresce (B5). O signal repassa o novo rect.
@@ -141,7 +139,6 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
     def exibir_menu(self) -> None:
         logger.info("Exibindo menu principal (desktop).")
         self.__tela_expediente.hide()
-        self.__limpar_endgame_anterior()
 
     def exibir_selecao_perfil(self) -> None:
         logger.info("Exibindo selecao de perfil no expediente.")
@@ -167,37 +164,7 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
 
     def exibir_resultado(self, pontuacao_global: float, dias_concluidos: int, venceu: bool) -> None:
         logger.info("Exibindo resultado final. venceu=%s, pontuacao=%.1f", venceu, pontuacao_global)
-        self.__tela_expediente.hide()
-        self.__limpar_endgame_anterior()
-        widget = self.__criar_endgame(pontuacao_global, venceu)
-        self.__endgame_atual = widget
-        self.__overlay_area.add_overlay(widget, auto_resize=False)
-        self.__overlay_area.overlay_resized.connect(self.__reposicionar_endgame)
-        widget.voltar_menu_solicitado.connect(self.voltar_menu_solicitado.emit)
-        widget.jogar_novamente_solicitado.connect(self.jogar_novamente_solicitado.emit)
-        self.__reposicionar_endgame(self.__overlay_area.rect())
-        widget.show()
-
-    @Slot(QRect)
-    def __reposicionar_endgame(self, parent_rect: QRect) -> None:
-        if self.__endgame_atual is None:
-            return
-        w = int(parent_rect.width() * 0.8)
-        h = int(parent_rect.height() * 0.8)
-        x = (parent_rect.width() - w) // 2
-        y = (parent_rect.height() - h) // 2
-        self.__endgame_atual.setGeometry(x, y, w, h)
-
-    def __criar_endgame(self, pontuacao: float, venceu: bool) -> QWidget:
-        if venceu:
-            return GameWin(pontuacao)
-        return GameOver(pontuacao)
-
-    def __limpar_endgame_anterior(self) -> None:
-        if self.__endgame_atual is not None:
-            self.__overlay_area.remove_overlay(self.__endgame_atual)
-            self.__endgame_atual.deleteLater()
-            self.__endgame_atual = None
+        self.__tela_expediente.exibir_tela_endgame(pontuacao_global, dias_concluidos, venceu)
 
     def exibir_popup_erro(self, mensagem: str) -> None:
         logger.warning("Popup de erro: %s", mensagem)

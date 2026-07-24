@@ -25,6 +25,9 @@ class GameOver(QFrame):
 
         self.__setup_ui(pontuacao_global)
 
+    def atualizar_pontuacao(self, pontuacao_global: float) -> None:
+        self.__label_pontuacao.setText(f"Pontuação final: {pontuacao_global:.1f}")
+
     def __setup_ui(self, pontuacao_global: float) -> None:
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
