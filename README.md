@@ -1,21 +1,35 @@
-# Inspetor IFF-BJI: Análise de Risco
+<p align="center">
+  <img src="docs/img/InspetorIFFBJI_banner.png" alt="Inspetor IFF-BJI" width="100%">
+</p>
 
-## 1. Contexto Institucional e Extensão Curricular
+# Inspetor IFF-BJI
 
-Este projeto de software foi desenvolvido como atividade integrante da **Curricularização da Extensão** do Curso de **Bacharelado em Engenharia de Computação** do **Instituto Federal Fluminense (IFF) - Campus Bom Jesus do Itabapoana**, desenvolvida na disciplina de **Higiene e Segurança do Trabalho**, na grade do 8° período.
+> Simulador de análise de risco ocupacional desenvolvido no IFF, Campus Bom Jesus do Itabapoana, como atividade de Curricularização da Extensão na disciplina de Higiene e Segurança do Trabalho. O jogador recebe relatórios de cenários reais em laboratórios, oficinas e refeitórios, classifica riscos e fatores de insegurança, e escolhe a intervenção cabível sob pressão de tempo. A nota sai de um modelo determinístico que pondera exatidão, completude e decaimento temporal, e o resultado reflete o que um técnico de segurança faria naquele contexto.
 
-A iniciativa cumpre o papel fundamental de estender o conhecimento acadêmico gerado na instituição para a sociedade, integrando conceitos avançados de Engenharia de Computação a uma aplicação prática de Segurança do Trabalho. O sistema possui potencial direto para ser utilizado em treinamentos internos de servidores e alunos, além de capacitações externas em empresas e comunidades da região.
+## Sumário
 
-## 2. Apresentação do Sistema
+- [1. Instalação Rápida](#1-instalação-rápida)
+- [2. Documentação e Guias](#2-documentação-e-guias)
+- [3. Arquitetura do Projeto](#3-arquitetura-do-projeto)
 
-O **Inspetor IFF-BJI: Análise de Risco** é um simulador interativo baseado na rotina técnica de um Técnico de Segurança do Trabalho dentro do ambiente do Instituto Federal Fluminense. 
+## 1. Instalação Rápida
 
-No papel de um inspetor, o usuário é responsável por analisar relatórios diários, inspecionar evidências de cenários de risco em dependências institucionais, como laboratórios, oficinas e refeitórios, e tomar decisões administrativas cabíveis sob forte pressão de tempo.
+Pré-requisitos: **Python 3.11+** e **Git**.
 
-A abordagem do sistema afasta-se de dinâmicas puramente recreativas ou baseadas em aleatoriedade (jogos convencionais), fundamentando-se em um **modelo matemático determinístico e avaliativo** estruturado para mensurar o desempenho técnico real do operador.
+```bash
+git clone https://github.com/WelingtonPeres/Inspetor_IFF_BJI.git
+cd Inspetor_IFF_BJI
+python -m venv venv
+# Windows (PowerShell): .\venv\Scripts\Activate.ps1
+# Linux/macOS:          source venv/bin/activate
+pip install -r requirements.txt
+python main.py
+```
+
+Quem nunca instalou Python, não sabe o que é `venv` ou trava em alguma etapa encontra o passo a passo em [docs/INSTALACAO.md](docs/INSTALACAO.md).
 
 
-##  Documentação do Projeto e Guias
+## 2. Documentação do Projeto e Guias
 
 Para manter este ficheiro principal conciso, toda a documentação técnica, especificações matemáticas e guias de desenvolvimento foram modularizados. Consulte os links abaixo para compreender a fundo os detalhes do projeto:
 
@@ -25,7 +39,7 @@ Para manter este ficheiro principal conciso, toda a documentação técnica, esp
 * **[Level Design e Fluxos do Jogo](docs/game_design/Level_Design.md)**: Mapeamento da experiência do utilizador, progressão de dificuldade e mecânicas de feedback.
 * **[Padrões de Nomenclatura e PEP-8](docs/PADROES_NOMENCLATURA_PEP8.md)**: Diretrizes estritas de estilo de código adotadas pela equipa de engenharia.
 
-##  Arquitetura do Projeto (Diagrama de Classes)
+## 3. Arquitetura do Projeto (Diagrama de Classes)
 
 O projeto segue os princípios da **Arquitetura Limpa (Clean Architecture)**, dividido em camadas concêntricas:
 

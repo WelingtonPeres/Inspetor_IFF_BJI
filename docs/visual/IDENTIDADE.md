@@ -1,6 +1,6 @@
 # Diretrizes de Identidade Institucional — IFFluminense
 
-Regras obrigatórias para uso da marca, cores e tipografia do Instituto Federal Fluminense no jogo **Inspetor IFF-BJI: Análise de Risco**.
+Regras obrigatórias para uso da marca, cores e tipografia do Instituto Federal Fluminense no jogo **Inspetor IFF-BJI**.
 
 > Fontes oficiais:
 > - https://portal1.iff.edu.br/.../identidade-visual

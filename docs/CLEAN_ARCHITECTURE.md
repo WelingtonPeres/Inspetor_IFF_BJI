@@ -2,7 +2,7 @@
 
 ## 1. Visão Geral
 
-O projeto **Inspetor IFF-BJI: Análise de Risco** adota os princípios da **Arquitetura Limpa (Clean Architecture)** para garantir separação rigorosa de responsabilidades, testabilidade e manutenibilidade do código. Este documento descreve a organização real das camadas, suas responsabilidades e as regras de dependência entre elas, conforme implementadas no código-fonte.
+O projeto **Inspetor IFF-BJI** adota os princípios da **Arquitetura Limpa (Clean Architecture)** para garantir separação rigorosa de responsabilidades, testabilidade e manutenibilidade do código. Este documento descreve a organização real das camadas, suas responsabilidades e as regras de dependência entre elas, conforme implementadas no código-fonte.
 
 ---
 
