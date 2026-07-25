@@ -681,13 +681,13 @@ PaginaDiagnostico #label_diagnostico {
 }
 
 /* --- GameWin / GameOver --- */
-GameWin, GameOver {
+GameWin {
     background-color: #f0f0f0;
     border: 2px solid #d0d0d0;
     border-radius: 8px;
 }
 
-GameWin #label_endgame_titulo, GameOver #label_endgame_titulo {
+GameWin #label_endgame_titulo {
     font-family: "Courier New", Consolas, monospace;
     font-size: 24px;
     font-weight: bold;
@@ -708,7 +708,7 @@ GameOver #label_endgame_titulo {
     background-color: #fde8e8;
 }
 
-GameWin #label_endgame_pontuacao, GameOver #label_endgame_pontuacao {
+GameWin #label_endgame_pontuacao {
     color: #1a1c1c;
     font-family: "Courier New", Consolas, monospace;
     font-size: 16px;
@@ -743,6 +743,15 @@ GameOver #gameover_card {
     border-radius: 2px;
 }
 
+GameOver QFrame#gameover_card {
+    background-image: url(icons/fim_jogo/oldpaper.png);
+    background-color: #eeeae2;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    border-radius: 2px;
+}
+
 GameOver #gameover_card_cabecalho {
     color: #5f5e5a;
 }
@@ -759,7 +768,12 @@ GameOver #gameover_card_parecer_num {
     color: #5f5e5a;
 }
 
+GameOver QScrollArea {
+    background-color: transparent;
+}
+
 GameOver #gameover_card_parecer_texto {
+    background-color: transparent;
     color: #1a1c1c;
 }
 
@@ -774,7 +788,6 @@ GameOver #gameover_score_valor {
 GameOver #gameover_btn_retry {
     background-color: #2F9E41;
     color: #ffffff;
-    font-size: 13px;
     font-weight: bold;
     padding: 10px 20px;
     border-radius: 6px;
@@ -785,10 +798,18 @@ GameOver #gameover_btn_retry:hover {
     background-color: #3cb350;
 }
 
+GameOver #gameover_btn_retry:focus {
+    background-color: #2a8a37;
+    border: 2px solid #ffffff;
+}
+
+GameOver #gameover_btn_retry:pressed {
+    background-color: #1e6b28;
+}
+
 GameOver #gameover_btn_menu {
     background-color: transparent;
     color: #556;
-    font-size: 13px;
     font-weight: bold;
     padding: 10px 20px;
     border-radius: 6px;
@@ -800,10 +821,19 @@ GameOver #gameover_btn_menu:hover {
     color: #222;
 }
 
+GameOver #gameover_btn_menu:focus {
+    border: 2px solid #555;
+    color: #000;
+}
+
+GameOver #gameover_btn_menu:pressed {
+    background-color: #d0d0d0;
+    border-color: #888;
+}
+
 GameOver #gameover_btn_quit {
     background-color: transparent;
-    color: #aa6666;
-    font-size: 13px;
+    color: #883333;
     font-weight: bold;
     padding: 10px 20px;
     border-radius: 6px;
@@ -811,8 +841,18 @@ GameOver #gameover_btn_quit {
 }
 
 GameOver #gameover_btn_quit:hover {
-    border-color: #aa7777;
-    color: #883333;
+    border-color: #883333;
+    color: #6a1f1f;
+}
+
+GameOver #gameover_btn_quit:focus {
+    border: 2px solid #883333;
+    color: #5a1515;
+}
+
+GameOver #gameover_btn_quit:pressed {
+    background-color: #f0d0d0;
+    border-color: #883333;
 }
 
 GameOver #gameover_footer {

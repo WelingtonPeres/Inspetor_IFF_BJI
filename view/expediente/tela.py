@@ -131,6 +131,7 @@ class TelaDeExpediente(QFrame):
         self.__pagina_game_win = GameWin(pontuacao_global=0.0)
         self.__pagina_game_win.voltar_menu_solicitado.connect(self.voltar_menu_solicitado.emit)
         self.__pagina_game_win.jogar_novamente_solicitado.connect(self.jogar_novamente_solicitado.emit)
+        self.__pagina_game_win.sair_solicitado.connect(self.sair_solicitado.emit)
 
         self.__pagina_game_over = GameOver(
             pontuacao_global=0.0,
@@ -235,8 +236,9 @@ class TelaDeExpediente(QFrame):
             self.__pagina_game_win.atualizar_pontuacao(pontuacao_global)
             self.__stack.setCurrentIndex(self.IDX_GAME_WIN)
             return
-        self.__pagina_game_over.atualizar_pontuacao(pontuacao_global)
-        self.__pagina_game_over.definir_parecer(self.__perfil_selecionado)
+        self.__pagina_game_over.exibir_resultado(
+            pontuacao_global, self.__perfil_selecionado
+        )
         self.__stack.setCurrentIndex(self.IDX_GAME_OVER)
 
     def exibir_com_tamanho_inicial(self, parent_rect: Any) -> None:

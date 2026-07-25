@@ -51,6 +51,15 @@ class LayoutLoader(QObject):
         factor_h = self.__screen_h / self.__ref_h
         return min(factor_w, factor_h)
 
+    def scale_factor(self) -> float:
+        """API publica para o factor de escala actual.
+
+        O factor e o minimo entre (largura/resolucao_base.w) e
+        (altura/resolucao_base.h), garantindo que o layout nao
+        deforma entre orientacoes.
+        """
+        return self._scale_factor()
+
     def _navigate(self, *keys: str) -> Any:
         current = self.__data
         for key in keys:

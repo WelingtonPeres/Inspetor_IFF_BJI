@@ -72,14 +72,11 @@ class CrtEffectsOverlay(QFrame):
         super().resizeEvent(event)
 
     def paintEvent(self, _event) -> None:
-        painter = QPainter(self)
-        w, h = self.width(), self.height()
-
-        self.__desenhar_scanlines(painter, w, h)
-        self.__desenhar_vinheta(painter, w, h)
-        self.__desenhar_scanline_bar(painter, w, h)
-
-        painter.end()
+        with QPainter(self) as painter:
+            w, h = self.width(), self.height()
+            self.__desenhar_scanlines(painter, w, h)
+            self.__desenhar_vinheta(painter, w, h)
+            self.__desenhar_scanline_bar(painter, w, h)
 
     @Slot()
     def __animar(self) -> None:

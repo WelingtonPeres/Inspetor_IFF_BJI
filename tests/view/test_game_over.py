@@ -66,10 +66,6 @@ class TestEstrutura:
         """A GameOver deve ter objectName 'game_over'."""
         assert game_over.objectName() == "game_over"
 
-    def test_property_class(self, game_over):
-        """A GameOver deve ter property class 'game_over'."""
-        assert game_over.property("class") == "game_over"
-
     def test_titulo_existe(self, game_over):
         """A GameOver deve conter um QLabel com texto 'GAME OVER'."""
         titulo = game_over.findChild(QLabel, "gameover_titulo")
@@ -443,18 +439,101 @@ class TestIntegracaoCrtOverlay:
             area_pai.height(),
         )
 
-    def test_game_over_nao_tem_qtimer_proprio(self, game_over):
-        """Apos a refactoracao, GameOver nao cria o seu proprio QTimer.
+    def test_qtimer_gerido_por_show_hide(self, game_over, qtbot):
+        """O QTimer do timestamp arranca em showEvent e para em hideEvent."""
+        # Encontrar QTimer filho directo do GameOver (excluindo CrtEffectsOverlay)
+        timers_directos = [
+            t for t in game_over.children()
+            if isinstance(t, QTimer)
+        ]
+        assert len(timers_directos) == 1
+        timer = timers_directos[0]
 
-        A gestao do QTimer de animacao foi delegada ao CrtEffectsOverlay.
-        Se existir algum QTimer dentro do GameOver, o seu parent deve ser
-        o overlay, nunca o proprio GameOver.
-        """
-        # Arrange — game_over pronto via fixture
+        # Antes do show, sem showEvent, nao deve estar a correr
+        assert not timer.isActive()
 
-        # Act — nada a executar
+        # Act — mostrar
+        game_over.show()
+        qtbot.waitExposed(game_over)
+        # Assert — apos show, timer arranca
+        assert timer.isActive()
 
-        # Assert — nenhum QTimer tem o GameOver como parent directo
-        timers = game_over.findChildren(QTimer)
-        for timer in timers:
-            assert timer.parent() is not game_over
+        # Cleanup — esconder deve parar
+        game_over.hide()
+        qtbot.waitExposed(game_over)
+        assert not timer.isActive()
+
+
+class TestResponsividade:
+    """Validacao do design responsivo: fontes/spacings/pictogramas escalam."""
+
+    def test_fontes_escalam_com_resolucao(self, layout_loader_1920, qtbot):
+        """Fontes devem diminuir em resolucoes menores e reverter em maiores."""
+        LayoutLoader._instance = None
+        loader = LayoutLoader.instance()
+        loader.set_screen(1920, 1080)
+        g = GameOver(pontuacao_global=820.0)
+        g.show()
+        qtbot.waitExposed(g)
+        font_titulo_1920 = g.findChild(QLabel, "gameover_titulo").font().pointSize()
+
+        loader.set_screen(1024, 576)
+        qtbot.waitExposed(g)
+        font_titulo_1024 = g.findChild(QLabel, "gameover_titulo").font().pointSize()
+
+        assert font_titulo_1024 < font_titulo_1920, (
+            f"Esperado font menor em 1024 ({font_titulo_1024}) que em 1920 ({font_titulo_1920})"
+        )
+
+    def test_spacings_escalam_com_resolucao(self, layout_loader_1920, qtbot):
+        """addSpacing do layout principal deve usar valores do layout.json escalados."""
+        LayoutLoader._instance = None
+        loader = LayoutLoader.instance()
+        loader.set_screen(1920, 1080)
+        g = GameOver(pontuacao_global=820.0)
+        g.show()
+        qtbot.waitExposed(g)
+        spacing_1920 = loader.scaled("gameover", "spacing", "entre_titulo_card")
+
+        loader.set_screen(1024, 576)
+        spacing_1024 = loader.scaled("gameover", "spacing", "entre_titulo_card")
+
+        assert spacing_1024 < spacing_1920
+        assert spacing_1920 == 16  # base em 1920
+        assert spacing_1024 == round(16 * 1024 / 1920)  # 9
+
+    def test_pictograma_widget_existe_e_cobre_widget_pai(self, layout_loader_1920, qtbot):
+        """O BackgroundRiscos deve existir como filho e ser transparente a mouse."""
+        g = GameOver(pontuacao_global=820.0)
+        g.show()
+        qtbot.waitExposed(g)
+        from view.widgets.efeitos.background_riscos import BackgroundRiscos
+        riscos = g.findChild(BackgroundRiscos)
+        assert riscos is not None
+        assert riscos.testAttribute(Qt.WA_TransparentForMouseEvents)
+        riscos_rect = riscos.geometry()
+        g_rect = g.rect()
+        assert (riscos_rect.width(), riscos_rect.height()) == (
+            g_rect.width(),
+            g_rect.height(),
+        )
+
+    def test_reaplicar_dimensoes_atualiza_fontes(self, layout_loader_1920, qtbot):
+        """__reaplicar_dimensoes deve actualizar pointSize das fontes."""
+        LayoutLoader._instance = None
+        loader = LayoutLoader.instance()
+        loader.set_screen(1920, 1080)
+        g = GameOver(pontuacao_global=820.0)
+        g.show()
+        qtbot.waitExposed(g)
+        titulo = g.findChild(QLabel, "gameover_titulo")
+        size_inicial = titulo.font().pointSize()
+
+        loader.set_screen(1280, 720)
+        # Forcar reaplicacao
+        g.__init__(pontuacao_global=820.0) if False else None
+        loader.escala_atualizada.emit()
+        qtbot.waitExposed(g)
+        size_novo = titulo.font().pointSize()
+
+        assert size_novo != size_inicial

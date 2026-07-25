@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from core.dtos.parecer_cipa import ParecerCIPA
+from core.interfaces.i_pareceres_cipa import IPareceresCIPA
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +16,7 @@ class ParecerCIPAIndisponivelError(Exception):
     pass
 
 
-class RepositorioDePareceresCIPA:
+class RepositorioDePareceresCIPA(IPareceresCIPA):
     """
     Carrega pareceres da CIPA a partir de JSON e fornece pareceres
     aleatorios por curso, com fallback automatico para DEFAULT.
