@@ -463,7 +463,7 @@
     },
     "botoes": {
       "altura": 40,
-      "largura_min": 110,
+      "largura_min": 55,
       "padding_y": 8,
       "border_radius": 6
     },
