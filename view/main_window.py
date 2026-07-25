@@ -43,10 +43,9 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Inspetor IFF-BJI")
-        # 1024x576 = metade da resolucao base (1920x1080). Permite encolcher
-        # a janela sem a tornar unusavel, mas nao bloqueia abaixo da resolucao
-        # real do monitor como o antigo 1920x1080 fazia.
-        self.setMinimumSize(1024, 576)
+        # 1280x720 = HD (16:9). Tamanho minimo e inicial.
+        self.setMinimumSize(1280, 720)
+        self.resize(1280, 720)
 
         self.__sincronizar_escala_com_tela()
 

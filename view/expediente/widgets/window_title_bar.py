@@ -29,15 +29,18 @@ class WindowTitleBar(QFrame):
         self.__altura_keys = altura_keys
         self.__main_layout: Optional[QHBoxLayout] = None
         self.__title_label: Optional[QLabel] = None
+        self.__btn_minimize: Optional[QPushButton] = None
+        self.__btn_maximize: Optional[QPushButton] = None
+        self.__close_btn: Optional[QPushButton] = None
         self.__setup_ui(titulo, altura)
         # Recalcula altura/margens/fonte quando o fator de escala muda.
         LayoutLoader.instance().escala_atualizada.connect(self.__on_escala_atualizada)
 
     def __setup_ui(self, titulo: str, altura: int):
+        L = LayoutLoader.instance()
         self.setFixedHeight(altura)
 
         layout = QHBoxLayout(self)
-        L = LayoutLoader.instance()
         layout.setContentsMargins(*L.scaled_margins("tela_de_expediente", "title_bar", "margens"))
         self.__main_layout = layout
 
@@ -50,24 +53,27 @@ class WindowTitleBar(QFrame):
 
         layout.addStretch()
 
+        btn_w = L.scaled("window_title_bar", "btn_tamanho")
+        btn_h = L.scaled("window_title_bar", "btn_altura")
+
         self.__btn_minimize = QPushButton("\u2014")
         self.__btn_minimize.setObjectName("window_minimize_button")
         self.__btn_minimize.setProperty("class", "window_minimize_button")
-        self.__btn_minimize.setFixedSize(36, 28)
+        self.__btn_minimize.setFixedSize(btn_w, btn_h)
         self.__btn_minimize.clicked.connect(self.minimized_solicitado.emit)
         layout.addWidget(self.__btn_minimize)
 
         self.__btn_maximize = QPushButton("\u25a1")
         self.__btn_maximize.setObjectName("window_maximize_button")
         self.__btn_maximize.setProperty("class", "window_maximize_button")
-        self.__btn_maximize.setFixedSize(36, 28)
+        self.__btn_maximize.setFixedSize(btn_w, btn_h)
         self.__btn_maximize.clicked.connect(self.maximized_solicitado.emit)
         layout.addWidget(self.__btn_maximize)
 
         self.__close_btn = QPushButton("\u2715")
         self.__close_btn.setObjectName("window_close_button")
         self.__close_btn.setProperty("class", "window_close_button")
-        self.__close_btn.setFixedSize(36, 28)
+        self.__close_btn.setFixedSize(btn_w, btn_h)
         self.__close_btn.clicked.connect(self.close_requested.emit)
         layout.addWidget(self.__close_btn)
 
@@ -86,8 +92,8 @@ class WindowTitleBar(QFrame):
 
     def reaplicar_dimensoes(self, altura: int) -> None:
         """Re-aplica altura, margens e fonte do titulo (chamado em resize)."""
-        self.setFixedHeight(altura)
         L = LayoutLoader.instance()
+        self.setFixedHeight(altura)
         if self.__main_layout is not None:
             self.__main_layout.setContentsMargins(
                 *L.scaled_margins("tela_de_expediente", "title_bar", "margens")
@@ -95,6 +101,13 @@ class WindowTitleBar(QFrame):
         if self.__title_label is not None:
             font = L.scaled("fontes", "ocorrencias", "modal_titulo_janela", "size")
             self.__title_label.setFont(QFont("Courier New", font))
+
+        # Atualizar tamanho dos botoes
+        btn_w = L.scaled("window_title_bar", "btn_tamanho")
+        btn_h = L.scaled("window_title_bar", "btn_altura")
+        for btn in (self.__btn_minimize, self.__btn_maximize, self.__close_btn):
+            if btn is not None:
+                btn.setFixedSize(btn_w, btn_h)
 
     def definir_titulo(self, titulo: str) -> None:
         label = self.findChild(QLabel, "window_title_text")

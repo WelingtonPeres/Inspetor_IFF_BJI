@@ -260,8 +260,10 @@ class TelaDeExpediente(QFrame):
         if self.__maximizado:
             self.setGeometry(parent_rect)
             return
-        w = int(parent_rect.width() * 0.8)
-        h = int(parent_rect.height() * 0.8)
+        L = LayoutLoader.instance()
+        proporcao = L.get("tela_de_expediente", "proporcao_tela")
+        w = int(parent_rect.width() * proporcao)
+        h = int(parent_rect.height() * proporcao)
         x = (parent_rect.width() - w) // 2
         y = (parent_rect.height() - h) // 2
         self.setGeometry(x, y, w, h)
