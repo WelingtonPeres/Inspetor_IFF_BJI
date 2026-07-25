@@ -133,8 +133,8 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
     def __on_minimizar_expediente(self) -> None:
         self.__tela_expediente.hide()
 
-    @Slot(str)
-    def __encaminhar_iniciar(self, _legenda: str) -> None:
+    @Slot()
+    def __encaminhar_iniciar(self, _legenda: str = "") -> None:
         self.iniciar_solicitado.emit()
 
     @Slot()
