@@ -371,28 +371,25 @@ class GameOver(QFrame):
         row_layout.setContentsMargins(0, 0, 0, 0)
         row_layout.setSpacing(L.scaled("gameover", "spacing", "entre_botoes_row"))
 
-        row_layout.addStretch()
         self.__btn_menu_principal = self.__make_btn(
             "Menu principal", "gameover_btn_menu",
             self.voltar_menu_solicitado.emit,
             altura, largura_min, font_btn,
         )
-        row_layout.addWidget(self.__btn_menu_principal)
-
-        row_layout.addStretch()
         self.__btn_jogar_novamente = self.__make_btn(
             "Tentar novamente", "gameover_btn_retry",
             self.jogar_novamente_solicitado.emit,
             altura, largura_min, font_btn,
         )
-        row_layout.addWidget(self.__btn_jogar_novamente)
-
-        row_layout.addStretch()
         self.__btn_sair = self.__make_btn(
             "Sair do Jogo", "gameover_btn_quit",
             self.sair_solicitado.emit,
             altura, largura_min, font_btn,
         )
+
+        row_layout.addStretch()
+        row_layout.addWidget(self.__btn_menu_principal)
+        row_layout.addWidget(self.__btn_jogar_novamente)
         row_layout.addWidget(self.__btn_sair)
         row_layout.addStretch()
 
