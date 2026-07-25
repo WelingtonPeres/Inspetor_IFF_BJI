@@ -38,6 +38,7 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
     continuar_solicitado = Signal()
     voltar_menu_solicitado = Signal()
     jogar_novamente_solicitado = Signal()
+    sair_solicitado = Signal()
 
     def __init__(self):
         super().__init__()
@@ -92,6 +93,7 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
         tela_expediente.continuar_solicitado.connect(self.continuar_solicitado.emit)
         tela_expediente.voltar_menu_solicitado.connect(self.voltar_menu_solicitado.emit)
         tela_expediente.jogar_novamente_solicitado.connect(self.jogar_novamente_solicitado.emit)
+        tela_expediente.sair_solicitado.connect(self.sair_solicitado.emit)
         tela_expediente.minimized_solicitado.connect(self.__on_minimizar_expediente)
         # O expediente flutua a 80% e nao preenche o overlay, mas ainda precisa
         # reagir quando o overlay cresce (B5). O signal repassa o novo rect.

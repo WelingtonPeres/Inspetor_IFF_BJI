@@ -5,8 +5,12 @@
   },
   "fontes": {
     "ocorrencias": {
-      "taskbar_texto": { "size": 9 },
-      "modal_titulo_janela": { "size": 9 }
+      "taskbar_texto": {
+        "size": 9
+      },
+      "modal_titulo_janela": {
+        "size": 9
+      }
     }
   },
   "desktop_shortcut": {
@@ -31,7 +35,12 @@
   },
   "taskbar": {
     "altura": 40,
-    "margens": { "top": 0, "right": 12, "bottom": 0, "left": 12 },
+    "margens": {
+      "top": 0,
+      "right": 12,
+      "bottom": 0,
+      "left": 12
+    },
     "start_botao": {
       "icone_arquivo": "logo_iff_branco.png",
       "texto": "Iniciar",
@@ -46,7 +55,12 @@
   },
   "tela": {
     "margens": {
-      "desktop": { "top": 48, "right": 48, "bottom": 8, "left": 48 }
+      "desktop": {
+        "top": 48,
+        "right": 48,
+        "bottom": 8,
+        "left": 48
+      }
     }
   },
   "wallpaper": {
@@ -60,17 +74,38 @@
   "sidebar": {
     "largura": 200,
     "itens": [
-      { "id": "dashboard", "label": "Dashboard", "inativo": true },
-      { "id": "reports",   "label": "Reports",   "inativo": false },
-      { "id": "logs",      "label": "Logs",      "inativo": true },
-      { "id": "settings",  "label": "Settings",  "inativo": true }
+      {
+        "id": "dashboard",
+        "label": "Dashboard",
+        "inativo": true
+      },
+      {
+        "id": "reports",
+        "label": "Reports",
+        "inativo": false
+      },
+      {
+        "id": "logs",
+        "label": "Logs",
+        "inativo": true
+      },
+      {
+        "id": "settings",
+        "label": "Settings",
+        "inativo": true
+      }
     ]
   },
   "anexo_preview": {
     "altura": 120,
     "thumbnail_largura": 160,
     "thumbnail_altura": 90,
-    "margens": { "top": 8, "right": 16, "bottom": 8, "left": 16 }
+    "margens": {
+      "top": 8,
+      "right": 16,
+      "bottom": 8,
+      "left": 16
+    }
   },
   "anexo_gallery": {
     "seta_largura": 48,
@@ -90,10 +125,20 @@
     "proporcao_tela": 0.8,
     "title_bar": {
       "altura": 32,
-      "margens": { "top": 0, "right": 8, "bottom": 0, "left": 12 }
+      "margens": {
+        "top": 0,
+        "right": 8,
+        "bottom": 0,
+        "left": 12
+      }
     },
     "body": {
-      "margens": { "top": 16, "right": 24, "bottom": 16, "left": 24 },
+      "margens": {
+        "top": 16,
+        "right": 24,
+        "bottom": 16,
+        "left": 24
+      },
       "spacing_entre_elementos": 12
     }
   },
@@ -102,17 +147,136 @@
     "altura": 340,
     "title_bar": {
       "altura": 32,
-      "margens": { "top": 0, "right": 12, "bottom": 0, "left": 12 }
+      "margens": {
+        "top": 0,
+        "right": 12,
+        "bottom": 0,
+        "left": 12
+      }
     },
     "body": {
-      "margens": { "top": 24, "right": 40, "bottom": 24, "left": 40 },
+      "margens": {
+        "top": 24,
+        "right": 40,
+        "bottom": 24,
+        "left": 40
+      },
       "spacing_entre_elementos": 16
     }
   },
   "atalhos_lista": [
-    { "icone_arquivo": "game.png", "legenda": "Iniciar", "action": "iniciar" },
-    { "icone_arquivo": "pasta_verde.png", "legenda": "Arquivos", "action": "info" },
-    { "icone_arquivo": "help.png", "legenda": "Help", "action": "info" },
-    { "icone_arquivo": "image.png", "legenda": "Wallpapers", "action": "wallpaper" }
-  ]
+    {
+      "icone_arquivo": "game.png",
+      "legenda": "Iniciar",
+      "action": "iniciar"
+    },
+    {
+      "icone_arquivo": "pasta_verde.png",
+      "legenda": "Arquivos",
+      "action": "info"
+    },
+    {
+      "icone_arquivo": "help.png",
+      "legenda": "Help",
+      "action": "info"
+    },
+    {
+      "icone_arquivo": "image.png",
+      "legenda": "Wallpapers",
+      "action": "wallpaper"
+    }
+  ],
+  "gameover": {
+    "card": {
+      "largura_min": 330,
+      "largura_max": 620,
+      "fator_largura": 0.58,
+      "altura_minima": 270,
+      "parecer_max_height": 150,
+      "padding": {
+        "top": 22,
+        "right": 20,
+        "bottom": 22,
+        "left": 20
+      }
+    },
+    "spacing": {
+      "entre_titulo_card": 16,
+      "entre_card_score": 18,
+      "entre_score_botoes": 18,
+      "entre_botoes_footer": 0,
+      "margem": 20,
+      "entre_botoes_row": 12,
+      "entre_footer": 10,
+      "spacers_top": 8,
+      "card_divider_altura": 2,
+      "spacers_mid": 12,
+      "spacers_ref": 10
+    },
+    "fontes": {
+      "header": {
+        "size": 14,
+        "letter_spacing": 0.5
+      },
+      "timestamp": {
+        "size": 12
+      },
+      "titulo": {
+        "size": 40,
+        "letter_spacing": 2.4
+      },
+      "subtitulo": {
+        "size": 14,
+        "letter_spacing": 0.9
+      },
+      "card_cabecalho": {
+        "size": 10,
+        "letter_spacing": 0.6
+      },
+      "card_subcabecalho": {
+        "size": 12
+      },
+      "card_parecer_num": {
+        "size": 12
+      },
+      "card_parecer_texto": {
+        "size": 13
+      },
+      "score_label": {
+        "size": 14,
+        "letter_spacing": 0.5
+      },
+      "score_valor": {
+        "size": 30
+      },
+      "footer_label": {
+        "size": 13,
+        "letter_spacing": 1.4
+      },
+      "botao": {
+        "size": 13
+      }
+    },
+    "botoes": {
+      "altura": 40,
+      "largura_min": 110,
+      "padding_y": 8,
+      "border_radius": 6
+    },
+    "footer": {
+      "indicator_size": 8,
+      "padding_y": 8,
+      "padding_x": 14
+    },
+    "pictogramas": {
+      "size_base_max": 130,
+      "size_base_min": 60,
+      "opacity": 0.07
+    },
+    "shadow": {
+      "blur": 4,
+      "offset_x": 5,
+      "offset_y": 5
+    }
+  }
 }

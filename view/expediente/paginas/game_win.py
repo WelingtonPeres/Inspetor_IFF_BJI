@@ -1,6 +1,6 @@
 import logging
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtWidgets import QApplication, QFrame, QLabel, QPushButton, QVBoxLayout
+from PySide6.QtWidgets import QFrame, QLabel, QPushButton, QVBoxLayout
 
 logger = logging.getLogger(__name__)
 
@@ -10,6 +10,7 @@ class GameWin(QFrame):
 
     voltar_menu_solicitado = Signal()
     jogar_novamente_solicitado = Signal()
+    sair_solicitado = Signal()
 
     def __init__(self, pontuacao_global: float, parent=None):
         super().__init__(parent)
@@ -58,5 +59,5 @@ class GameWin(QFrame):
         self.__btn_sair = QPushButton("Sair do Jogo")
         self.__btn_sair.setObjectName("btn_sair_jogo")
         self.__btn_sair.setProperty("class", "btn_secundario")
-        self.__btn_sair.clicked.connect(QApplication.instance().quit)
+        self.__btn_sair.clicked.connect(self.sair_solicitado.emit)
         layout.addWidget(self.__btn_sair)

@@ -147,15 +147,20 @@ class TestPaginas:
         stack = expediente.findChild(QStackedWidget)
         assert stack.currentIndex() == indice_esperado
         pagina = stack.widget(indice_esperado)
-        titulo = pagina.findChild(QLabel, "label_endgame_titulo")
-        assert titulo is not None
         if venceu:
-            assert titulo.text() == "EXPEDIENTE CONCLUÍDO"
+            titulo = pagina.findChild(QLabel, "label_endgame_titulo")
+            assert titulo is not None
+            assert titulo.text() == "EXPEDIENTE CONCLU\u00CDDO"
+            pont = pagina.findChild(QLabel, "label_endgame_pontuacao")
+            assert pont is not None
+            assert "5000.0" in pont.text()
         else:
-            assert titulo.text() == "EXPEDIENTE INTERROMPIDO"
-        pont = pagina.findChild(QLabel, "label_endgame_pontuacao")
-        assert pont is not None
-        assert "5000.0" in pont.text()
+            titulo = pagina.findChild(QLabel, "gameover_titulo")
+            assert titulo is not None
+            assert titulo.text() == "GAME OVER"
+            pont = pagina.findChild(QLabel, "gameover_score_valor")
+            assert pont is not None
+            assert "5000" in pont.text()
 
     def test_navegacao_ciclo_completo(self, expediente):
         """Navegar por todas as paginas sequencialmente deve funcionar."""
