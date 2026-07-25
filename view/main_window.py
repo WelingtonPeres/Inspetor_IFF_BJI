@@ -39,6 +39,9 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
     voltar_menu_solicitado = Signal()
     jogar_novamente_solicitado = Signal()
     sair_solicitado = Signal()
+    arquivos_solicitado = Signal()
+    help_solicitado = Signal()
+    wallpapers_solicitado = Signal()
 
     def __init__(self):
         super().__init__()
@@ -78,7 +81,12 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
         return overlay_area
 
     def __build_taskbar(self) -> Taskbar:
-        return Taskbar()
+        taskbar = Taskbar()
+        taskbar.arquivos_solicitado.connect(self.__on_arquivos_solicitado)
+        taskbar.help_solicitado.connect(self.__on_help_solicitado)
+        taskbar.wallpapers_solicitado.connect(self.__on_wallpapers_solicitado)
+        taskbar.iniciar_solicitado.connect(self.__encaminhar_iniciar)
+        return taskbar
 
     def __build_tela_menu(self) -> TelaMenuPrincipal:
         tela_menu = TelaMenuPrincipal()
@@ -128,6 +136,22 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
     @Slot(str)
     def __encaminhar_iniciar(self, _legenda: str) -> None:
         self.iniciar_solicitado.emit()
+
+    @Slot()
+    def __on_arquivos_solicitado(self) -> None:
+        logger.info("Arquivos solicitado via taskbar.")
+
+    @Slot()
+    def __on_help_solicitado(self) -> None:
+        logger.info("Help solicitado via taskbar.")
+
+    @Slot()
+    def __on_wallpapers_solicitado(self) -> None:
+        from view.desktop.wallpaper_selector import WallpaperSelector
+
+        dialog = WallpaperSelector(self)
+        dialog.wallpaper_selecionado.connect(self.__tela_menu._TelaMenuPrincipal__aplicar_wallpaper)
+        dialog.exec()
 
     def inicializar(self) -> None:
         logger.info("JanelaPrincipal inicializada.")

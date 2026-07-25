@@ -319,20 +319,26 @@ QFrame#taskbar {
     border-top: 1px solid #3f4a3d;
 }
 
-QPushButton#taskbar_start {
+QLabel#taskbar_start {
     background-color: transparent;
     border: none;
-    padding: 4px 12px;
-    border-radius: 4px;
-}
-
-QPushButton#taskbar_start:hover {
-    background-color: #1e2020;
 }
 
 QLabel#taskbar_clock {
     color: #e2e2e2;
     font-family: "Open Sans";
+}
+
+QFrame#separator_green {
+    background-color: #2F9E41;
+    border: none;
+    max-width: 2px;
+}
+
+QFrame#separator_red {
+    background-color: #CD191E;
+    border: none;
+    max-width: 2px;
 }
 
 /* --- Desktop (z=1) --- */

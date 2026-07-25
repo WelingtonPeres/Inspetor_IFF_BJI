@@ -34,19 +34,46 @@
     }
   },
   "taskbar": {
-    "altura": 40,
+    "altura": 44,
     "margens": {
-      "top": 0,
+      "top": 2,
       "right": 12,
-      "bottom": 0,
+      "bottom": 2,
       "left": 12
     },
-    "start_botao": {
-      "icone_arquivo": "logo_iff_branco.png",
-      "texto": "Iniciar",
-      "padding_y": 4,
-      "padding_x": 12,
-      "border_radius": 4
+    "start": {
+      "icone_arquivo": "iffOS.png",
+      "icone_tamanho": 64,
+      "tooltip": "Iniciar",
+      "margens": {
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "left": 0
+      },
+      "spacing": 8
+    },
+    "separator": {
+      "largura": 1
+    },
+    "atalhos": {
+      "margens": {
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "left": 0
+      },
+      "spacing_entre_atalhos": 16,
+      "icone": {
+        "largura": 32,
+        "altura": 32
+      },
+      "shortcut_margens": {
+        "top": 4,
+        "right": 4,
+        "bottom": 4,
+        "left": 4
+      }
     },
     "system_tray": {
       "relogio_formato": "HH:mm",
@@ -315,12 +342,12 @@
     {
       "icone_arquivo": "pasta_verde.png",
       "legenda": "Arquivos",
-      "action": "info"
+      "action": "info_arquivos"
     },
     {
       "icone_arquivo": "help.png",
       "legenda": "Help",
-      "action": "info"
+      "action": "info_help"
     },
     {
       "icone_arquivo": "image.png",

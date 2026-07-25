@@ -1,7 +1,7 @@
 import json
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from PySide6.QtCore import QObject, Signal
 
@@ -19,7 +19,7 @@ class LayoutLoader(QObject):
 
     escala_atualizada = Signal()
 
-    _instance: "LayoutLoader | None" = None
+    _instance: Optional["LayoutLoader"] = None
 
     @classmethod
     def instance(cls) -> "LayoutLoader":
