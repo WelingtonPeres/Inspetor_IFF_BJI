@@ -21,9 +21,9 @@ from PySide6.QtWidgets import (
 
 from view.expediente.widgets.anexo_preview import AnexoPreview
 from view.expediente.widgets.stamp_button import StampButton
-from view.widgets.midia.video_player import VideoPlayer
 from view.expediente.overlays.anexo_gallery import AnexoGallery
 from view.expediente.overlays.media_viewer import MediaViewer
+from view.widgets.midia.media_player_base import MediaPlayerBase
 from view.infrastructure.layout_loader import LayoutLoader
 
 logger = logging.getLogger(__name__)
@@ -51,7 +51,7 @@ class PaginaInspecao(QFrame):
         self.__gallery: Optional[AnexoGallery] = None
         self.__media_viewer: Optional[MediaViewer] = None
         self.__anexos_data: List[Dict[str, Any]] = []
-        self.__video_player_fullscreen: Optional[VideoPlayer] = None
+
 
         self.__setup_ui()
         self.__layout_loader.escala_atualizada.connect(self.__reaplicar_dimensoes)
@@ -108,6 +108,7 @@ class PaginaInspecao(QFrame):
 
         titulo_label = self.__criar_label_info("titulo")
         titulo_label.setProperty("class", "label_info_titulo")
+        self.__aplicar_fonte_titulo(titulo_label)
         layout.addWidget(titulo_label)
 
         linha_local_ativ = QHBoxLayout()
@@ -484,6 +485,9 @@ class PaginaInspecao(QFrame):
 
     @Slot()
     def __fechar_gallery(self) -> None:
+        player = self.__gallery.obter_player_atual()
+        if isinstance(player, MediaPlayerBase):
+            player.parar()
         self.__gallery.hide()
 
     @Slot(int)
@@ -497,35 +501,9 @@ class PaginaInspecao(QFrame):
             self.__media_viewer.show()
             self.__media_viewer.raise_()
             return
-        if anexo.get("tipo_midia") == "VIDEO":
-            player = self.__gallery.obter_player_atual()
-            if isinstance(player, VideoPlayer):
-                player.sair_fullscreen_solicitado.connect(self.__fechar_video_fullscreen, type=Qt.ConnectionType.UniqueConnection)
-                player.entrar_fullscreen(self.__obter_anchor_ou_window())
-                self.__video_player_fullscreen = player
-                self.__gallery.hide()
-
     @Slot()
     def __fechar_media_viewer(self) -> None:
         self.__media_viewer.hide()
-
-    @Slot()
-    def __fechar_video_fullscreen(self) -> None:
-        self.__video_player_fullscreen = None
-        if self.__gallery:
-            self.__ancorar_overlay(self.__gallery)
-            self.__gallery.show()
-
-    def __obter_anchor_ou_window(self) -> QWidget:
-        """Retorna o _OverlayArea se existir; senao a top-level window.
-
-        O fallback mantem o comportamento historico em cenarios standalone
-        (testes), onde a galeria fica como janela top-level.
-        """
-        anchor = self.__obter_anchor_widget()
-        if anchor is not None:
-            return anchor
-        return self.window()
 
     def __obter_anchor_widget(self) -> Optional[QWidget]:
         """Sobe na arvore de pais ate achar o _OverlayArea; None se nao houver."""
@@ -551,10 +529,18 @@ class PaginaInspecao(QFrame):
             overlay.setParent(anchor)
         overlay.setGeometry(anchor.rect())
 
+    def __aplicar_fonte_titulo(self, label: QLabel) -> None:
+        L = self.__layout_loader
+        tamanho = L.scaled("pagina_inspecao", "fontes", "titulo_relatorio", "size")
+        fonte = QFont("Open Sans", tamanho)
+        fonte.setWeight(QFont.Weight.Bold)
+        label.setFont(fonte)
+
     @Slot()
     def __reaplicar_dimensoes(self) -> None:
-        """Reaplica dimensoes dependentes de escala apos resize."""
-        # AnexoPreview ja reconecta ao signal proprio
-        # StampButton nao usa LayoutLoader
-        # Apenas forcar update de layouts que dependem de spacing/margins
+        L = self.__layout_loader
+        tamanho = L.scaled("pagina_inspecao", "fontes", "titulo_relatorio", "size")
+        fonte = QFont("Open Sans", tamanho)
+        fonte.setWeight(QFont.Weight.Bold)
+        self.__labels_info["titulo"].setFont(fonte)
         self.updateGeometry()

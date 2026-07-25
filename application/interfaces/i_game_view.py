@@ -22,10 +22,6 @@ class IGameView(ABC):
         pass
 
     @abstractmethod
-    def exibir_tela_carregamento(self) -> None:
-        pass
-
-    @abstractmethod
     def trocar_para_tela_inspecao(self) -> None:
         pass
 

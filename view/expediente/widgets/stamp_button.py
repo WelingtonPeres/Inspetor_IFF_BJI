@@ -1,6 +1,8 @@
-from PySide6.QtCore import Qt, QRectF, QSize
+from PySide6.QtCore import Qt, QRectF, QSize, Slot
 from PySide6.QtGui import QColor, QFont, QFontMetrics, QPainter, QPen
 from PySide6.QtWidgets import QPushButton, QSizePolicy
+
+from view.infrastructure.layout_loader import LayoutLoader
 
 
 STAMP_COLORS = {
@@ -22,13 +24,19 @@ class StampButton(QPushButton):
         super().__init__(texto, parent)
         self.__cor = STAMP_COLORS.get(texto, QColor("#889484"))
         self.__angulo = STAMP_ROTATIONS.get(texto, 0.0)
+        self.__layout = LayoutLoader.instance()
 
         self.setObjectName(f"stamp_decisao_{texto}")
         self.setCheckable(True)
         self.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
 
+        self.__layout.escala_atualizada.connect(self.__reaplicar_escala)
+
     def sizeHint(self) -> QSize:
-        return QSize(160, 52)
+        return QSize(
+            self.__layout.scaled("stamp_button", "largura"),
+            self.__layout.scaled("stamp_button", "altura"),
+        )
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -66,8 +74,8 @@ class StampButton(QPushButton):
         painter.restore()
 
     def __criar_fonte_adaptado(self):
-        tamanho_base = 20
-        margem = 16
+        tamanho_base = self.__layout.scaled("stamp_button", "font_size")
+        margem = self.__layout.scaled("stamp_button", "margem_horizontal")
         disponivel = self.rect().width() - margem
 
         fonte = QFont("Open Sans", tamanho_base)
@@ -79,7 +87,7 @@ class StampButton(QPushButton):
 
         if largura_texto > disponivel:
             proporcao = disponivel / largura_texto
-            tamanho = max(12, int(tamanho_base * proporcao))
+            tamanho = max(10, int(tamanho_base * proporcao))
         else:
             tamanho = tamanho_base
 
@@ -88,3 +96,7 @@ class StampButton(QPushButton):
 
         altura_fonte = int(tamanho * 1.55)
         return fonte, altura_fonte
+
+    @Slot()
+    def __reaplicar_escala(self) -> None:
+        self.updateGeometry()

@@ -52,11 +52,11 @@ class TestEstrutura:
         bar = expediente.findChild(WindowTitleBar)
         assert bar is not None
 
-    def test_stacked_com_seis_paginas(self, expediente):
-        """O QStackedWidget interno deve conter 6 paginas."""
+    def test_stacked_com_cinco_paginas(self, expediente):
+        """O QStackedWidget interno deve conter 5 paginas."""
         stack = expediente.findChild(QStackedWidget)
         assert stack is not None
-        assert stack.count() == 6
+        assert stack.count() == 5
 
     def test_sidebar_integrada(self, expediente):
         """TelaDeExpediente deve conter uma Sidebar."""
@@ -83,7 +83,7 @@ class TestEstrutura:
 
 class TestPaginas:
     """
-    Testes de navegacao entre as 5 paginas do QStackedWidget.
+    Testes de navegacao entre as 4 paginas do QStackedWidget (sem loading).
     """
 
     def test_pagina_0_selecao_perfil(self, expediente):
@@ -97,22 +97,11 @@ class TestPaginas:
         btn = pagina.findChild(QPushButton, "btn_confirmar_perfil")
         assert btn is not None
 
-    def test_pagina_1_loading(self, expediente):
-        """A pagina 1 deve conter label de loading e progress bar."""
-        expediente.exibir_tela_carregamento()
-        stack = expediente.findChild(QStackedWidget)
-        pagina = stack.widget(1)
-        texto = pagina.findChild(QLabel, "label_loading_texto")
-        assert texto is not None
-        assert texto.text() == "CARREGANDO EXPEDIENTE..."
-        progress = pagina.findChild(QProgressBar, "loading_progress_bar")
-        assert progress is not None
-
-    def test_pagina_2_inspecao_com_splitter_60_40(self, expediente):
-        """A pagina 2 deve conter QSplitter com proporcao 60/40."""
+    def test_pagina_1_inspecao_com_splitter_60_40(self, expediente):
+        """A pagina 1 deve conter QSplitter com proporcao 60/40."""
         expediente.renderizar_relatorio({"titulo": "Teste"})
         stack = expediente.findChild(QStackedWidget)
-        pagina = stack.widget(2)
+        pagina = stack.widget(1)
         splitter = pagina.findChild(QSplitter)
         assert splitter is not None
         assert splitter.count() == 2
@@ -123,8 +112,8 @@ class TestPaginas:
         btn = pagina.findChild(QPushButton, "btn_submeter")
         assert btn is not None
 
-    def test_pagina_3_diagnostico(self, expediente):
-        """A pagina 3 deve conter label de feedback e botao continuar."""
+    def test_pagina_2_diagnostico(self, expediente):
+        """A pagina 2 deve conter label de feedback e botao continuar."""
         dto = DiagnosticoPontuacaoDTO(
             qnt_riscos_marcados=2, qnt_riscos_gabarito=3,
             qnt_riscos_corretos_marcados=1, estado_ato=True,
@@ -133,16 +122,16 @@ class TestPaginas:
         )
         expediente.exibir_tela_diagnostico(dto)
         stack = expediente.findChild(QStackedWidget)
-        pagina = stack.widget(3)
+        pagina = stack.widget(2)
         btn = pagina.findChild(QPushButton, "btn_continuar")
         assert btn is not None
 
     @pytest.mark.parametrize("venceu,indice_esperado", [
-        (True, 4),
-        (False, 5),
+        (True, 3),
+        (False, 4),
     ])
-    def test_pagina_4_5_endgame_win_lose(self, expediente, venceu, indice_esperado):
-        """As paginas 4 e 5 devem exibir GameWin/GameOver conforme venceu."""
+    def test_pagina_3_4_endgame_win_lose(self, expediente, venceu, indice_esperado):
+        """As paginas 3 e 4 devem exibir GameWin/GameOver conforme venceu."""
         expediente.exibir_tela_endgame(pontuacao_global=5000.0, dias_concluidos=1, venceu=venceu)
         stack = expediente.findChild(QStackedWidget)
         assert stack.currentIndex() == indice_esperado
@@ -166,10 +155,8 @@ class TestPaginas:
         """Navegar por todas as paginas sequencialmente deve funcionar."""
         expediente.exibir_selecao_perfil()
         assert expediente._TelaDeExpediente__stack.currentIndex() == 0
-        expediente.exibir_tela_carregamento()
-        assert expediente._TelaDeExpediente__stack.currentIndex() == 1
         expediente.renderizar_relatorio({"titulo": "Teste"})
-        assert expediente._TelaDeExpediente__stack.currentIndex() == 2
+        assert expediente._TelaDeExpediente__stack.currentIndex() == 1
         dto = DiagnosticoPontuacaoDTO(
             qnt_riscos_marcados=0, qnt_riscos_gabarito=0,
             qnt_riscos_corretos_marcados=0, estado_ato=True,
@@ -177,11 +164,11 @@ class TestPaginas:
             tempo_resposta_segundos=10.0, pontuacao_final=500.0,
         )
         expediente.exibir_tela_diagnostico(dto)
-        assert expediente._TelaDeExpediente__stack.currentIndex() == 3
+        assert expediente._TelaDeExpediente__stack.currentIndex() == 2
         expediente.exibir_tela_endgame(5000.0, 1, True)
-        assert expediente._TelaDeExpediente__stack.currentIndex() == 4
+        assert expediente._TelaDeExpediente__stack.currentIndex() == 3
         expediente.exibir_tela_endgame(3000.0, 1, False)
-        assert expediente._TelaDeExpediente__stack.currentIndex() == 5
+        assert expediente._TelaDeExpediente__stack.currentIndex() == 4
 
 
 class TestSignals:
@@ -294,20 +281,14 @@ class TestSidebar:
         sidebar = expediente.findChild(Sidebar)
         assert sidebar.isHidden()
 
-    def test_sidebar_oculta_no_loading(self, expediente):
-        """Sidebar deve estar oculta na pagina 1."""
-        expediente.exibir_tela_carregamento()
-        sidebar = expediente.findChild(Sidebar)
-        assert sidebar.isHidden()
-
     def test_sidebar_visivel_na_inspecao(self, expediente):
-        """Sidebar deve estar visivel na pagina 2 (nao oculta)."""
+        """Sidebar deve estar visivel na pagina 1 (nao oculta)."""
         expediente.renderizar_relatorio({"titulo": "Teste"})
         sidebar = expediente.findChild(Sidebar)
         assert not sidebar.isHidden()
 
     def test_sidebar_visivel_no_diagnostico(self, expediente):
-        """Sidebar deve estar visivel na pagina 3 (nao oculta)."""
+        """Sidebar deve estar visivel na pagina 2 (nao oculta)."""
         dto = DiagnosticoPontuacaoDTO(
             qnt_riscos_marcados=0, qnt_riscos_gabarito=0,
             qnt_riscos_corretos_marcados=0, estado_ato=True,
@@ -319,7 +300,7 @@ class TestSidebar:
         assert not sidebar.isHidden()
 
     def test_sidebar_oculta_no_endgame(self, expediente):
-        """Sidebar deve estar oculta nas paginas de endgame (4 e 5)."""
+        """Sidebar deve estar oculta nas paginas de endgame (3 e 4)."""
         expediente.exibir_tela_endgame(5000.0, 1, True)
         sidebar = expediente.findChild(Sidebar)
         assert sidebar.isHidden()
@@ -338,13 +319,6 @@ class TestTituloDinamico:
         bar = expediente.findChild(WindowTitleBar)
         label = bar.findChild(QLabel, "window_title_text")
         assert "Seleção" in label.text()
-
-    def test_titulo_loading(self, expediente):
-        """exibir_tela_carregamento deve mudar titulo para 'Carregando...'."""
-        expediente.exibir_tela_carregamento()
-        bar = expediente.findChild(WindowTitleBar)
-        label = bar.findChild(QLabel, "window_title_text")
-        assert "Carregando" in label.text()
 
     def test_titulo_inspecao(self, expediente):
         """renderizar_relatorio deve mudar titulo para 'Relatorio: ...'."""
@@ -381,7 +355,7 @@ class TestCasosLimite:
     def test_renderizar_relatorio_com_dados_vazios_nao_deve_lancar_excecao(self, expediente):
         """renderizar_relatorio com dict vazio nao deve lancar excecao."""
         expediente.renderizar_relatorio({})
-        assert expediente._TelaDeExpediente__stack.currentIndex() == 2
+        assert expediente._TelaDeExpediente__stack.currentIndex() == 1
 
     def test_reiniciar_reseta_para_pagina_0(self, expediente):
         """reiniciar deve voltar para pagina 0 e limpar formulario."""

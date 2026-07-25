@@ -170,10 +170,6 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
         self.__tela_expediente.exibir_selecao_perfil()
         self.__tela_expediente.exibir_com_tamanho_inicial(self.__overlay_area.rect())
 
-    def exibir_tela_carregamento(self) -> None:
-        logger.info("Exibindo tela de carregamento.")
-        self.__tela_expediente.exibir_tela_carregamento()
-
     def trocar_para_tela_inspecao(self) -> None:
         logger.info("Exibindo expediente (tela de inspecao).")
         self.__tela_expediente.show()

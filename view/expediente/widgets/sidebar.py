@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import Dict, Optional
 from PySide6.QtCore import Qt, QSize, Signal, Slot
-from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtGui import QFont, QIcon, QPixmap
 from PySide6.QtWidgets import (
     QFrame,
     QLabel,
@@ -92,6 +92,7 @@ class Sidebar(QFrame):
         titulo = QLabel("IFF-BJI · Inspetor")
         titulo.setObjectName("sidebar_titulo")
         titulo.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.__aplicar_fonte_titulo(titulo)
         inner.addWidget(titulo)
 
         return header
@@ -103,6 +104,9 @@ class Sidebar(QFrame):
         btn.setProperty("class", "sidebar_item")
         btn.setFixedHeight(L.scaled("sidebar", "item_altura"))
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
+
+        self.__aplicar_fonte_item(btn)
+        self.__aplicar_padding_item(btn)
 
         icone_nome = _ICONE_MAP.get(item["id"], item["id"])
         assets = _resolver_assets()
@@ -141,19 +145,43 @@ class Sidebar(QFrame):
 
         self.__ativo = item_id
 
+    def __aplicar_fonte_item(self, btn: QPushButton) -> None:
+        L = self.__layout_loader
+        tamanho = L.scaled("sidebar", "item_font_size")
+        fonte = btn.font()
+        fonte.setPointSize(tamanho)
+        btn.setFont(fonte)
+
+    def __aplicar_padding_item(self, btn: QPushButton) -> None:
+        L = self.__layout_loader
+        pad = L.scaled_margins("sidebar", "item_padding")
+        btn.setStyleSheet(
+            f"padding: {pad[1]}px {pad[2]}px {pad[3]}px {pad[0]}px;"
+        )
+
+    def __aplicar_fonte_titulo(self, label: QLabel) -> None:
+        L = self.__layout_loader
+        tamanho = L.scaled("sidebar", "titulo_font_size")
+        fonte = label.font()
+        fonte.setPointSize(tamanho)
+        label.setFont(fonte)
+
     @Slot()
     def __reaplicar_dimensoes(self) -> None:
         L = self.__layout_loader
         self.setFixedWidth(L.scaled("sidebar", "largura"))
-        # Atualizar altura dos botoes
         item_altura = L.scaled("sidebar", "item_altura")
         icon_size = L.scaled("sidebar", "icone_tamanho")
         for btn in self.__botoes.values():
             btn.setFixedHeight(item_altura)
             btn.setIconSize(QSize(icon_size, icon_size))
-        # Atualizar logo
+            self.__aplicar_fonte_item(btn)
+            self.__aplicar_padding_item(btn)
         header = self.findChild(QFrame, "sidebar_header")
         if header:
+            self.__aplicar_fonte_titulo(
+                header.findChild(QLabel, "sidebar_titulo")
+            )
             logo_label = header.findChild(QLabel)
             if logo_label and logo_label.pixmap():
                 logo_size = L.scaled("sidebar", "logo_tamanho")
@@ -164,7 +192,6 @@ class Sidebar(QFrame):
                         Qt.TransformationMode.SmoothTransformation,
                     )
                     logo_label.setPixmap(pixmap)
-        # Atualizar divider
         divider = self.findChild(QFrame, "sidebar_divider")
         if divider:
             divider.setFixedHeight(L.scaled("sidebar", "divider_altura"))

@@ -101,6 +101,13 @@
   "sidebar": {
     "largura": 200,
     "item_altura": 48,
+    "item_font_size": 13,
+    "item_padding": {
+      "top": 12,
+      "right": 16,
+      "bottom": 12,
+      "left": 16
+    },
     "icone_tamanho": 20,
     "logo_tamanho": 40,
     "header_margens": {
@@ -109,6 +116,7 @@
       "bottom": 16,
       "left": 0
     },
+    "titulo_font_size": 11,
     "divider_altura": 1,
     "itens": [
       {
@@ -132,6 +140,12 @@
         "inativo": true
       }
     ]
+  },
+  "stamp_button": {
+    "largura": 160,
+    "altura": 52,
+    "font_size": 20,
+    "margem_horizontal": 16
   },
   "anexo_preview": {
     "altura": 120,
@@ -218,6 +232,9 @@
       },
       "fator_subtitulo": {
         "size": 13
+      },
+      "titulo_relatorio": {
+        "size": 60
       }
     },
     "grupo_decisao": {
