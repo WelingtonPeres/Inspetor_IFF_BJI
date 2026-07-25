@@ -5,6 +5,7 @@ from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QStacked
 
 from view.widgets.midia.audio_player import AudioPlayer
 from view.widgets.midia.image_viewer import ImageViewer
+from view.widgets.midia.media_player_base import MediaPlayerBase
 from view.widgets.midia.video_player import VideoPlayer
 logger = logging.getLogger(__name__)
 
@@ -25,13 +26,23 @@ class AnexoGallery(QFrame):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
 
-        header = QHBoxLayout()
-        header.addStretch()
+        header_bar = QFrame()
+        header_bar.setObjectName("gallery_header_bar")
+        header_layout = QHBoxLayout(header_bar)
+        header_layout.setContentsMargins(12, 4, 12, 4)
+
+        titulo = QLabel("Anexos")
+        titulo.setObjectName("gallery_header_titulo")
+        header_layout.addWidget(titulo)
+
+        header_layout.addStretch()
+
         btn_fechar = QPushButton("✕")
         btn_fechar.setObjectName("gallery_close_button")
         btn_fechar.clicked.connect(self.fechar_solicitado.emit)
-        header.addWidget(btn_fechar)
-        layout.addLayout(header)
+        header_layout.addWidget(btn_fechar)
+
+        layout.addWidget(header_bar)
 
         content = QHBoxLayout()
         content.setContentsMargins(48, 0, 48, 0)
@@ -62,6 +73,10 @@ class AnexoGallery(QFrame):
     def carregar_anexos(self, anexos: List[Dict]) -> None:
         self.__anexos = anexos
         self.__indice_atual = 0
+
+        for w in self.__players:
+            if isinstance(w, MediaPlayerBase):
+                w.parar()
         self.__players.clear()
 
         while self.__stack.count() > 0:
@@ -100,6 +115,7 @@ class AnexoGallery(QFrame):
     @Slot()
     def __anterior(self) -> None:
         if self.__indice_atual > 0:
+            self.__parar_player_atual()
             self.__indice_atual -= 1
             self.__stack.setCurrentIndex(self.__indice_atual)
             self.__atualizar_indicador()
@@ -107,9 +123,15 @@ class AnexoGallery(QFrame):
     @Slot()
     def __proximo(self) -> None:
         if self.__indice_atual < len(self.__players) - 1:
+            self.__parar_player_atual()
             self.__indice_atual += 1
             self.__stack.setCurrentIndex(self.__indice_atual)
             self.__atualizar_indicador()
+
+    def __parar_player_atual(self) -> None:
+        player = self.obter_player_atual()
+        if isinstance(player, MediaPlayerBase):
+            player.parar()
 
     def obter_player_atual(self):
         if 0 <= self.__indice_atual < len(self.__players):

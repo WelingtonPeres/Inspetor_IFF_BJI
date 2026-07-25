@@ -52,7 +52,6 @@ QStackedWidget {
 #label_info_titulo {
     color: #71dd77;
     font-family: "Open Sans";
-    font-size: 60px;
     font-weight: 700;
     text-align: left;
     text-transform: uppercase;
@@ -319,20 +318,26 @@ QFrame#taskbar {
     border-top: 1px solid #3f4a3d;
 }
 
-QPushButton#taskbar_start {
+QLabel#taskbar_start {
     background-color: transparent;
     border: none;
-    padding: 4px 12px;
-    border-radius: 4px;
-}
-
-QPushButton#taskbar_start:hover {
-    background-color: #1e2020;
 }
 
 QLabel#taskbar_clock {
     color: #e2e2e2;
     font-family: "Open Sans";
+}
+
+QFrame#separator_green {
+    background-color: #2F9E41;
+    border: none;
+    max-width: 2px;
+}
+
+QFrame#separator_red {
+    background-color: #CD191E;
+    border: none;
+    max-width: 2px;
 }
 
 /* --- Desktop (z=1) --- */
@@ -464,7 +469,6 @@ QFrame#sidebar {
 #sidebar_titulo {
     color: #becab9;
     font-family: "Open Sans";
-    font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.05em;
 }
@@ -481,9 +485,7 @@ QFrame#sidebar {
     border: none;
     border-left: 3px solid transparent;
     font-family: "Open Sans";
-    font-size: 13px;
     font-weight: 500;
-    padding: 12px 16px;
     text-align: left;
 }
 
@@ -546,7 +548,35 @@ QFrame#anexo_gallery {
     background-color: rgba(0, 0, 0, 179);
 }
 
-QPushButton#gallery_close_button,
+QFrame#gallery_header_bar {
+    background-color: rgba(0, 0, 0, 140);
+    min-height: 40px;
+}
+
+QLabel#gallery_header_titulo {
+    color: #e2e2e2;
+    font-family: "Open Sans";
+    font-size: 14px;
+    font-weight: 700;
+}
+
+QPushButton#gallery_close_button {
+    background-color: rgba(255, 255, 255, 30);
+    color: #e2e2e2;
+    border: 1px solid #5e7a72;
+    border-radius: 4px;
+    font-size: 18px;
+    padding: 4px 14px;
+    min-width: 32px;
+    min-height: 28px;
+}
+
+QPushButton#gallery_close_button:hover {
+    background-color: #CD191E;
+    color: #ffffff;
+    border-color: #CD191E;
+}
+
 QPushButton#gallery_prev_button,
 QPushButton#gallery_next_button {
     background-color: rgba(0, 0, 0, 100);
@@ -556,7 +586,6 @@ QPushButton#gallery_next_button {
     font-size: 16px;
 }
 
-QPushButton#gallery_close_button:hover,
 QPushButton#gallery_prev_button:hover,
 QPushButton#gallery_next_button:hover {
     background-color: #2F9E41;

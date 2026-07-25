@@ -186,17 +186,30 @@ class TestOnIniciarSolicitado:
     """
     Testes do Método on_iniciar_solicitado
 
-    Validar que o método instrui a View a exibir a seleção de perfil.
+    Validar que o método instrui a View a exibir a seleção de perfil
+    apenas quando o estado atual é ESTADO_MENU.
     """
 
     def test_view_exibir_selecao_perfil_chamado(self, gm, view_mock):
         """
         View.exibir_selecao_perfil é Chamado
 
-        on_iniciar_solicitado deve chamar exibir_selecao_perfil da View.
+        on_iniciar_solicitado deve chamar exibir_selecao_perfil da View
+        quando o estado actual for ESTADO_MENU.
         """
         gm.on_iniciar_solicitado()
         view_mock.exibir_selecao_perfil.assert_called_once_with()
+
+    def test_ignorado_fora_do_menu(self, gm, view_mock):
+        """
+        Deve ser Ignorado Fora do Menu
+
+        on_iniciar_solicitado não deve chamar exibir_selecao_perfil
+        se o estado actual não for ESTADO_MENU.
+        """
+        gm._GameManager__estado_atual = gm.ESTADO_EXPEDIENTE
+        gm.on_iniciar_solicitado()
+        view_mock.exibir_selecao_perfil.assert_not_called()
 
 
 class TestIniciarExpediente:

@@ -362,32 +362,36 @@ class GameOver(QFrame):
         L = self.__layout_loader
         altura = L.scaled("gameover", "botoes", "altura")
         largura_min = L.scaled("gameover", "botoes", "largura_min")
-        row = QWidget()
-        row_layout = QHBoxLayout(row)
-        row_layout.setContentsMargins(0, 0, 0, 0)
-        row_layout.setSpacing(L.scaled("gameover", "spacing", "entre_botoes_row"))
         font_btn = QFont("Open Sans")
         font_btn.setPointSize(L.scaled("gameover", "fontes", "botao", "size"))
         font_btn.setWeight(QFont.Weight.Bold)
 
-        row_layout.addStretch()
-        for btn in (
-            self.__make_btn("Tentar novamente", "gameover_btn_retry",
-                            self.jogar_novamente_solicitado.emit,
-                            altura, largura_min, font_btn),
-            self.__make_btn("Menu principal", "gameover_btn_menu",
-                            self.voltar_menu_solicitado.emit,
-                            altura, largura_min, font_btn),
-            self.__make_btn("Sair do Jogo", "gameover_btn_quit",
-                            self.sair_solicitado.emit,
-                            altura, largura_min, font_btn),
-        ):
-            row_layout.addWidget(btn, 1)
-        row_layout.addStretch()
+        row = QWidget()
+        row_layout = QHBoxLayout(row)
+        row_layout.setContentsMargins(0, 0, 0, 0)
+        row_layout.setSpacing(L.scaled("gameover", "spacing", "entre_botoes_row"))
 
-        self.__btn_jogar_novamente = row_layout.itemAt(0).widget()
-        self.__btn_menu_principal = row_layout.itemAt(1).widget()
-        self.__btn_sair = row_layout.itemAt(2).widget()
+        self.__btn_menu_principal = self.__make_btn(
+            "Menu principal", "gameover_btn_menu",
+            self.voltar_menu_solicitado.emit,
+            altura, largura_min, font_btn,
+        )
+        self.__btn_jogar_novamente = self.__make_btn(
+            "Tentar novamente", "gameover_btn_retry",
+            self.jogar_novamente_solicitado.emit,
+            altura, largura_min, font_btn,
+        )
+        self.__btn_sair = self.__make_btn(
+            "Sair do Jogo", "gameover_btn_quit",
+            self.sair_solicitado.emit,
+            altura, largura_min, font_btn,
+        )
+
+        row_layout.addStretch()
+        row_layout.addWidget(self.__btn_menu_principal)
+        row_layout.addWidget(self.__btn_jogar_novamente)
+        row_layout.addWidget(self.__btn_sair)
+        row_layout.addStretch()
 
         layout.addWidget(row)
 

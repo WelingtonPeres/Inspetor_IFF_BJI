@@ -19,7 +19,6 @@ from view.expediente.paginas.diagnostico import PaginaDiagnostico
 from view.expediente.paginas.game_win import GameWin
 from view.expediente.paginas.game_over import GameOver
 from view.expediente.paginas.inspecao import PaginaInspecao
-from view.expediente.paginas.loading import PaginaLoading
 from view.expediente.paginas.selecao_perfil import PaginaSelecaoPerfil
 
 logger = logging.getLogger(__name__)
@@ -35,11 +34,10 @@ class TelaDeExpediente(QFrame):
     minimized_solicitado = Signal()
 
     IDX_SELECAO_PERFIL = 0
-    IDX_LOADING = 1
-    IDX_INSPECAO = 2
-    IDX_DIAGNOSTICO = 3
-    IDX_GAME_WIN = 4
-    IDX_GAME_OVER = 5
+    IDX_INSPECAO = 1
+    IDX_DIAGNOSTICO = 2
+    IDX_GAME_WIN = 3
+    IDX_GAME_OVER = 4
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -60,7 +58,6 @@ class TelaDeExpediente(QFrame):
 
         # Paginas Filhas
         self.__pagina_perfil: PaginaSelecaoPerfil
-        self.__pagina_loading: PaginaLoading
         self.__pagina_diagnostico: PaginaDiagnostico
         self.__pagina_game_win: GameWin
         self.__pagina_game_over: GameOver
@@ -120,8 +117,6 @@ class TelaDeExpediente(QFrame):
         self.__pagina_perfil = PaginaSelecaoPerfil()
         self.__pagina_perfil.perfil_confirmado.connect(self.__on_perfil_confirmado)
 
-        self.__pagina_loading = PaginaLoading()
-
         self.__pagina_diagnostico = PaginaDiagnostico()
         self.__pagina_diagnostico.continuar_solicitado.connect(self.continuar_solicitado.emit)
 
@@ -143,7 +138,6 @@ class TelaDeExpediente(QFrame):
 
         stack = QStackedWidget()
         stack.addWidget(self.__pagina_perfil)
-        stack.addWidget(self.__pagina_loading)
         stack.addWidget(self.__pagina_inspecao)
         stack.addWidget(self.__pagina_diagnostico)
         stack.addWidget(self.__pagina_game_win)
@@ -163,7 +157,6 @@ class TelaDeExpediente(QFrame):
     @Slot(str)
     def __on_perfil_confirmado(self, perfil: str) -> None:
         self.__perfil_selecionado = perfil
-        self.exibir_tela_carregamento()
         self.perfil_confirmado.emit(perfil)
 
     @Slot(int)
@@ -198,6 +191,8 @@ class TelaDeExpediente(QFrame):
 
     @Slot()
     def __on_fechar(self) -> None:
+        self.reiniciar()
+        self.voltar_menu_solicitado.emit()
         self.hide()
         self.__maximizado = False
         self.__title_bar.set_maximizado(False)
@@ -211,10 +206,6 @@ class TelaDeExpediente(QFrame):
     def exibir_selecao_perfil(self) -> None:
         self.__title_bar.definir_titulo("Seleção de Perfil")
         self.__stack.setCurrentIndex(self.IDX_SELECAO_PERFIL)
-
-    def exibir_tela_carregamento(self) -> None:
-        self.__title_bar.definir_titulo("Carregando...")
-        self.__stack.setCurrentIndex(self.IDX_LOADING)
 
     def renderizar_relatorio(self, dados_relatorio: Dict[str, Any]) -> None:
         logger.info("Renderizando relatorio: %s", dados_relatorio.get("titulo", ""))
@@ -257,15 +248,24 @@ class TelaDeExpediente(QFrame):
             self.__reposicionar(rect)
 
     def __reposicionar(self, parent_rect: Any) -> None:
+        L = LayoutLoader.instance()
+        proporcao = L.get("tela_de_expediente", "proporcao_tela")
+        w_80 = int(parent_rect.width() * proporcao)
+        if w_80 < 1280:
+            w = parent_rect.width()
+            h = parent_rect.height()
+            x = 0
+            y = 0
+        else:
+            w = w_80
+            h = int(parent_rect.height() * proporcao)
+            x = (parent_rect.width() - w) // 2
+            y = (parent_rect.height() - h) // 2
+        self.__tamanho_normal = QRect(x, y, w, h)
         if self.__maximizado:
             self.setGeometry(parent_rect)
             return
-        w = int(parent_rect.width() * 0.8)
-        h = int(parent_rect.height() * 0.8)
-        x = (parent_rect.width() - w) // 2
-        y = (parent_rect.height() - h) // 2
         self.setGeometry(x, y, w, h)
-        self.__tamanho_normal = self.geometry()
 
     def reiniciar(self) -> None:
         self.__pagina_inspecao.limpar_formulario()

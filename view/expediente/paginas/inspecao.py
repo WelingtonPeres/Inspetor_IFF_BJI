@@ -3,9 +3,10 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from PySide6.QtCore import Qt, QSize, Signal, Slot
-from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtGui import QIcon, QPixmap, QFont
 from PySide6.QtWidgets import (
     QButtonGroup,
+    QFrame,
     QGridLayout,
     QGroupBox,
     QHBoxLayout,
@@ -20,14 +21,15 @@ from PySide6.QtWidgets import (
 
 from view.expediente.widgets.anexo_preview import AnexoPreview
 from view.expediente.widgets.stamp_button import StampButton
-from view.widgets.midia.video_player import VideoPlayer
 from view.expediente.overlays.anexo_gallery import AnexoGallery
 from view.expediente.overlays.media_viewer import MediaViewer
+from view.widgets.midia.media_player_base import MediaPlayerBase
+from view.infrastructure.layout_loader import LayoutLoader
 
 logger = logging.getLogger(__name__)
 
 
-class PaginaInspecao(QWidget):
+class PaginaInspecao(QFrame):
     """Widget de inspecao com splitter 60/40, formulario e temporizador."""
 
     submeter_respostas = Signal(dict)
@@ -36,6 +38,8 @@ class PaginaInspecao(QWidget):
         super().__init__(parent)
         self.setObjectName("pagina_inspecao")
         self.setProperty("class", "pagina_inspecao")
+
+        self.__layout_loader = LayoutLoader.instance()
 
         self.__labels_info: Dict[str, QLabel]
         self.__anexo_preview: AnexoPreview
@@ -47,14 +51,17 @@ class PaginaInspecao(QWidget):
         self.__gallery: Optional[AnexoGallery] = None
         self.__media_viewer: Optional[MediaViewer] = None
         self.__anexos_data: List[Dict[str, Any]] = []
-        self.__video_player_fullscreen: Optional[VideoPlayer] = None
+
 
         self.__setup_ui()
+        self.__layout_loader.escala_atualizada.connect(self.__reaplicar_dimensoes)
 
     def __setup_ui(self) -> None:
         splitter = self.__build_splitter()
 
         layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
         layout.addWidget(splitter)
 
     def __build_splitter(self) -> QSplitter:
@@ -71,8 +78,10 @@ class PaginaInspecao(QWidget):
         return splitter
 
     def __build_deck(self) -> QWidget:
+        L = self.__layout_loader
         deck = QWidget(objectName="deck_observacao")
         deck_layout = QVBoxLayout(deck)
+        deck_layout.setSpacing(L.scaled("pagina_inspecao", "deck", "spacing"))
 
         info_block = self.__build_info_block()
         deck_layout.addWidget(info_block)
@@ -90,18 +99,20 @@ class PaginaInspecao(QWidget):
         demais campos (local, atividade, envolvidos, descricao) usam
         QGroupBox com classe 'group_box'.
         """
+        L = self.__layout_loader
         block = QWidget(objectName="info_block_relatorio")
         layout = QVBoxLayout(block)
-        layout.setSpacing(12)
+        layout.setSpacing(L.scaled("pagina_inspecao", "info_block", "spacing"))
 
         self.__labels_info = {}
 
         titulo_label = self.__criar_label_info("titulo")
         titulo_label.setProperty("class", "label_info_titulo")
+        self.__aplicar_fonte_titulo(titulo_label)
         layout.addWidget(titulo_label)
 
         linha_local_ativ = QHBoxLayout()
-        linha_local_ativ.setSpacing(12)
+        linha_local_ativ.setSpacing(L.scaled("pagina_inspecao", "grupo_riscos", "spacing"))
 
         campos_linha = [
             ("local", "Local"),
@@ -131,7 +142,7 @@ class PaginaInspecao(QWidget):
         grupo.setObjectName(f"group_info_{chave}")
         grupo.setProperty("class", "group_box")
         grupo_layout = QVBoxLayout(grupo)
-        grupo_layout.setContentsMargins(8, 12, 8, 8)
+        grupo_layout.setContentsMargins(*self.__layout_loader.scaled_margins("pagina_inspecao", "grupo_info", "margens"))
         grupo_layout.addWidget(label)
         return grupo
 
@@ -146,8 +157,10 @@ class PaginaInspecao(QWidget):
         return label
 
     def __build_prancheta(self) -> QWidget:
+        L = self.__layout_loader
         prancheta = QWidget(objectName="prancheta")
         prancheta_layout = QVBoxLayout(prancheta)
+        prancheta_layout.setSpacing(L.scaled("pagina_inspecao", "prancheta", "spacing"))
 
         self.__chk_riscos = {}
         self.__chk_fatores = {}
@@ -166,13 +179,14 @@ class PaginaInspecao(QWidget):
         return prancheta
 
     def __build_grupo_riscos(self) -> QGroupBox:
+        L = self.__layout_loader
         grupo = QGroupBox("Riscos Identificados")
         grupo.setObjectName("group_riscos")
         grupo.setProperty("class", "group_box")
 
         layout = QGridLayout(grupo)
-        layout.setSpacing(10)
-        layout.setContentsMargins(0, 8, 0, 0)
+        layout.setSpacing(L.scaled("pagina_inspecao", "grupo_riscos", "spacing"))
+        layout.setContentsMargins(*L.scaled_margins("pagina_inspecao", "grupo_riscos", "margens"))
 
         layout.setColumnStretch(0, 1)
         layout.setColumnStretch(1, 1)
@@ -199,7 +213,7 @@ class PaginaInspecao(QWidget):
             self.__chk_riscos[risco] = btn
 
         inner = QHBoxLayout()
-        inner.setSpacing(10)
+        inner.setSpacing(L.scaled("pagina_inspecao", "grupo_riscos", "spacing"))
         inner.addStretch()
         for risco in linha_1:
             btn = self.__criar_tile_risco(risco, labels[risco])
@@ -211,6 +225,7 @@ class PaginaInspecao(QWidget):
         return grupo
 
     def __criar_tile_risco(self, risco: str, label: str) -> QToolButton:
+        L = self.__layout_loader
         btn = QToolButton()
         btn.setObjectName(f"tile_risco_{risco}")
         btn.setProperty("riscoTile", True)
@@ -218,7 +233,10 @@ class PaginaInspecao(QWidget):
         btn.setText(label)
         btn.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
         btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
-        btn.setMinimumSize(96, 96)
+        btn.setMinimumSize(
+            L.scaled("pagina_inspecao", "tile_risco", "tamanho_minimo"),
+            L.scaled("pagina_inspecao", "tile_risco", "tamanho_minimo"),
+        )
 
         icone_color = self.__resolver_icone_risco(risco, "_color")
         icone_white = self.__resolver_icone_risco(risco, "_dark")
@@ -228,7 +246,10 @@ class PaginaInspecao(QWidget):
         if icone_white is not None:
             btn.setProperty("icone_white", str(icone_white))
 
-        btn.setIconSize(QSize(64, 64))
+        btn.setIconSize(QSize(
+            L.scaled("pagina_inspecao", "tile_risco", "icone_tamanho"),
+            L.scaled("pagina_inspecao", "tile_risco", "icone_tamanho"),
+        ))
         self.__aplicar_icone_risco(btn, btn.isChecked())
         btn.toggled.connect(lambda checked, b=btn: self.__aplicar_icone_risco(b, checked))
 
@@ -248,12 +269,13 @@ class PaginaInspecao(QWidget):
         return caminho if caminho.exists() else None
 
     def __build_grupo_fatores(self) -> QGroupBox:
+        L = self.__layout_loader
         grupo = QGroupBox("Fatores de Inseguranca")
         grupo.setObjectName("group_fatores")
         grupo.setProperty("class", "group_box")
 
         layout = QHBoxLayout(grupo)
-        layout.setSpacing(12)
+        layout.setSpacing(L.scaled("pagina_inspecao", "grupo_fatores", "spacing"))
 
         dados = {
             "ATO_INSEGURO": ("Ato Inseguro", "falha humana"),
@@ -278,16 +300,17 @@ class PaginaInspecao(QWidget):
             btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
             inner = QHBoxLayout(btn)
-            inner.setContentsMargins(6, 8, 6, 8)
-            inner.setSpacing(10)
+            inner.setContentsMargins(*L.scaled_margins("pagina_inspecao", "fator_tile", "margens"))
+            inner.setSpacing(L.scaled("pagina_inspecao", "fator_tile", "spacing"))
             inner.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
             icon_label = QLabel()
             icon_label.setObjectName(f"fator_icon_{fator}")
             icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            icon_size = L.scaled("pagina_inspecao", "fator_tile", "icone_tamanho")
             if icone_color is not None:
                 icon_label.setPixmap(QPixmap(str(icone_color)).scaled(
-                    48, 48, Qt.AspectRatioMode.KeepAspectRatio,
+                    icon_size, icon_size, Qt.AspectRatioMode.KeepAspectRatio,
                     Qt.TransformationMode.SmoothTransformation,
                 ))
             inner.addWidget(icon_label, 3)
@@ -299,13 +322,20 @@ class PaginaInspecao(QWidget):
             titulo_label = QLabel(titulo)
             titulo_label.setObjectName(f"fator_titulo_{fator}")
             titulo_label.setProperty("class", "fator_titulo")
-            titulo_label.setStyleSheet("color: #ffffff; font-size: 16px; font-weight: 700;")
+            font_size = L.scaled("pagina_inspecao", "fontes", "fator_titulo", "size")
+            font = QFont()
+            font.setPointSize(font_size)
+            font.setWeight(QFont.Weight.Bold)
+            titulo_label.setFont(font)
             texto_layout.addWidget(titulo_label)
 
             subtitulo_label = QLabel(subtitulo)
             subtitulo_label.setObjectName(f"fator_subtitulo_{fator}")
             subtitulo_label.setProperty("class", "fator_subtitulo")
-            subtitulo_label.setStyleSheet("color: #ffffff; font-size: 13px;")
+            font_size = L.scaled("pagina_inspecao", "fontes", "fator_subtitulo", "size")
+            font = QFont()
+            font.setPointSize(font_size)
+            subtitulo_label.setFont(font)
             texto_layout.addWidget(subtitulo_label)
 
             inner.addLayout(texto_layout, 7)
@@ -339,20 +369,19 @@ class PaginaInspecao(QWidget):
             cor_texto = "#ffffff"
 
         if icon_label is not None and caminho:
+            L = self.__layout_loader
+            icon_size = L.scaled("pagina_inspecao", "fator_tile", "icone_tamanho")
             pixmap = QPixmap(caminho).scaled(
-                48, 48, Qt.AspectRatioMode.KeepAspectRatio,
+                icon_size, icon_size,
+                Qt.AspectRatioMode.KeepAspectRatio,
                 Qt.TransformationMode.SmoothTransformation,
             )
             icon_label.setPixmap(pixmap)
 
         if titulo_label is not None:
-            titulo_label.setStyleSheet(
-                f"color: {cor_texto}; font-size: 16px; font-weight: 700;"
-            )
+            titulo_label.setStyleSheet(f"color: {cor_texto};")
         if subtitulo_label is not None:
-            subtitulo_label.setStyleSheet(
-                f"color: {cor_texto}; font-size: 13px;"
-            )
+            subtitulo_label.setStyleSheet(f"color: {cor_texto};")
 
     def __resolver_icone_fator(self, chave: str, sufixo: str) -> Optional[Path]:
         assets = Path(__file__).resolve().parent.parent.parent / "assets"
@@ -360,11 +389,12 @@ class PaginaInspecao(QWidget):
         return caminho if caminho.exists() else None
 
     def __build_grupo_decisao(self) -> QGroupBox:
+        L = self.__layout_loader
         grupo = QGroupBox("Decisão Administrativa")
         grupo.setObjectName("group_decisao")
         grupo.setProperty("class", "group_box")
         layout = QHBoxLayout(grupo)
-        layout.setSpacing(12)
+        layout.setSpacing(L.scaled("pagina_inspecao", "grupo_decisao", "spacing"))
         layout.addStretch()
         self.__radio_decisao = QButtonGroup(grupo)
         for decisao in ["ADVERTIR", "INTERDITAR", "IGNORAR"]:
@@ -455,6 +485,9 @@ class PaginaInspecao(QWidget):
 
     @Slot()
     def __fechar_gallery(self) -> None:
+        player = self.__gallery.obter_player_atual()
+        if isinstance(player, MediaPlayerBase):
+            player.parar()
         self.__gallery.hide()
 
     @Slot(int)
@@ -468,35 +501,9 @@ class PaginaInspecao(QWidget):
             self.__media_viewer.show()
             self.__media_viewer.raise_()
             return
-        if anexo.get("tipo_midia") == "VIDEO":
-            player = self.__gallery.obter_player_atual()
-            if isinstance(player, VideoPlayer):
-                player.sair_fullscreen_solicitado.connect(self.__fechar_video_fullscreen, type=Qt.ConnectionType.UniqueConnection)
-                player.entrar_fullscreen(self.__obter_anchor_ou_window())
-                self.__video_player_fullscreen = player
-                self.__gallery.hide()
-
     @Slot()
     def __fechar_media_viewer(self) -> None:
         self.__media_viewer.hide()
-
-    @Slot()
-    def __fechar_video_fullscreen(self) -> None:
-        self.__video_player_fullscreen = None
-        if self.__gallery:
-            self.__ancorar_overlay(self.__gallery)
-            self.__gallery.show()
-
-    def __obter_anchor_ou_window(self) -> QWidget:
-        """Retorna o _OverlayArea se existir; senao a top-level window.
-
-        O fallback mantem o comportamento historico em cenarios standalone
-        (testes), onde a galeria fica como janela top-level.
-        """
-        anchor = self.__obter_anchor_widget()
-        if anchor is not None:
-            return anchor
-        return self.window()
 
     def __obter_anchor_widget(self) -> Optional[QWidget]:
         """Sobe na arvore de pais ate achar o _OverlayArea; None se nao houver."""
@@ -521,3 +528,19 @@ class PaginaInspecao(QWidget):
         if overlay.parent() is not anchor:
             overlay.setParent(anchor)
         overlay.setGeometry(anchor.rect())
+
+    def __aplicar_fonte_titulo(self, label: QLabel) -> None:
+        L = self.__layout_loader
+        tamanho = L.scaled("pagina_inspecao", "fontes", "titulo_relatorio", "size")
+        fonte = QFont("Open Sans", tamanho)
+        fonte.setWeight(QFont.Weight.Bold)
+        label.setFont(fonte)
+
+    @Slot()
+    def __reaplicar_dimensoes(self) -> None:
+        L = self.__layout_loader
+        tamanho = L.scaled("pagina_inspecao", "fontes", "titulo_relatorio", "size")
+        fonte = QFont("Open Sans", tamanho)
+        fonte.setWeight(QFont.Weight.Bold)
+        self.__labels_info["titulo"].setFont(fonte)
+        self.updateGeometry()

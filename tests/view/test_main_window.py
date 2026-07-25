@@ -68,10 +68,6 @@ class TestJanelaPrincipal:
         assert te is not None
         assert te.isVisible()
 
-    def test_exibir_tela_carregamento(self, janela):
-        """exibir_tela_carregamento deve delegar sem erros."""
-        janela.exibir_tela_carregamento()
-
     def test_exibir_tela_diagnostico(self, janela):
         """exibir_tela_diagnostico deve delegar sem erros."""
         dto = DiagnosticoPontuacaoDTO(

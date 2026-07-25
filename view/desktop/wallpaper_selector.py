@@ -29,6 +29,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from view.infrastructure.layout_loader import LayoutLoader
+
 logger = logging.getLogger(__name__)
 
 DIRETORIO_WALLPAPERS = (
@@ -38,7 +40,6 @@ DIRETORIO_WALLPAPERS = (
 EXTENSOES_VALIDAS = {".jpg", ".jpeg", ".png", ".bmp", ".gif"}
 SETTINGS_GROUP = "wallpaper"
 SETTINGS_KEY = "caminho_atual"
-TAMANHO_THUMBNAIL = (160, 90)
 
 
 class WallpaperSelector(QDialog):
@@ -57,9 +58,11 @@ class WallpaperSelector(QDialog):
         super().__init__(parent)
         self.setWindowTitle("Selecionar Papel de Parede")
         self.setObjectName("wallpaper_selector")
+        self.setProperty("class", "wallpaper_selector")
         self.setModal(True)
-        self.setMinimumSize(640, 420)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
+
+        self.__layout_loader = LayoutLoader.instance()
 
         self.__imagens: List[Path] = []
         self.__selected_path: str = ""
@@ -67,20 +70,25 @@ class WallpaperSelector(QDialog):
         self.__btn_aplicar: QPushButton | None = None
         self.__preview_label: QLabel | None = None
         self.__grid: QGridLayout | None = None
-        self.__thumb_w = TAMANHO_THUMBNAIL[0]
-        self.__thumb_h = TAMANHO_THUMBNAIL[1]
 
         self.__setup_ui()
         self.__carregar_imagens()
+        self.__layout_loader.escala_atualizada.connect(self.__reaplicar_dimensoes)
 
     def __setup_ui(self) -> None:
+        L = self.__layout_loader
+
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(16, 16, 16, 16)
-        layout.setSpacing(12)
+        layout.setContentsMargins(*L.scaled_margins("wallpaper_selector", "layout", "margens"))
+        layout.setSpacing(L.scaled("wallpaper_selector", "layout", "spacing"))
 
         label_instrucao = QLabel("Escolha um wallpaper para o ambiente de trabalho (disponível apenas no diretório fixo):")
         label_instrucao.setProperty("class", "wallpaper_selector_instrucao")
         label_instrucao.setObjectName("wallpaper_selector_instrucao")
+        font_size = L.scaled("wallpaper_selector", "fontes", "instrucao", "size")
+        font = label_instrucao.font()
+        font.setPointSize(font_size)
+        label_instrucao.setFont(font)
         layout.addWidget(label_instrucao)
 
         scroll = QScrollArea()
@@ -92,7 +100,7 @@ class WallpaperSelector(QDialog):
         container.setObjectName("wallpaper_grid_container")
         self.__grid = QGridLayout(container)
         self.__grid.setContentsMargins(0, 0, 0, 0)
-        self.__grid.setSpacing(12)
+        self.__grid.setSpacing(L.scaled("wallpaper_selector", "thumbnail", "grid_gap"))
         self.__grid.setAlignment(
             Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft
         )
@@ -101,12 +109,12 @@ class WallpaperSelector(QDialog):
         layout.addWidget(scroll, stretch=1)
 
         preview_layout = QHBoxLayout()
-        preview_layout.setSpacing(8)
+        preview_layout.setSpacing(L.scaled("wallpaper_selector", "layout", "spacing"))
 
         self.__preview_label = QLabel("Nenhum wallpaper selecionado")
         self.__preview_label.setObjectName("wallpaper_preview_label")
         self.__preview_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.__preview_label.setFixedHeight(120)
+        self.__preview_label.setFixedHeight(L.scaled("wallpaper_selector", "preview", "altura"))
         self.__preview_label.setSizePolicy(
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
         )
@@ -132,6 +140,30 @@ class WallpaperSelector(QDialog):
         botoes_layout.addWidget(btn_cancelar)
 
         layout.addLayout(botoes_layout)
+
+        self.setMinimumSize(
+            L.scaled("wallpaper_selector", "dialog", "largura_minima"),
+            L.scaled("wallpaper_selector", "dialog", "altura_minima"),
+        )
+
+    @Slot()
+    def __reaplicar_dimensoes(self) -> None:
+        """Reaplica dimensoes dependentes de escala apos resize."""
+        L = self.__layout_loader
+
+        if self.__grid is not None:
+            self.__grid.setSpacing(L.scaled("wallpaper_selector", "thumbnail", "grid_gap"))
+
+        if self.__preview_label is not None:
+            self.__preview_label.setFixedHeight(L.scaled("wallpaper_selector", "preview", "altura"))
+
+        self.setMinimumSize(
+            L.scaled("wallpaper_selector", "dialog", "largura_minima"),
+            L.scaled("wallpaper_selector", "dialog", "altura_minima"),
+        )
+
+        if self.__imagens:
+            self.__popular_grid()
 
     def __carregar_imagens(self) -> None:
         """Scan dinamico do diretorio de wallpapers por extensoes validas."""
@@ -169,26 +201,39 @@ class WallpaperSelector(QDialog):
         """Preenche a grid com thumbnails clicaveis."""
         self.__limpar_grid()
 
-        cols = max(1, (self.width() - 32) // (self.__thumb_w + 24))
+        L = self.__layout_loader
+        thumb_w = L.scaled("wallpaper_selector", "thumbnail", "largura")
+        thumb_h = L.scaled("wallpaper_selector", "thumbnail", "altura")
+
+        margem_container = L.scaled("wallpaper_selector", "thumbnail", "margem_container")
+        cols = max(1, (self.width() - margem_container) // (thumb_w + L.scaled("wallpaper_selector", "thumbnail", "grid_gap")))
 
         for idx, img_path in enumerate(self.__imagens):
-            thumbnail_widget = self.__criar_thumbnail(img_path, idx)
+            thumbnail_widget = self.__criar_thumbnail(img_path, idx, thumb_w, thumb_h)
             row = idx // cols
             col = idx % cols
-            self.__grid.addWidget(thumbnail_widget, row, col)
+            if self.__grid:
+                self.__grid.addWidget(thumbnail_widget, row, col)
 
     def __limpar_grid(self) -> None:
+        if self.__grid is None:
+            return
         while self.__grid.count():
             item = self.__grid.takeAt(0)
             if item and item.widget():
                 item.widget().deleteLater()
 
-    def __criar_thumbnail(self, img_path: Path, index: int) -> QFrame:
+    def __criar_thumbnail(self, img_path: Path, index: int, thumb_w: int, thumb_h: int) -> QFrame:
         """Cria um QFrame contendo a thumbnail e o nome do ficheiro."""
+        L = self.__layout_loader
+
         frame = QFrame()
         frame.setObjectName(f"wallpaper_thumb_{index}")
         frame.setProperty("class", "wallpaper_thumbnail")
-        frame.setFixedSize(self.__thumb_w + 16, self.__thumb_h + 40)
+
+        frame_w = thumb_w + L.scaled("wallpaper_selector", "thumbnail", "frame_padding")
+        frame_h = thumb_h + L.scaled("wallpaper_selector", "thumbnail", "frame_altura_extra")
+        frame.setFixedSize(frame_w, frame_h)
         frame.setFrameShape(QFrame.Shape.StyledPanel)
 
         frame_layout = QVBoxLayout(frame)
@@ -198,15 +243,15 @@ class WallpaperSelector(QDialog):
 
         thumb_label = QLabel()
         thumb_label.setObjectName(f"thumb_img_{index}")
-        thumb_label.setFixedSize(self.__thumb_w, self.__thumb_h)
+        thumb_label.setFixedSize(thumb_w, thumb_h)
         thumb_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         thumb_label.setProperty("class", "wallpaper_thumb_imagem")
 
         pixmap = QPixmap(str(img_path))
         if not pixmap.isNull():
             scaled = pixmap.scaled(
-                self.__thumb_w,
-                self.__thumb_h,
+                thumb_w,
+                thumb_h,
                 Qt.AspectRatioMode.KeepAspectRatio,
                 Qt.TransformationMode.SmoothTransformation,
             )
@@ -221,11 +266,13 @@ class WallpaperSelector(QDialog):
         nome_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         nome_label.setWordWrap(True)
         nome_label.setProperty("class", "wallpaper_thumb_nome")
+        font_size = L.scaled("wallpaper_selector", "fontes", "nome", "size")
+        font = nome_label.font()
+        font.setPointSize(font_size)
+        nome_label.setFont(font)
         frame_layout.addWidget(nome_label)
 
-        frame.mousePressEvent = lambda _event, i=index: self.__selecionar_thumbnail(
-            i
-        )
+        frame.mousePressEvent = lambda _event, i=index: self.__selecionar_thumbnail(i)
 
         return frame
 
@@ -243,15 +290,18 @@ class WallpaperSelector(QDialog):
         self.__selected_index = index
         selected_path = self.__imagens[index]
         self.__selected_path = str(selected_path)
+
         if self.__btn_aplicar:
             self.__btn_aplicar.setEnabled(True)
 
         if self.__preview_label:
             pixmap = QPixmap(self.__selected_path)
             if not pixmap.isNull():
+                preview_w = self.__layout_loader.scaled("wallpaper_selector", "preview", "largura_max")
+                preview_h = self.__layout_loader.scaled("wallpaper_selector", "preview", "altura")
                 preview_pixmap = pixmap.scaled(
-                    400,
-                    120,
+                    preview_w,
+                    preview_h,
                     Qt.AspectRatioMode.KeepAspectRatio,
                     Qt.TransformationMode.SmoothTransformation,
                 )

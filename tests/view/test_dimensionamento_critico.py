@@ -113,34 +113,38 @@ class TestTelaExpedienteDimensionamento:
     def test_exibir_com_tamanho_inicial_recalcula_a_cada_chamada(self):
         """
         Chamadas consecutivas com parent_rect diferentes devem produzir
-        geometrias diferentes e centradas.
+        geometrias diferentes.
+
+        Abaixo de HD (w_80 < 1280): expediente preenche o overlay.
+        Acima de HD (w_80 >= 1280): expediente ocupa 80% centrado.
         """
         # Arrange
         pai = QWidget()
-        pai.setGeometry(0, 0, 1200, 1000)
+        pai.setGeometry(0, 0, 2000, 1200)
         expediente = TelaDeExpediente(parent=pai)
-        rect_pequeno = QRect(0, 0, 1000, 800)
-        rect_grande = QRect(0, 0, 1200, 1000)
+        rect_subhd = QRect(0, 0, 1000, 800)
+        rect_hd = QRect(0, 0, 1600, 1000)
 
         # Act
-        expediente.exibir_com_tamanho_inicial(rect_pequeno)
-        geo_pequena = expediente.geometry()
+        expediente.exibir_com_tamanho_inicial(rect_subhd)
+        geo_subhd = expediente.geometry()
 
-        expediente.exibir_com_tamanho_inicial(rect_grande)
-        geo_grande = expediente.geometry()
+        expediente.exibir_com_tamanho_inicial(rect_hd)
+        geo_hd = expediente.geometry()
 
-        # Assert
-        assert geo_pequena.width() == int(1000 * 0.8)
-        assert geo_pequena.height() == int(800 * 0.8)
-        assert geo_pequena.x() == (1000 - geo_pequena.width()) // 2
-        assert geo_pequena.y() == (800 - geo_pequena.height()) // 2
+        # Assert — sub-HD: preenche todo o overlay
+        assert geo_subhd.width() == 1000
+        assert geo_subhd.height() == 800
+        assert geo_subhd.x() == 0
+        assert geo_subhd.y() == 0
 
-        assert geo_grande.width() == int(1200 * 0.8)
-        assert geo_grande.height() == int(1000 * 0.8)
-        assert geo_grande.x() == (1200 - geo_grande.width()) // 2
-        assert geo_grande.y() == (1000 - geo_grande.height()) // 2
+        # Assert — HD: 80% centrado (1600*0.8 = 1280, 1000*0.8 = 800)
+        assert geo_hd.width() == 1280
+        assert geo_hd.height() == 800
+        assert geo_hd.x() == (1600 - 1280) // 2
+        assert geo_hd.y() == (1000 - 800) // 2
 
-        assert expediente._TelaDeExpediente__tamanho_normal == geo_grande
+        assert expediente._TelaDeExpediente__tamanho_normal == geo_hd
 
 
 class TestOverlayNotificacao:

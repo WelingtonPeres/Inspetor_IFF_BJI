@@ -5,7 +5,7 @@ from typing import List, Optional
 
 from PySide6.QtCore import (
     Qt, QPropertyAnimation, QAbstractAnimation, Property,
-    Signal, QEasingCurve, QRectF,
+    Signal, QEasingCurve, QRectF, Slot,
 )
 from PySide6.QtWidgets import (
     QWidget, QPushButton, QSizePolicy,
@@ -17,6 +17,7 @@ from PySide6.QtGui import (
 )
 
 from view.expediente.modelos.character_data import CharacterData
+from view.infrastructure.layout_loader import LayoutLoader
 
 logger = logging.getLogger(__name__)
 
@@ -32,31 +33,6 @@ class CardRenderData:
     depth: float
     offset_px: float
     z_order: float
-
-
-CARD_WIDTH      = 260
-CARD_HEIGHT     = 460
-SLOT_SPACING    = 340
-ANIM_DURATION   = 350
-BUMP_DURATION   = 200
-
-SCALE_AT_CENTRE  = 1.0
-SCALE_AT_SLOT    = 0.72
-SCALE_MIN        = 0.45
-OPACITY_AT_CENTRE = 1.0
-OPACITY_AT_SLOT   = 0.5
-OPACITY_MIN       = 0.2
-
-CARD_BG        = QColor("#12121e")
-ACCENT_COLOR   = QColor("#2F9E41")
-ACCENT_GLOW    = QColor(47, 158, 65, 45)
-TEXT_WHITE     = QColor("#ffffff")
-TEXT_MUTED     = QColor("#7777aa")
-
-NAV_BTN_SIZE   = 52
-NAV_BTN_MARGIN = 16
-
-NAME_BAR_RATIO = 0.17
 
 
 class CharacterCarousel(QWidget):
@@ -94,13 +70,17 @@ class CharacterCarousel(QWidget):
         parent: Optional[QWidget] = None,
     ):
         super().__init__(parent)
+        self.setObjectName("character_carousel")
+        self.setProperty("class", "character_carousel")
+
         self.__characters = characters
         self.__index = 0
         self.__scroll_offset = 0.0
         self.__animation: Optional[QPropertyAnimation] = None
-        self.__scale = 1.0
 
-        self.setMinimumHeight(int((CARD_HEIGHT + 60) * 0.5))
+        self.__layout_loader = LayoutLoader.instance()
+        self.__scale = self.__compute_scale()
+
         self.setSizePolicy(
             QSizePolicy.Policy.Expanding,
             QSizePolicy.Policy.Expanding,
@@ -109,47 +89,55 @@ class CharacterCarousel(QWidget):
 
         self.__btn_prev = QPushButton("\u25C0", self)
         self.__btn_prev.setObjectName("carousel_btn_prev")
-        self.__btn_prev.setFixedSize(
-            self.__nav_btn_size(), self.__nav_btn_size()
-        )
-        self.__btn_prev.setToolTip("Anterior (\u2190)")
-        self.__btn_prev.clicked.connect(self.slide_previous)
+        self.__btn_prev.setProperty("class", "carousel_nav_btn")
 
         self.__btn_next = QPushButton("\u25B6", self)
         self.__btn_next.setObjectName("carousel_btn_next")
-        self.__btn_next.setFixedSize(
-            self.__nav_btn_size(), self.__nav_btn_size()
-        )
+        self.__btn_next.setProperty("class", "carousel_nav_btn")
+
+        self.__update_nav_buttons()
+
+        self.__btn_prev.setToolTip("Anterior (\u2190)")
+        self.__btn_prev.clicked.connect(self.slide_previous)
+
         self.__btn_next.setToolTip("Pr\u00F3ximo (\u2192)")
         self.__btn_next.clicked.connect(self.slide_next)
 
         self.index_changed.emit(self.__index)
 
+        self.__layout_loader.escala_atualizada.connect(self.__on_escala_atualizada)
+
     def __compute_scale(self) -> float:
         """Factor de escala proporcional ao tamanho disponivel.
 
-        Os valores base (CARD_WIDTH, CARD_HEIGHT, etc.) foram desenhados
-        para uma area de referencia de 1000x600. Em areas maiores ou
-        menores, todos os elementos escalam uniformemente.
+        Usa o factor global do LayoutLoader combinado com a area
+        de referencia do carousel.
         """
+        L = self.__layout_loader
+        ref_w = L.get("character_carousel", "ref_area", "largura")
+        ref_h = L.get("character_carousel", "ref_area", "altura")
+        global_scale = L.scale_factor()
+
         if self.width() == 0 or self.height() == 0:
-            return 1.0
-        return min(self.width() / 1000.0, self.height() / 600.0)
+            return global_scale
+
+        local_scale = min(self.width() / ref_w, self.height() / ref_h)
+        return min(global_scale, local_scale)
 
     def __card_width(self) -> float:
-        return CARD_WIDTH * self.__scale
+        return self.__layout_loader.scaled("character_carousel", "card", "largura_base") * self.__scale
 
     def __card_height(self) -> float:
-        return CARD_HEIGHT * self.__scale
+        return self.__layout_loader.scaled("character_carousel", "card", "altura_base") * self.__scale
 
     def __slot_spacing(self) -> float:
-        return SLOT_SPACING * self.__scale
+        return self.__layout_loader.scaled("character_carousel", "slot_spacing") * self.__scale
 
     def __nav_btn_size(self) -> int:
-        return int(NAV_BTN_SIZE * self.__scale)
+        return int(self.__layout_loader.scaled("character_carousel", "nav_btn", "tamanho") * self.__scale)
 
     def __nav_btn_margin(self) -> int:
-        return int(NAV_BTN_MARGIN * self.__scale)
+        return int(self.__layout_loader.scaled("character_carousel", "nav_btn", "margem") * self.__scale)
 
     def _get_offset(self) -> float:
         return self.__scroll_offset
@@ -211,10 +199,12 @@ class CharacterCarousel(QWidget):
         if (self.__animation
                 and self.__animation.state() == QAbstractAnimation.State.Running):
             self.__animation.stop()
+        L = self.__layout_loader
+        bump_dur = L.get("character_carousel", "bump_duration")
         self.__animation = QPropertyAnimation(self, b"scroll_offset")
-        self.__animation.setDuration(BUMP_DURATION)
+        self.__animation.setDuration(bump_dur)
         self.__animation.setStartValue(0.0)
-        self.__animation.setKeyValueAt(0.4, direction * 15.0)
+        self.__animation.setKeyValueAt(0.4, direction * 15.0 * self.__scale)
         self.__animation.setEndValue(0.0)
         self.__animation.setEasingCurve(QEasingCurve.Type.OutElastic)
         self.__animation.start()
@@ -224,8 +214,10 @@ class CharacterCarousel(QWidget):
         if (self.__animation
                 and self.__animation.state() == QAbstractAnimation.State.Running):
             self.__animation.stop()
+        L = self.__layout_loader
+        anim_dur = L.get("character_carousel", "anim_duration")
         self.__animation = QPropertyAnimation(self, b"scroll_offset")
-        self.__animation.setDuration(ANIM_DURATION)
+        self.__animation.setDuration(anim_dur)
         self.__animation.setStartValue(0.0)
         self.__animation.setEndValue(target)
         self.__animation.setEasingCurve(QEasingCurve.Type.OutCubic)
@@ -253,9 +245,20 @@ class CharacterCarousel(QWidget):
         self.__scroll_offset = 0.0
         self.update()
 
+    @Slot()
+    def __on_escala_atualizada(self) -> None:
+        """Reage a mudanca de escala global (resize da janela)."""
+        self.__scale = self.__compute_scale()
+        self.__update_nav_buttons()
+        self.update()
+
     def resizeEvent(self, event: QResizeEvent) -> None:
         """Reposiciona os botoes de navegacao ao redimensionar."""
         self.__scale = self.__compute_scale()
+        self.__update_nav_buttons()
+        super().resizeEvent(event)
+
+    def __update_nav_buttons(self) -> None:
         btn_size = self.__nav_btn_size()
         btn_margin = self.__nav_btn_margin()
         self.__btn_prev.setFixedSize(btn_size, btn_size)
@@ -265,7 +268,6 @@ class CharacterCarousel(QWidget):
         self.__btn_next.move(
             self.width() - btn_size - btn_margin, cy
         )
-        super().resizeEvent(event)
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         """Navegacao por teclado: setas laterais."""
@@ -316,6 +318,7 @@ class CharacterCarousel(QWidget):
         card_height: float,
     ) -> List[CardRenderData]:
         """Constroi a lista de dados de renderizacao para cada carta visivel."""
+        L = self.__layout_loader
         cards: List[CardRenderData] = []
         for i, ch in enumerate(self.__characters):
             offset_px = (
@@ -327,14 +330,20 @@ class CharacterCarousel(QWidget):
                 continue
 
             t = min(1.0, dist / slot_spacing)
+            scale_at_centre = L.get("character_carousel", "scale", "centro")
+            scale_at_slot = L.get("character_carousel", "scale", "slot")
+            scale_min = L.get("character_carousel", "scale", "min")
             card_scale = max(
-                SCALE_MIN,
-                SCALE_AT_CENTRE - t * (SCALE_AT_CENTRE - SCALE_AT_SLOT),
+                scale_min,
+                scale_at_centre - t * (scale_at_centre - scale_at_slot),
             )
+            opacity_at_centre = L.get("character_carousel", "opacity", "centro")
+            opacity_at_slot = L.get("character_carousel", "opacity", "slot")
+            opacity_min = L.get("character_carousel", "opacity", "min")
             opacity = max(
-                OPACITY_MIN,
-                OPACITY_AT_CENTRE
-                - t * (OPACITY_AT_CENTRE - OPACITY_AT_SLOT),
+                opacity_min,
+                opacity_at_centre
+                - t * (opacity_at_centre - opacity_at_slot),
             )
 
             card_w = card_width * card_scale
@@ -414,9 +423,11 @@ class CharacterCarousel(QWidget):
     def __desenhar_glow(self, p: QPainter, r: QRectF, radius: float,
                         card: CardRenderData) -> None:
         """Glow verde na carta central ou sombra lateral nas restantes."""
+        L = self.__layout_loader
+        accent_glow = QColor(L.get("character_carousel", "cores", "accent_glow"))
         if card.is_centre:
             sr = r.translated(10, 10)
-            p.setBrush(QBrush(ACCENT_GLOW))
+            p.setBrush(QBrush(accent_glow))
             p.setPen(Qt.PenStyle.NoPen)
             p.drawRoundedRect(sr, radius, radius)
             return
@@ -430,6 +441,9 @@ class CharacterCarousel(QWidget):
     def __desenhar_fundo(self, p: QPainter, r: QRectF, radius: float,
                          card: CardRenderData) -> None:
         """Clip-path + fundo escurecido proporcionalmente a profundidade."""
+        L = self.__layout_loader
+        card_bg = QColor(L.get("character_carousel", "cores", "card_bg"))
+
         clip = QPainterPath()
         clip.addRoundedRect(r, radius, radius)
         p.setClipPath(clip)
@@ -438,14 +452,14 @@ class CharacterCarousel(QWidget):
         alpha = int(255 * card.opacity * (1.0 - d * 0.2))
         if d > 0:
             bg = QColor(
-                int(CARD_BG.red() * (1.0 - d * 0.3)),
-                int(CARD_BG.green() * (1.0 - d * 0.3)),
-                int(CARD_BG.blue() * (1.0 - d * 0.1)),
+                int(card_bg.red() * (1.0 - d * 0.3)),
+                int(card_bg.green() * (1.0 - d * 0.3)),
+                int(card_bg.blue() * (1.0 - d * 0.1)),
             )
             bg.setAlpha(alpha)
             p.fillRect(r, bg)
             return
-        bg = QColor(CARD_BG)
+        bg = QColor(card_bg)
         bg.setAlpha(alpha)
         p.fillRect(r, bg)
 
@@ -477,7 +491,9 @@ class CharacterCarousel(QWidget):
     def __desenhar_barra_nome(self, p: QPainter, r: QRectF,
                               card: CardRenderData) -> None:
         """Barra inferior com gradiente e nome do perfil."""
-        bar_h = r.height() * NAME_BAR_RATIO
+        L = self.__layout_loader
+        name_bar_ratio = L.get("character_carousel", "name_bar_ratio")
+        bar_h = r.height() * name_bar_ratio
         bar = QRectF(r.x(), r.bottom() - bar_h, r.width(), bar_h)
         grad = QLinearGradient(bar.topLeft(), bar.bottomLeft())
         grad.setColorAt(0.0, QColor(0, 0, 0, 0))
@@ -526,8 +542,10 @@ class CharacterCarousel(QWidget):
                    Qt.AlignmentFlag.AlignCenter, badge_text)
 
     def __desenhar_borda(self, p: QPainter, r: QRectF, radius: float,
-                          card: CardRenderData) -> None:
+                         card: CardRenderData) -> None:
         """Borda accent na carta central ou edge nas restantes."""
+        L = self.__layout_loader
+        accent_color = QColor(L.get("character_carousel", "cores", "accent"))
         with self.__aplicar_perspectiva(p, card):
             if not card.is_centre:
                 alpha = int(70 * card.opacity * (1.0 - card.depth * 0.4))
@@ -536,7 +554,7 @@ class CharacterCarousel(QWidget):
                 p.drawRoundedRect(r, radius, radius)
                 return
 
-            border = QPen(ACCENT_COLOR, max(2.0, 2.5 * card.scale * self.__scale))
+            border = QPen(accent_color, max(2.0, 2.5 * card.scale * self.__scale))
             p.setPen(border)
             p.setBrush(Qt.BrushStyle.NoBrush)
             p.drawRoundedRect(r, radius, radius)

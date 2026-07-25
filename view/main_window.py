@@ -39,14 +39,16 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
     voltar_menu_solicitado = Signal()
     jogar_novamente_solicitado = Signal()
     sair_solicitado = Signal()
+    arquivos_solicitado = Signal()
+    help_solicitado = Signal()
+    wallpapers_solicitado = Signal()
 
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Inspetor IFF-BJI")
-        # 1024x576 = metade da resolucao base (1920x1080). Permite encolcher
-        # a janela sem a tornar unusavel, mas nao bloqueia abaixo da resolucao
-        # real do monitor como o antigo 1920x1080 fazia.
-        self.setMinimumSize(1024, 576)
+        # 1280x720 = HD (16:9). Tamanho minimo e inicial.
+        self.setMinimumSize(1280, 720)
+        self.resize(1280, 720)
 
         self.__sincronizar_escala_com_tela()
 
@@ -79,7 +81,12 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
         return overlay_area
 
     def __build_taskbar(self) -> Taskbar:
-        return Taskbar()
+        taskbar = Taskbar()
+        taskbar.arquivos_solicitado.connect(self.__on_arquivos_solicitado)
+        taskbar.help_solicitado.connect(self.__on_help_solicitado)
+        taskbar.wallpapers_solicitado.connect(self.__on_wallpapers_solicitado)
+        taskbar.iniciar_solicitado.connect(self.__encaminhar_iniciar)
+        return taskbar
 
     def __build_tela_menu(self) -> TelaMenuPrincipal:
         tela_menu = TelaMenuPrincipal()
@@ -126,9 +133,25 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
     def __on_minimizar_expediente(self) -> None:
         self.__tela_expediente.hide()
 
-    @Slot(str)
-    def __encaminhar_iniciar(self, _legenda: str) -> None:
+    @Slot()
+    def __encaminhar_iniciar(self, _legenda: str = "") -> None:
         self.iniciar_solicitado.emit()
+
+    @Slot()
+    def __on_arquivos_solicitado(self) -> None:
+        logger.info("Arquivos solicitado via taskbar.")
+
+    @Slot()
+    def __on_help_solicitado(self) -> None:
+        logger.info("Help solicitado via taskbar.")
+
+    @Slot()
+    def __on_wallpapers_solicitado(self) -> None:
+        from view.desktop.wallpaper_selector import WallpaperSelector
+
+        dialog = WallpaperSelector(self)
+        dialog.wallpaper_selecionado.connect(self.__tela_menu._TelaMenuPrincipal__aplicar_wallpaper)
+        dialog.exec()
 
     def inicializar(self) -> None:
         logger.info("JanelaPrincipal inicializada.")
@@ -146,10 +169,6 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
         logger.info("Exibindo selecao de perfil no expediente.")
         self.__tela_expediente.exibir_selecao_perfil()
         self.__tela_expediente.exibir_com_tamanho_inicial(self.__overlay_area.rect())
-
-    def exibir_tela_carregamento(self) -> None:
-        logger.info("Exibindo tela de carregamento.")
-        self.__tela_expediente.exibir_tela_carregamento()
 
     def trocar_para_tela_inspecao(self) -> None:
         logger.info("Exibindo expediente (tela de inspecao).")

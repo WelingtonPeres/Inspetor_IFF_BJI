@@ -3,7 +3,7 @@ Suite completa de testes para o componente Taskbar.
 """
 
 import pytest
-from PySide6.QtWidgets import QApplication, QFrame, QLabel, QPushButton
+from PySide6.QtWidgets import QApplication, QFrame, QLabel
 
 from view.desktop.taskbar import Taskbar
 
@@ -60,13 +60,14 @@ class TestTaskbar:
 
     def test_start_button_icone(self, taskbar):
         """
-        O botao Iniciar deve ser um QPushButton com icone.
+        O icone do IFFOS deve ser um QLabel com pixmap.
 
-        O icone e carregado do caminho especificado no layout.json.
+        O pixmap e carregado do caminho especificado no layout.json.
         """
-        start = taskbar.findChild(QPushButton, "taskbar_start")
+        start = taskbar.findChild(QLabel, "taskbar_start")
         assert start is not None
-        assert not start.icon().isNull()
+        assert start.pixmap() is not None
+        assert not start.pixmap().isNull()
         assert start.toolTip() == "Iniciar"
 
     def test_relogio_atualiza(self, taskbar, qtbot):

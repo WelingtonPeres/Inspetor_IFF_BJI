@@ -72,6 +72,8 @@ class GameManager:
         Recebe o sinal ``btn_iniciar_clicado`` da ``ViewMenuInicial``.
         Instrui a View a exibir a tela de seleção de perfil.
         """
+        if self.__estado_atual != self.ESTADO_MENU:
+            return
         self.__view.exibir_selecao_perfil()
 
     def iniciar_expediente(self, perfil: str) -> None:

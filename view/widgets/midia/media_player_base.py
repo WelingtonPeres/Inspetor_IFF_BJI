@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QPushButton,
     QSlider,
+    QStyle,
     QVBoxLayout,
     QWidget,
 )
@@ -18,6 +19,22 @@ from PySide6.QtWidgets import (
 from view.infrastructure.layout_loader import LayoutLoader
 
 logger = logging.getLogger(__name__)
+
+
+class _ClickSeekSlider(QSlider):
+    """Slider que salta para a posicao clicada no trilho."""
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            pos = event.position().toPoint() if hasattr(event, 'position') else event.pos()
+            val = QStyle.sliderValueFromPosition(
+                self.minimum(), self.maximum(), pos.x(), self.width()
+            )
+            self.setValue(val)
+            self.sliderMoved.emit(val)
+            event.accept()
+            return
+        super().mousePressEvent(event)
 
 
 class MediaPlayerBase(QFrame):
@@ -56,7 +73,7 @@ class MediaPlayerBase(QFrame):
         self._btn_play.clicked.connect(self._toggle_play)
         controls_layout.addWidget(self._btn_play)
 
-        self._slider = QSlider(Qt.Orientation.Horizontal)
+        self._slider = _ClickSeekSlider(Qt.Orientation.Horizontal)
         self._slider.sliderMoved.connect(self._player.setPosition)
         controls_layout.addWidget(self._slider, stretch=1)
 
@@ -128,6 +145,12 @@ class MediaPlayerBase(QFrame):
         if status == QMediaPlayer.MediaStatus.EndOfMedia:
             self._btn_play.setText("▶")
             self._slider.setValue(0)
+
+    def parar(self) -> None:
+        """Para a reproducao e reseta o estado visual."""
+        self._player.stop()
+        self._btn_play.setText("▶")
+        self._slider.setValue(0)
 
     def format_tempo(self, ms: int) -> str:
         """Formata milissegundos como m:ss."""

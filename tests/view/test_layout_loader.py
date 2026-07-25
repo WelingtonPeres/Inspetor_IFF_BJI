@@ -74,20 +74,20 @@ class TestLayoutLoader:
         """
         scaled_margins retorna tupla na ordem (left, top, right, bottom).
 
-        Para taskbar.margens {left:12, top:0, right:12, bottom:0}
-        em resolucao referencia deve retornar (12, 0, 12, 0).
+        Para taskbar.margens {left:12, top:2, right:12, bottom:2}
+        em resolucao referencia deve retornar (12, 2, 12, 2).
         """
         loader.set_screen(1920, 1080)
         margens = loader.scaled_margins("taskbar", "margens")
-        assert margens == (12, 0, 12, 0)
+        assert margens == (12, 2, 12, 2)
 
     def test_get_raw(self, loader):
         """
         get() retorna o valor bruto do JSON sem escala.
 
-        taskbar.start_botao.texto deve retornar "Iniciar".
+        taskbar.start.tooltip deve retornar "Iniciar".
         """
-        texto = loader.get("taskbar", "start_botao", "texto")
+        texto = loader.get("taskbar", "start", "tooltip")
         assert texto == "Iniciar"
 
     def test_get_lista_atalhos(self, loader):

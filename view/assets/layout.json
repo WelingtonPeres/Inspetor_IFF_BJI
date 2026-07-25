@@ -34,19 +34,46 @@
     }
   },
   "taskbar": {
-    "altura": 40,
+    "altura": 44,
     "margens": {
-      "top": 0,
+      "top": 2,
       "right": 12,
-      "bottom": 0,
+      "bottom": 2,
       "left": 12
     },
-    "start_botao": {
-      "icone_arquivo": "logo_iff_branco.png",
-      "texto": "Iniciar",
-      "padding_y": 4,
-      "padding_x": 12,
-      "border_radius": 4
+    "start": {
+      "icone_arquivo": "iffOS.png",
+      "icone_tamanho": 64,
+      "tooltip": "Iniciar",
+      "margens": {
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "left": 0
+      },
+      "spacing": 8
+    },
+    "separator": {
+      "largura": 1
+    },
+    "atalhos": {
+      "margens": {
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "left": 0
+      },
+      "spacing_entre_atalhos": 16,
+      "icone": {
+        "largura": 32,
+        "altura": 32
+      },
+      "shortcut_margens": {
+        "top": 4,
+        "right": 4,
+        "bottom": 4,
+        "left": 4
+      }
     },
     "system_tray": {
       "relogio_formato": "HH:mm",
@@ -73,6 +100,24 @@
   },
   "sidebar": {
     "largura": 200,
+    "item_altura": 48,
+    "item_font_size": 13,
+    "item_padding": {
+      "top": 12,
+      "right": 16,
+      "bottom": 12,
+      "left": 16
+    },
+    "icone_tamanho": 20,
+    "logo_tamanho": 40,
+    "header_margens": {
+      "top": 20,
+      "right": 0,
+      "bottom": 16,
+      "left": 0
+    },
+    "titulo_font_size": 11,
+    "divider_altura": 1,
     "itens": [
       {
         "id": "dashboard",
@@ -96,6 +141,12 @@
       }
     ]
   },
+  "stamp_button": {
+    "largura": 160,
+    "altura": 52,
+    "font_size": 20,
+    "margem_horizontal": 16
+  },
   "anexo_preview": {
     "altura": 120,
     "thumbnail_largura": 160,
@@ -105,6 +156,130 @@
       "right": 16,
       "bottom": 8,
       "left": 16
+    }
+  },
+  "pagina_loading": {
+    "titulo": {
+      "fonte": "Courier New",
+      "tamanho": 16
+    },
+    "progress_bar": {
+      "altura": 20
+    },
+    "texto": {
+      "fonte": "Open Sans",
+      "tamanho": 14
+    }
+  },
+  "pagina_diagnostico": {
+    "spacing": 16,
+    "btn_altura": 40,
+    "btn_largura_min": 110,
+    "font_size": 13
+  },
+  "game_win": {
+    "spacing": 16,
+    "btn_altura": 40,
+    "btn_largura_min": 110,
+    "font_size": 13,
+    "titulo_size": 24,
+    "pontuacao_size": 16
+  },
+  "pagina_inspecao": {
+    "deck": {
+      "spacing": 12
+    },
+    "info_block": {
+      "spacing": 12
+    },
+    "grupo_info": {
+      "margens": {
+        "top": 12,
+        "right": 8,
+        "bottom": 8,
+        "left": 8
+      }
+    },
+    "grupo_riscos": {
+      "spacing": 10,
+      "margens": {
+        "top": 8,
+        "right": 0,
+        "bottom": 0,
+        "left": 0
+      }
+    },
+    "tile_risco": {
+      "tamanho_minimo": 96,
+      "icone_tamanho": 64
+    },
+    "grupo_fatores": {
+      "spacing": 12
+    },
+    "fator_tile": {
+      "icone_tamanho": 48,
+      "margens": {
+        "top": 8,
+        "right": 6,
+        "bottom": 8,
+        "left": 6
+      },
+      "spacing": 10
+    },
+    "fontes": {
+      "fator_titulo": {
+        "size": 16
+      },
+      "fator_subtitulo": {
+        "size": 13
+      },
+      "titulo_relatorio": {
+        "size": 60
+      }
+    },
+    "grupo_decisao": {
+      "spacing": 12
+    },
+    "botao_submeter": {
+      "margem_top": 12
+    },
+    "prancheta": {
+      "spacing": 12
+    }
+  },
+  "character_carousel": {
+    "card": {
+      "largura_base": 260,
+      "altura_base": 460
+    },
+    "slot_spacing": 340,
+    "anim_duration": 350,
+    "bump_duration": 200,
+    "scale": {
+      "centro": 1.0,
+      "slot": 0.72,
+      "min": 0.45
+    },
+    "opacity": {
+      "centro": 1.0,
+      "slot": 0.5,
+      "min": 0.2
+    },
+    "nav_btn": {
+      "tamanho": 52,
+      "margem": 16
+    },
+    "name_bar_ratio": 0.17,
+    "cores": {
+      "card_bg": "#12121e",
+      "accent": "#2F9E41",
+      "accent_glow": "#2F9E41",
+      "text_white": "#ffffff",
+      "text_muted": "#7777aa"
+    },
+    "ref_area": {
+      "largura": 1000,
+      "altura": 600
     }
   },
   "anexo_gallery": {
@@ -120,6 +295,17 @@
     "progress_altura": 6,
     "icone_tamanho": 20,
     "font_size": 9
+  },
+  "window_title_bar": {
+    "altura": 32,
+    "margens": {
+      "top": 0,
+      "right": 8,
+      "bottom": 0,
+      "left": 12
+    },
+    "btn_tamanho": 36,
+    "btn_altura": 28
   },
   "tela_de_expediente": {
     "proporcao_tela": 0.8,
@@ -173,12 +359,12 @@
     {
       "icone_arquivo": "pasta_verde.png",
       "legenda": "Arquivos",
-      "action": "info"
+      "action": "info_arquivos"
     },
     {
       "icone_arquivo": "help.png",
       "legenda": "Help",
-      "action": "info"
+      "action": "info_help"
     },
     {
       "icone_arquivo": "image.png",
@@ -186,6 +372,41 @@
       "action": "wallpaper"
     }
   ],
+  "wallpaper_selector": {
+    "dialog": {
+      "largura_minima": 640,
+      "altura_minima": 420
+    },
+    "thumbnail": {
+      "largura": 160,
+      "altura": 90,
+      "frame_padding": 16,
+      "frame_altura_extra": 40,
+      "grid_gap": 24,
+      "margem_container": 32
+    },
+    "preview": {
+      "altura": 120,
+      "largura_max": 400
+    },
+    "layout": {
+      "margens": {
+        "top": 16,
+        "right": 16,
+        "bottom": 16,
+        "left": 16
+      },
+      "spacing": 12
+    },
+    "fontes": {
+      "instrucao": {
+        "size": 9
+      },
+      "nome": {
+        "size": 9
+      }
+    }
+  },
   "gameover": {
     "card": {
       "largura_min": 330,
@@ -206,7 +427,7 @@
       "entre_score_botoes": 18,
       "entre_botoes_footer": 0,
       "margem": 20,
-      "entre_botoes_row": 12,
+      "entre_botoes_row": 8,
       "entre_footer": 10,
       "spacers_top": 8,
       "card_divider_altura": 2,
@@ -259,7 +480,7 @@
     },
     "botoes": {
       "altura": 40,
-      "largura_min": 110,
+      "largura_min": 55,
       "padding_y": 8,
       "border_radius": 6
     },
