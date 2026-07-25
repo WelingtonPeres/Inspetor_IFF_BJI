@@ -191,6 +191,8 @@ class TelaDeExpediente(QFrame):
 
     @Slot()
     def __on_fechar(self) -> None:
+        self.reiniciar()
+        self.voltar_menu_solicitado.emit()
         self.hide()
         self.__maximizado = False
         self.__title_bar.set_maximizado(False)

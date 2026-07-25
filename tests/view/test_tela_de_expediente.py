@@ -263,11 +263,26 @@ class TestTamanho:
         expediente.show()
         assert expediente.geometry() == tamanho
 
-    def test_fechar_reseta_maximizado(self, expediente):
-        """Fechar deve resetar estado maximizado."""
+    def test_fechar_reseta_estado_e_sinaliza_menu(self, expediente):
+        """Fechar deve resetar o expediente e emitir voltar_menu_solicitado."""
+        stack = expediente.findChild(QStackedWidget)
         expediente._TelaDeExpediente__maximizado = True
+        # navega para uma pagina interna qualquer (nao selecao)
+        if stack.currentIndex() == 0:
+            stack.setCurrentIndex(2)
+
+        sinal_recebido = False
+
+        def _marcar():
+            nonlocal sinal_recebido
+            sinal_recebido = True
+
+        expediente.voltar_menu_solicitado.connect(_marcar)
         expediente._TelaDeExpediente__on_fechar()
+
         assert not expediente._TelaDeExpediente__maximizado
+        assert stack.currentIndex() == 0
+        assert sinal_recebido
 
 
 class TestSidebar:
