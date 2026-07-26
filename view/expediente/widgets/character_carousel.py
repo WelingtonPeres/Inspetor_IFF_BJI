@@ -62,6 +62,8 @@ class CharacterCarousel(QWidget):
         Inicia animacao de deslize para o perfil seguinte.
     """
 
+    ASPECT_RATIO = 260.0 / 460.0
+
     index_changed = Signal(int)
 
     def __init__(
@@ -124,11 +126,19 @@ class CharacterCarousel(QWidget):
         local_scale = min(self.width() / ref_w, self.height() / ref_h)
         return min(global_scale, local_scale)
 
+    def __expediente_altura(self) -> int:
+        parent = self.parent()
+        while parent is not None:
+            if parent.objectName() == "tela_de_expediente":
+                return parent.height()
+            parent = parent.parent()
+        return self.height()
+
     def __card_width(self) -> float:
-        return self.__layout_loader.scaled("character_carousel", "card", "largura_base") * self.__scale
+        return self.__card_height() * self.ASPECT_RATIO
 
     def __card_height(self) -> float:
-        return self.__layout_loader.scaled("character_carousel", "card", "altura_base") * self.__scale
+        return self.__expediente_altura() * 0.6
 
     def __slot_spacing(self) -> float:
         return self.__layout_loader.scaled("character_carousel", "slot_spacing") * self.__scale
