@@ -1,22 +1,3 @@
-"""
-Widget reutilizavel que desenha pictogramas decorativos de risco
-no fundo de uma tela. Usado na TelaGameOver para reforcar a
-identidade visual CRT + seguranca do trabalho.
-
-Os pictogramas vem de ``view/assets/icons/fim_jogo/pictogramas/*.png``
-e sao colorizados em runtime via ``CompositionMode_DestinationIn``
-para que cada icone mantenha a silhueta original mas com a cor
-configurada no ``layout.json`` em
-``gameover.pictogramas.items[*].cor``.
-
-Cache:
-  * ``__raw_cache``: pixmaps originais carregados uma unica vez
-    no ``__init__`` (evita I/O em cada repaint).
-  * ``__colored_cache``: pixmaps ja escalados e coloridos, chaveados
-    por ``(filename, target_size, cor_hex)``. Re-criado apenas em
-    ``__atualizar_cache``, chamado quando a escala muda.
-"""
-
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -33,18 +14,14 @@ logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class PictogramaSpec:
-    """Especificacao declarativa de um pictograma decorativo."""
     filename: str
-    fx: float          # posicao horizontal em fracao (0-1)
-    fy: float          # posicao vertical em fracao (0-1)
-    angulo_graus: int  # rotacao em graus
-    tamanho_base: int  # tamanho de referencia a 1920x1080 (px)
-    cor: str           # cor hex (#rrggbb) para tintar o pictograma
+    fx: float
+    fy: float
+    angulo_graus: int
+    tamanho_base: int
+    cor: str
 
 
-# Constante com os pictogramas usados no fundo do GameOver.
-# Posicoes, rotacoes e cores sao calibradas para 1920x1080.
-# Sao aproximadas via fracao, para escalarem com a janela.
 _RISCOS_BG: Tuple[PictogramaSpec, ...] = (
     PictogramaSpec("flame.png",       0.18, 0.18, -12, 120, "#ffb4ab"),
     PictogramaSpec("skull.png",       0.82, 0.22,  10, 100, "#e2e2e2"),
@@ -54,40 +31,66 @@ _RISCOS_BG: Tuple[PictogramaSpec, ...] = (
     PictogramaSpec("test-pipe.png",   0.90, 0.50, -15,  95, "#ffb4ab"),
 )
 
+_RISCOS_BG_GAMEWIN: Tuple[PictogramaSpec, ...] = (
+    PictogramaSpec("star.png",           0.12, 0.15, -10, 100, "#71dd77"),
+    PictogramaSpec("shield-check.png",   0.85, 0.20,  12, 110, "#8dd2d8"),
+    PictogramaSpec("medal-2.png",        0.18, 0.72,   6, 120, "#f3d78a"),
+    PictogramaSpec("leaf.png",           0.82, 0.78,  -8, 115, "#71dd77"),
+    PictogramaSpec("clipboard-check.png",0.08, 0.42,  14, 100, "#eeeae2"),
+    PictogramaSpec("square-check.png",   0.92, 0.50, -12, 100, "#8dd2d8"),
+)
+
+_SPEC_MAP = {
+    "gameover": _RISCOS_BG,
+    "gamewin": _RISCOS_BG_GAMEWIN,
+}
+
+_ICON_SUBDIR_MAP = {
+    "gameover": "pictogramas",
+    "gamewin": "",
+}
+
 
 class BackgroundRiscos(QWidget):
     """Fundo decorativo com pictogramas de risco em baixa opacidade."""
 
-    _ICONS_DIR_NAME = "pictogramas"
     _FLOOR_SCALE = 0.55
     _CEIL_SCALE = 1.0
     _OPACITY_MAX = 0.18
 
-    def __init__(self, layout_loader: LayoutLoader, icons_dir: Path, parent=None):
+    def __init__(self, layout_loader: LayoutLoader, icons_dir: Path, parent=None, layout_key: str = "gameover"):
         super().__init__(parent)
         self.setObjectName("bg_riscos")
         self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.__layout_loader = layout_loader
         self.__icons_dir = icons_dir
-        self.__raw_cache: Dict[str, QPixmap] = {
-            spec.filename: QPixmap(str(icons_dir / self._ICONS_DIR_NAME / spec.filename))
-            for spec in _RISCOS_BG
-        }
+        self.__layout_key = layout_key
+        self.__spec_list = _SPEC_MAP.get(layout_key, _RISCOS_BG)
+        self.__icons_subdir = _ICON_SUBDIR_MAP.get(layout_key, "pictogramas")
+        self.__raw_cache: Dict[str, QPixmap] = {}
+        self.__carregar_raw_cache()
         self.__colored_cache: Dict[Tuple[str, int, str], QPixmap] = {}
         self.__atualizar_cache()
 
+    def __carregar_raw_cache(self) -> None:
+        for spec in self.__spec_list:
+            if self.__icons_subdir:
+                path = str(self.__icons_dir / self.__icons_subdir / spec.filename)
+            else:
+                path = str(self.__icons_dir / spec.filename)
+            self.__raw_cache[spec.filename] = QPixmap(path)
+
     def __atualizar_cache(self) -> None:
-        """Re-calcula os pixmaps coloridos+escalados segundo o scale factor corrente."""
         self.__colored_cache.clear()
         sf = self.__escala_clampada()
         size_max = self.__layout_loader.scaled(
-            "gameover", "pictogramas", "size_base_max"
+            self.__layout_key, "pictogramas", "size_base_max"
         )
         size_min = self.__layout_loader.scaled(
-            "gameover", "pictogramas", "size_base_min"
+            self.__layout_key, "pictogramas", "size_base_min"
         )
-        for spec in _RISCOS_BG:
+        for spec in self.__spec_list:
             raw = self.__raw_cache.get(spec.filename)
             if raw is None or raw.isNull():
                 continue
@@ -102,7 +105,6 @@ class BackgroundRiscos(QWidget):
             )
 
     def invalidar_cache(self) -> None:
-        """Hook para re-aplicar cache apos escala_atualizada."""
         self.__atualizar_cache()
         self.update()
 
@@ -123,18 +125,18 @@ class BackgroundRiscos(QWidget):
 
             sf_clamped = self.__escala_clampada()
             opacidade_base = self.__layout_loader.get(
-                "gameover", "pictogramas", "opacity"
+                self.__layout_key, "pictogramas", "opacity"
             )
             opacidade = min(self._OPACITY_MAX, opacidade_base / sf_clamped)
 
             size_max = self.__layout_loader.scaled(
-                "gameover", "pictogramas", "size_base_max"
+                self.__layout_key, "pictogramas", "size_base_max"
             )
             size_min = self.__layout_loader.scaled(
-                "gameover", "pictogramas", "size_base_min"
+                self.__layout_key, "pictogramas", "size_base_min"
             )
 
-            for spec in _RISCOS_BG:
+            for spec in self.__spec_list:
                 raw = self.__raw_cache.get(spec.filename)
                 if raw is None or raw.isNull():
                     continue
@@ -160,7 +162,6 @@ class BackgroundRiscos(QWidget):
 
     @staticmethod
     def __colorir(source: QPixmap, color: QColor) -> QPixmap:
-        """Substitui os pixels nao-transparentes pela cor alvo."""
         result = QPixmap(source.size())
         result.fill(color)
         with QPainter(result) as p:
