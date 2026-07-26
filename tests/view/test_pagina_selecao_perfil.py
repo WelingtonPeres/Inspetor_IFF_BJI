@@ -189,27 +189,28 @@ class TestCarouselNavegacao:
 
     def test_slide_previous_nao_ultrapassa_inicio(self, pagina):
         """
-        slide_previous() no indice 0 nao deve alterar o indice.
+        slide_previous() no indice 0 deve dar a volta para o ultimo indice.
 
-        Deve executar a animacao de bump (elastica) sem modificar
-        o indice do carousel.
+        O carrossel e circular: ao recuar no inicio, o indice passa
+        para o ultimo perfil com animacao de transicao.
         """
         # Arrange
         carousel = pagina._PaginaSelecaoPerfil__carousel
+        ultimo = len(carousel.characters) - 1
         assert carousel.current_index == 0
 
-        # Act — tenta recuar alem do primeiro perfil
+        # Act — recua alem do primeiro perfil
         carousel.slide_previous()
 
-        # Assert — o bump animation nao altera o indice
-        assert carousel.current_index == 0
+        # Assert — o indice da volta para o ultimo
+        assert carousel.current_index == ultimo
 
     def test_slide_next_nao_ultrapassa_fim(self, pagina):
         """
-        slide_next() no ultimo indice nao deve ultrapassar o limite.
+        slide_next() no ultimo indice deve dar a volta para o indice 0.
 
-        Deve executar a animacao de bump (elastica) sem modificar
-        o indice do carousel.
+        O carrossel e circular: ao avancar no fim, o indice passa
+        para o primeiro perfil com animacao de transicao.
         """
         # Arrange — posiciona o carousel no ultimo perfil
         carousel = pagina._PaginaSelecaoPerfil__carousel
@@ -218,11 +219,11 @@ class TestCarouselNavegacao:
         carousel.update()
         assert carousel.current_index == ultimo
 
-        # Act — tenta avancar alem do ultimo perfil
+        # Act — avanca alem do ultimo perfil
         carousel.slide_next()
 
-        # Assert — o bump animation nao altera o indice
-        assert carousel.current_index == ultimo
+        # Assert — o indice da volta para 0
+        assert carousel.current_index == 0
 
     def test_contador_atualiza_com_navegacao(self, pagina, qtbot):
         """
@@ -300,20 +301,22 @@ class TestCarouselConfirm:
 
     def test_key_left_navega(self, pagina, qtbot):
         """
-        Pressionar Left no indice 0 nao deve lancar erro nem alterar o indice.
+        Pressionar Left no indice 0 deve dar a volta para o ultimo indice.
 
-        O carousel executa a animacao de bump sem modificar o estado.
+        O carrossel e circular: ao recuar no inicio, o indice passa
+        para o ultimo perfil.
         """
         # Arrange
         carousel = pagina._PaginaSelecaoPerfil__carousel
+        ultimo = len(carousel.characters) - 1
         assert carousel.current_index == 0
         pagina.setFocus()
 
         # Act — pressiona a seta esquerda
         qtbot.keyClick(pagina, Qt.Key_Left)
 
-        # Assert — o indice permanece em 0 (apenas bump animation)
-        assert carousel.current_index == 0
+        # Assert — o indice da volta para o ultimo
+        assert carousel.current_index == ultimo
 
     def test_key_right_navega_e_confirma(self, pagina, qtbot):
         """
