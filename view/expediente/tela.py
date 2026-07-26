@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
 
 from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
 from infrastructure.repository.repositorio_pareceres_cipa import RepositorioDePareceresCIPA
+from infrastructure.repository.repositorio_pareceres_cipavitoria import RepositorioDePareceresCIPAVitoria
 from view.expediente.widgets.sidebar import Sidebar
 from view.expediente.widgets.window_title_bar import WindowTitleBar
 from view.infrastructure.layout_loader import LayoutLoader
@@ -51,6 +52,7 @@ class TelaDeExpediente(QFrame):
         self.__perfil_selecionado: str = ""
 
         self.__repositorio_pareceres: RepositorioDePareceresCIPA = RepositorioDePareceresCIPA()
+        self.__repositorio_pareceres_vitoria: RepositorioDePareceresCIPAVitoria = RepositorioDePareceresCIPAVitoria()
 
         self.__anexo_gallery: AnexoGallery
         self.__media_viewer: MediaViewer
@@ -123,7 +125,10 @@ class TelaDeExpediente(QFrame):
         self.__pagina_inspecao = PaginaInspecao()
         self.__pagina_inspecao.submeter_respostas.connect(self.submeter_respostas.emit)
 
-        self.__pagina_game_win = GameWin(pontuacao_global=0.0)
+        self.__pagina_game_win = GameWin(
+            pontuacao_global=0.0,
+            repositorio=self.__repositorio_pareceres_vitoria,
+        )
         self.__pagina_game_win.voltar_menu_solicitado.connect(self.voltar_menu_solicitado.emit)
         self.__pagina_game_win.jogar_novamente_solicitado.connect(self.jogar_novamente_solicitado.emit)
         self.__pagina_game_win.sair_solicitado.connect(self.sair_solicitado.emit)
@@ -224,7 +229,9 @@ class TelaDeExpediente(QFrame):
         logger.info("Exibindo endgame: %.1f pts, venceu=%s", pontuacao_global, venceu)
         self.__title_bar.definir_titulo("Fim do Expediente")
         if venceu:
-            self.__pagina_game_win.atualizar_pontuacao(pontuacao_global)
+            self.__pagina_game_win.exibir_resultado(
+                pontuacao_global, self.__perfil_selecionado
+            )
             self.__stack.setCurrentIndex(self.IDX_GAME_WIN)
             return
         self.__pagina_game_over.exibir_resultado(

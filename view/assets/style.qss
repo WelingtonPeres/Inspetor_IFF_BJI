@@ -738,6 +738,155 @@ GameWin #label_endgame_pontuacao {
     padding: 8px;
 }
 
+/* ——— CRT GameWin ——— */
+GameWin {
+    background-color: #0a0a0a;
+    border: 6px solid #1a1c1c;
+    border-radius: 14px;
+}
+
+GameWin #gamewin_header {
+    color: #71dd77;
+}
+
+GameWin #gamewin_timestamp {
+    color: #889484;
+}
+
+GameWin #gamewin_titulo {
+    color: #71dd77;
+}
+
+GameWin #gamewin_subtitulo {
+    color: #8dfa91;
+}
+
+GameWin #gamewin_card {
+    background-color: #eeeae2;
+    border-radius: 2px;
+}
+
+GameWin QFrame#gamewin_card {
+    background-image: url(icons/fim_jogo/oldpaper.png);
+    background-color: #eeeae2;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    border-radius: 2px;
+}
+
+GameWin #gamewin_card_cabecalho {
+    color: #5f5e5a;
+}
+
+GameWin #gamewin_card_subcabecalho {
+    color: #1a1c1c;
+}
+
+GameWin #gamewin_card_divider {
+    background-color: #1a1c1c;
+}
+
+GameWin #gamewin_card_parecer_num {
+    color: #5f5e5a;
+}
+
+GameWin QScrollArea {
+    background-color: transparent;
+}
+
+GameWin #gamewin_card_parecer_texto {
+    background-color: transparent;
+    color: #1a1c1c;
+}
+
+GameWin #gamewin_score_label {
+    color: #889484;
+}
+
+GameWin #gamewin_score_valor {
+    color: #8dfa91;
+}
+
+GameWin #gamewin_btn_retry {
+    background-color: #2F9E41;
+    color: #ffffff;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: none;
+}
+
+GameWin #gamewin_btn_retry:hover {
+    background-color: #3cb350;
+}
+
+GameWin #gamewin_btn_retry:focus {
+    background-color: #2a8a37;
+    border: 2px solid #ffffff;
+}
+
+GameWin #gamewin_btn_retry:pressed {
+    background-color: #1e6b28;
+}
+
+GameWin #gamewin_btn_menu {
+    background-color: transparent;
+    color: #889484;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: 1px solid #3f4a3d;
+}
+
+GameWin #gamewin_btn_menu:hover {
+    border-color: #6f7a6d;
+    color: #c0c4c0;
+}
+
+GameWin #gamewin_btn_menu:focus {
+    border: 2px solid #ffffff;
+    color: #e0e4e0;
+}
+
+GameWin #gamewin_btn_menu:pressed {
+    background-color: #2a302a;
+    border-color: #8f9a8d;
+}
+
+GameWin #gamewin_btn_quit {
+    background-color: transparent;
+    color: #71dd77;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: 1px solid #3f5a3d;
+}
+
+GameWin #gamewin_btn_quit:hover {
+    border-color: #71dd77;
+    color: #8dfa91;
+}
+
+GameWin #gamewin_btn_quit:focus {
+    border: 2px solid #71dd77;
+    color: #8dfa91;
+}
+
+GameWin #gamewin_btn_quit:pressed {
+    background-color: #1a2a1a;
+    border-color: #71dd77;
+}
+
+GameWin #gamewin_aprovado {
+    border: 5px solid #37a547;
+    border-radius: 50%;
+    color: #37a547;
+    font-weight: 800;
+    font-size: 20px;
+    background-color: rgba(238, 234, 226, 0.1);
+}
+
 /* ——— CRT GameOver ——— */
 GameOver {
     background-color: #0a0a0a;

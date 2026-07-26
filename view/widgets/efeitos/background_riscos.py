@@ -63,13 +63,14 @@ class BackgroundRiscos(QWidget):
     _CEIL_SCALE = 1.0
     _OPACITY_MAX = 0.18
 
-    def __init__(self, layout_loader: LayoutLoader, icons_dir: Path, parent=None):
+    def __init__(self, layout_loader: LayoutLoader, icons_dir: Path, parent=None, layout_key: str = "gameover"):
         super().__init__(parent)
         self.setObjectName("bg_riscos")
         self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.__layout_loader = layout_loader
         self.__icons_dir = icons_dir
+        self.__layout_key = layout_key
         self.__raw_cache: Dict[str, QPixmap] = {
             spec.filename: QPixmap(str(icons_dir / self._ICONS_DIR_NAME / spec.filename))
             for spec in _RISCOS_BG
@@ -82,10 +83,10 @@ class BackgroundRiscos(QWidget):
         self.__colored_cache.clear()
         sf = self.__escala_clampada()
         size_max = self.__layout_loader.scaled(
-            "gameover", "pictogramas", "size_base_max"
+            self.__layout_key, "pictogramas", "size_base_max"
         )
         size_min = self.__layout_loader.scaled(
-            "gameover", "pictogramas", "size_base_min"
+            self.__layout_key, "pictogramas", "size_base_min"
         )
         for spec in _RISCOS_BG:
             raw = self.__raw_cache.get(spec.filename)
@@ -123,15 +124,15 @@ class BackgroundRiscos(QWidget):
 
             sf_clamped = self.__escala_clampada()
             opacidade_base = self.__layout_loader.get(
-                "gameover", "pictogramas", "opacity"
+                self.__layout_key, "pictogramas", "opacity"
             )
             opacidade = min(self._OPACITY_MAX, opacidade_base / sf_clamped)
 
             size_max = self.__layout_loader.scaled(
-                "gameover", "pictogramas", "size_base_max"
+                self.__layout_key, "pictogramas", "size_base_max"
             )
             size_min = self.__layout_loader.scaled(
-                "gameover", "pictogramas", "size_base_min"
+                self.__layout_key, "pictogramas", "size_base_min"
             )
 
             for spec in _RISCOS_BG:

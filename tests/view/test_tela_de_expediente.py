@@ -137,12 +137,12 @@ class TestPaginas:
         assert stack.currentIndex() == indice_esperado
         pagina = stack.widget(indice_esperado)
         if venceu:
-            titulo = pagina.findChild(QLabel, "label_endgame_titulo")
+            titulo = pagina.findChild(QLabel, "gamewin_titulo")
             assert titulo is not None
-            assert titulo.text() == "EXPEDIENTE CONCLU\u00CDDO"
-            pont = pagina.findChild(QLabel, "label_endgame_pontuacao")
+            assert titulo.text() == "CASO ENCERRADO"
+            pont = pagina.findChild(QLabel, "gamewin_score_valor")
             assert pont is not None
-            assert "5000.0" in pont.text()
+            assert "5000" in pont.text()
         else:
             titulo = pagina.findChild(QLabel, "gameover_titulo")
             assert titulo is not None
@@ -208,7 +208,7 @@ class TestSignals:
     def test_voltar_menu_signal(self, expediente, qtbot):
         """Clicar em voltar ao menu na pagina de endgame deve emitir voltar_menu_solicitado."""
         expediente.exibir_tela_endgame(5000.0, 1, True)
-        btn = expediente.findChild(QPushButton, "btn_voltar_menu")
+        btn = expediente.findChild(QPushButton, "gamewin_btn_menu")
         with qtbot.waitSignal(expediente.voltar_menu_solicitado, timeout=1000):
             qtbot.mouseClick(btn, Qt.MouseButton.LeftButton)
 
