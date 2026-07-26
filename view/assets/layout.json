@@ -255,6 +255,9 @@
     "slot_spacing": 340,
     "anim_duration": 350,
     "bump_duration": 200,
+    "depth_decay": 0.6,
+    "max_visible_slots": 3,
+    "max_lift": 15,
     "scale": {
       "centro": 1.0,
       "slot": 0.72,
