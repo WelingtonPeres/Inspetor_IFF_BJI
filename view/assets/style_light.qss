@@ -884,15 +884,6 @@ GameWin #gamewin_btn_quit:pressed {
     border-color: #2a6e2a;
 }
 
-GameWin #gamewin_aprovado {
-    border: 5px solid #37a547;
-    border-radius: 50%;
-    color: #37a547;
-    font-weight: 800;
-    font-size: 20px;
-    background-color: rgba(238, 234, 226, 0.1);
-}
-
 /* ——— CRT GameOver ——— */
 GameOver {
     background-color: #e8e8e8;

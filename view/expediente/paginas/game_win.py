@@ -2,8 +2,8 @@
 Tela de vitoria — expediente concluido com sucesso.
 
 Espelha a estrutura do GameOver (CRT overlay, card CIPA, parecer,
-pictogramas decorativos) mas com paleta verde de aprovacao e
-carimbo "APROVADO" sobre o card. Inclui efeito de confete.
+pictogramas decorativos) mas com paleta verde de aprovacao.
+Inclui efeito de confete.
 """
 
 import logging
@@ -92,7 +92,6 @@ class GameWin(QFrame):
         self.__label_parecer_num: QLabel = None
         self.__label_parecer_texto: QLabel = None
         self.__scroll_parecer: QScrollArea = None
-        self.__label_aprovado: QLabel = None
         self.__label_pontuacao_label: QLabel = None
         self.__label_pontuacao_valor: QLabel = None
         self.__btn_jogar_novamente: QPushButton = None
@@ -131,7 +130,6 @@ class GameWin(QFrame):
         self.__bg_riscos.setGeometry(r)
         self.__confetti_overlay.setGeometry(r)
         self.__ajustar_tamanho_do_card()
-        self.__posicionar_carimbo()
 
     def showEvent(self, event):
         super().showEvent(event)
@@ -207,8 +205,8 @@ class GameWin(QFrame):
         L = self.__layout_loader
 
         self.__trofeu = TrofeuIcon(
-            cor="#8dfa91",
-            tamanho=L.scaled("gamewin", "fontes", "titulo", "size"),
+            cor="#FFD700",
+            tamanho=L.scaled("gamewin", "fontes", "trophy", "size"),
         )
         container_trofeu = QWidget()
         container_layout = QHBoxLayout(container_trofeu)
@@ -352,29 +350,6 @@ class GameWin(QFrame):
         )
         self.__card.setMinimumHeight(L.scaled("gamewin", "card", "altura_minima"))
         layout.addWidget(self.__card, alignment=Qt.AlignmentFlag.AlignCenter)
-
-        self.__label_aprovado = QLabel("APROVADO")
-        self.__label_aprovado.setObjectName("gamewin_aprovado")
-        self.__label_aprovado.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        font_aprovado = QFont("Open Sans")
-        font_aprovado.setPointSize(20)
-        font_aprovado.setWeight(QFont.Weight.ExtraBold)
-        self.__label_aprovado.setFont(font_aprovado)
-        self.__label_aprovado.setParent(self.__card)
-        self.__label_aprovado.setFixedSize(130, 130)
-        self.__label_aprovado.hide()
-
-    def __posicionar_carimbo(self) -> None:
-        if not self.__card.isVisible():
-            return
-        cw = self.__card.width()
-        ch = self.__card.height()
-        sw = self.__label_aprovado.width()
-        sh = self.__label_aprovado.height()
-        x = (cw - sw) // 2
-        y = (ch - sh) // 2
-        self.__label_aprovado.move(x, y)
-        self.__label_aprovado.show()
 
     def __build_score(self, layout: QVBoxLayout) -> None:
         L = self.__layout_loader

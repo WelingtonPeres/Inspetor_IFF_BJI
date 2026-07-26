@@ -226,6 +226,9 @@
         "size": 14,
         "letter_spacing": 0.9
       },
+      "trophy": {
+        "size": 80
+      },
       "card_cabecalho": {
         "size": 10,
         "letter_spacing": 0.6

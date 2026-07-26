@@ -130,13 +130,6 @@ class TestEstrutura:
         assert btn is not None
         assert btn.text() == "Sair do Jogo"
 
-    def test_label_aprovado_existe(self, game_win):
-        """A GameWin deve conter o carimbo 'gamewin_aprovado'."""
-        carimbo = game_win.findChild(QLabel, "gamewin_aprovado")
-        assert carimbo is not None
-        assert carimbo.text() == "APROVADO"
-
-
 class TestPontuacao:
     """
     Testes de actualizacao de pontuacao da GameWin.
@@ -348,9 +341,4 @@ class TestResponsividade:
         game_win.resize(1200, 900)
         game_win.resize(400, 300)
 
-    def test_carimbo_posicionado(self, game_win):
-        """O carimbo APROVADO deve ser posicionado apos resize."""
-        game_win.resize(800, 600)
-        carimbo = game_win.findChild(QLabel, "gamewin_aprovado")
-        assert carimbo.x() >= 0
-        assert carimbo.y() >= 0
+

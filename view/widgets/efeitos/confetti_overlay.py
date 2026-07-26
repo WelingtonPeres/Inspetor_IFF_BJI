@@ -46,7 +46,7 @@ class ConfettiOverlay(QFrame):
     enquanto o widget esta visivel (show/hide lifecycle).
     """
 
-    _INTERVALO_MS = 33
+    _INTERVALO_MS = 8
     _GRAVIDADE = 0.3
     _NUM_PARTICULAS = 26
 
