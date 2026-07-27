@@ -526,3 +526,112 @@ class TestCondicaoVitoriaExatamenteNoLimiar:
     def test_condicao_vitoria_exatamente_no_limiar(self, motor):
         """600/1000 = 60% → deve retornar True."""
         assert motor.conferir_condicao_vitoria(600.0, 1000.0) is True
+
+
+class TestCalcularPontuacaoDetalhada:
+    """
+    Testes do novo metodo calcular_pontuacao_detalhada().
+    """
+
+    def test_retorna_dto_com_12_campos(self, motor, v_max_por_relatorio, dto_inspetor_perfeito):
+        """O retorno deve ser DiagnosticoPontuacaoDTO com nota_riscos, nota_fatores, etc."""
+        # Arrange
+        from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
+        f = DiagnosticoFeedbackDTO()
+        # Act
+        r = motor.calcular_pontuacao_detalhada(v_max_por_relatorio, dto_inspetor_perfeito, f)
+        # Assert
+        assert r.nota_riscos > 0.0
+        assert r.nota_fatores > 0.0
+        assert r.nota_decisao > 0.0
+        assert r.pontos_bonus_tempo == pytest.approx(0.0)
+        assert r.pontuacao_final > 0.0
+
+    def test_bonus_tempo_zero_abaixo_ideal(self, motor, v_max_por_relatorio, dto_inspetor_perfeito):
+        """Com t=45s (<=60s), pontos_bonus_tempo deve ser 0.0."""
+        # Arrange
+        from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
+        f = DiagnosticoFeedbackDTO()
+        # Act
+        r = motor.calcular_pontuacao_detalhada(v_max_por_relatorio, dto_inspetor_perfeito, f)
+        # Assert
+        assert r.pontos_bonus_tempo == pytest.approx(0.0)
+
+    def test_bonus_tempo_negativo_acima_ideal(self, motor, v_max_por_relatorio, dto_inspetor_lento):
+        """Com t=120s (>90s), pontos_bonus_tempo deve ser < 0."""
+        # Arrange
+        from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
+        f = DiagnosticoFeedbackDTO()
+        # Act
+        r = motor.calcular_pontuacao_detalhada(v_max_por_relatorio, dto_inspetor_lento, f)
+        # Assert
+        assert r.pontos_bonus_tempo < 0.0
+
+    def test_pontuacao_final_consistente_com_metodo_original(self, motor, v_max_por_relatorio, dto_inspetor_perfeito):
+        """calcular_pontuacao_detalhada().pontuacao_final == calcular_pontuacao_relatorio()."""
+        # Arrange
+        from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
+        f = DiagnosticoFeedbackDTO()
+        # Act
+        original = motor.calcular_pontuacao_relatorio(v_max_por_relatorio, dto_inspetor_perfeito)
+        detalhada = motor.calcular_pontuacao_detalhada(v_max_por_relatorio, dto_inspetor_perfeito, f)
+        # Assert
+        assert detalhada.pontuacao_final == pytest.approx(original)
+
+
+class TestCalcularScoresPorItem:
+    """
+    Testes do novo metodo calcular_scores_por_item().
+    """
+
+    def test_retorna_dois_dicts(self, motor, v_max_por_relatorio):
+        """O retorno deve ser uma tupla de dois dicionarios."""
+        # Arrange
+        from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
+        f = DiagnosticoFeedbackDTO(riscos_acertados=["FISICO"])
+        # Act
+        sr, sf = motor.calcular_scores_por_item(v_max_por_relatorio, f)
+        # Assert
+        assert isinstance(sr, dict)
+        assert isinstance(sf, dict)
+
+    def test_risco_acertado_score_positivo(self, motor, v_max_por_relatorio):
+        """Riscos em riscos_acertados devem ter score > 0."""
+        # Arrange
+        from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
+        f = DiagnosticoFeedbackDTO(riscos_acertados=["FISICO"])
+        # Act
+        sr, _ = motor.calcular_scores_por_item(v_max_por_relatorio, f)
+        # Assert
+        assert sr.get("FISICO", 0.0) > 0.0
+
+    def test_risco_inventado_score_negativo(self, motor, v_max_por_relatorio):
+        """Riscos em riscos_inventados devem ter score < 0."""
+        # Arrange
+        from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
+        f = DiagnosticoFeedbackDTO(riscos_inventados=["ACIDENTE"])
+        # Act
+        sr, _ = motor.calcular_scores_por_item(v_max_por_relatorio, f)
+        # Assert
+        assert sr.get("ACIDENTE", 0.0) < 0.0
+
+    def test_risco_esquecido_score_zero(self, motor, v_max_por_relatorio):
+        """Riscos em riscos_esquecidos devem ter score 0.0."""
+        # Arrange
+        from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
+        f = DiagnosticoFeedbackDTO(riscos_esquecidos=["BIOLOGICO"])
+        # Act
+        sr, _ = motor.calcular_scores_por_item(v_max_por_relatorio, f)
+        # Assert
+        assert sr.get("BIOLOGICO", 0.0) == pytest.approx(0.0)
+
+    def test_lista_vazia_nao_crasha(self, motor, v_max_por_relatorio):
+        """Feedback com todas as listas vazias nao deve lancar excepcao."""
+        # Arrange
+        from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
+        f = DiagnosticoFeedbackDTO()
+        # Act
+        sr, sf = motor.calcular_scores_por_item(v_max_por_relatorio, f)
+        # Assert
+        assert sr == {}
+        assert sf == {}

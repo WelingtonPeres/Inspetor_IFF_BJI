@@ -1,5 +1,5 @@
 import logging
-from typing import List, Dict, Any, NamedTuple
+from typing import NamedTuple
 
 from core.model.folha_de_gabarito import FolhaDeGabarito
 from core.model.folha_de_resposta import FolhaDeResposta
