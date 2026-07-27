@@ -221,8 +221,8 @@ class TelaDeExpediente(QFrame):
 
     def exibir_tela_diagnostico(self, resultado: ResultadoDiagnosticoDTO) -> None:
         logger.info("Exibindo diagnostico: %s", resultado)
-        self.__title_bar.definir_titulo("Resultado da Inspeção")
-        self.__pagina_diagnostico.exibir_diagnostico(resultado.pontuacao)
+        self.__title_bar.definir_titulo("Resultado da Inspecao")
+        self.__pagina_diagnostico.exibir_diagnostico(resultado)
         self.__stack.setCurrentIndex(self.IDX_DIAGNOSTICO)
 
     def exibir_tela_endgame(self, pontuacao_global: float, dias_concluidos: int, venceu: bool) -> None:
