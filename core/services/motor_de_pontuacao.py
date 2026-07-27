@@ -1,7 +1,8 @@
 import logging
-from typing import List, Dict, Any
+from typing import List
 
 from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
+from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
 from core.model.relatorio import Relatorio
 
 logger = logging.getLogger(__name__)
@@ -122,6 +123,94 @@ class MotorDePontuacao:
         
         nota_final = (nota_riscos + nota_fatores + nota_decisao) * tempo_gasto
         return nota_final
+
+    def calcular_pontuacao_detalhada(
+        self, v_max: float, dados_pontuacao: DiagnosticoPontuacaoDTO,
+        feedback: DiagnosticoFeedbackDTO,
+    ) -> DiagnosticoPontuacaoDTO:
+        """
+        Variante de calcular_pontuacao_relatorio que expoe todos os
+        sub-totais intermedios, preenchendo o DiagnosticoPontuacaoDTO
+        completo com 12 campos.
+        """
+        nota_riscos = self._calcular_pontuacao_riscos(
+            v_max=v_max,
+            riscos_corretos_marcados=dados_pontuacao.qnt_riscos_corretos_marcados,
+            riscos_no_gabarito=dados_pontuacao.qnt_riscos_gabarito,
+            riscos_marcados=dados_pontuacao.qnt_riscos_marcados,
+        )
+        nota_fatores = self._calcular_pontuacao_inseguranca(
+            v_max=v_max,
+            acertou_ato=dados_pontuacao.estado_ato,
+            acertou_condicao=dados_pontuacao.estado_condicao,
+        )
+        nota_decisao = self._calcular_pontuacao_decisao(
+            v_max=v_max,
+            status_decisao=dados_pontuacao.status_decisao_jogador,
+        )
+        fator_tempo = self._calcular_fator_tempo(dados_pontuacao.tempo_resposta_segundos)
+
+        soma_subtotais = nota_riscos + nota_fatores + nota_decisao
+        nota_final = soma_subtotais * fator_tempo
+        pontos_bonus_tempo = soma_subtotais * (fator_tempo - 1.0)
+
+        return DiagnosticoPontuacaoDTO(
+            qnt_riscos_marcados=dados_pontuacao.qnt_riscos_marcados,
+            qnt_riscos_gabarito=dados_pontuacao.qnt_riscos_gabarito,
+            qnt_riscos_corretos_marcados=dados_pontuacao.qnt_riscos_corretos_marcados,
+            estado_ato=dados_pontuacao.estado_ato,
+            estado_condicao=dados_pontuacao.estado_condicao,
+            status_decisao_jogador=dados_pontuacao.status_decisao_jogador,
+            tempo_resposta_segundos=dados_pontuacao.tempo_resposta_segundos,
+            pontuacao_final=nota_final,
+            nota_riscos=nota_riscos,
+            nota_fatores=nota_fatores,
+            nota_decisao=nota_decisao,
+            pontos_bonus_tempo=pontos_bonus_tempo,
+        )
+
+    def calcular_scores_por_item(
+        self, v_max: float, feedback: DiagnosticoFeedbackDTO,
+    ) -> tuple[dict[str, float], dict[str, float]]:
+        """
+        Distribui a nota de riscos e factores entre os itens
+        individuais para exibicao nos tiles da tela de diagnostico.
+
+        Scores positivos para acertos, zero para omissoes e
+        negativos para marcacoes indevidas.
+
+        Returns:
+            (score_por_risco, score_por_fator) — dicts nome → float.
+        """
+        score_por_risco: dict[str, float] = {}
+        score_por_fator: dict[str, float] = {}
+
+        p_riscos_base = v_max * self.PESO_RISCOS
+
+        total_marcados = len(feedback.riscos_acertados) + len(feedback.riscos_inventados)
+        if total_marcados > 0:
+            score_por_acerto = p_riscos_base / total_marcados if total_marcados > 0 else 0.0
+            for risco in feedback.riscos_acertados:
+                score_por_risco[risco] = score_por_acerto
+            for risco in feedback.riscos_inventados:
+                score_por_risco[risco] = -score_por_acerto
+
+        for risco in feedback.riscos_esquecidos:
+            score_por_risco[risco] = 0.0
+
+        p_fatores_base = v_max * self.PESO_FATORES
+        total_fatores_avaliados = len(feedback.fatores_acertados) + len(feedback.fatores_inventados)
+        if total_fatores_avaliados > 0:
+            score_por_fator_acerto = p_fatores_base / total_fatores_avaliados
+            for fator in feedback.fatores_acertados:
+                score_por_fator[fator] = score_por_fator_acerto
+            for fator in feedback.fatores_inventados:
+                score_por_fator[fator] = -score_por_fator_acerto
+
+        for fator in feedback.fatores_esquecidos:
+            score_por_fator[fator] = 0.0
+
+        return score_por_risco, score_por_fator
 
     def conferir_condicao_vitoria(self, pontuacao_obtida: float, pontuacao_maxima: float) -> bool:
         """
