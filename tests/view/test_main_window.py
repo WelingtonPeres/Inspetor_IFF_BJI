@@ -7,7 +7,9 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMainWindow, QMessageBox, QPushButton
 
 from view.main_window import JanelaPrincipal
+from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
 from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
+from core.dtos.resultado_diagnostico import ResultadoDiagnosticoDTO
 
 
 @pytest.fixture(autouse=True)
@@ -76,7 +78,9 @@ class TestJanelaPrincipal:
             estado_condicao=False, status_decisao_jogador="OTIMA",
             tempo_resposta_segundos=30.0, pontuacao_final=1500.0,
         )
-        janela.exibir_tela_diagnostico(dto)
+        janela.exibir_tela_diagnostico(
+            ResultadoDiagnosticoDTO(pontuacao=dto, feedback=DiagnosticoFeedbackDTO())
+        )
 
     def test_renderizar_relatorio(self, janela):
         """renderizar_relatorio deve delegar sem erros."""

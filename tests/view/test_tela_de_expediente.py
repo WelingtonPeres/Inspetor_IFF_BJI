@@ -15,7 +15,9 @@ from view.expediente.widgets.sidebar import Sidebar
 from view.expediente.widgets.window_title_bar import WindowTitleBar
 from view.expediente.overlays.anexo_gallery import AnexoGallery
 from view.expediente.overlays.media_viewer import MediaViewer
+from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
 from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
+from core.dtos.resultado_diagnostico import ResultadoDiagnosticoDTO
 
 
 @pytest.fixture(autouse=True)
@@ -120,7 +122,7 @@ class TestPaginas:
             estado_condicao=False, status_decisao_jogador="OTIMA",
             tempo_resposta_segundos=30.0, pontuacao_final=1500.0,
         )
-        expediente.exibir_tela_diagnostico(dto)
+        expediente.exibir_tela_diagnostico(ResultadoDiagnosticoDTO(pontuacao=dto, feedback=DiagnosticoFeedbackDTO()))
         stack = expediente.findChild(QStackedWidget)
         pagina = stack.widget(2)
         btn = pagina.findChild(QPushButton, "btn_continuar")
@@ -163,7 +165,7 @@ class TestPaginas:
             estado_condicao=True, status_decisao_jogador="OTIMA",
             tempo_resposta_segundos=10.0, pontuacao_final=500.0,
         )
-        expediente.exibir_tela_diagnostico(dto)
+        expediente.exibir_tela_diagnostico(ResultadoDiagnosticoDTO(pontuacao=dto, feedback=DiagnosticoFeedbackDTO()))
         assert expediente._TelaDeExpediente__stack.currentIndex() == 2
         expediente.exibir_tela_endgame(5000.0, 1, True)
         assert expediente._TelaDeExpediente__stack.currentIndex() == 3
@@ -200,7 +202,7 @@ class TestSignals:
             estado_condicao=True, status_decisao_jogador="OTIMA",
             tempo_resposta_segundos=10.0, pontuacao_final=500.0,
         )
-        expediente.exibir_tela_diagnostico(dto)
+        expediente.exibir_tela_diagnostico(ResultadoDiagnosticoDTO(pontuacao=dto, feedback=DiagnosticoFeedbackDTO()))
         btn = expediente.findChild(QPushButton, "btn_continuar")
         with qtbot.waitSignal(expediente.continuar_solicitado, timeout=1000):
             qtbot.mouseClick(btn, Qt.MouseButton.LeftButton)
@@ -310,7 +312,7 @@ class TestSidebar:
             estado_condicao=True, status_decisao_jogador="OTIMA",
             tempo_resposta_segundos=10.0, pontuacao_final=500.0,
         )
-        expediente.exibir_tela_diagnostico(dto)
+        expediente.exibir_tela_diagnostico(ResultadoDiagnosticoDTO(pontuacao=dto, feedback=DiagnosticoFeedbackDTO()))
         sidebar = expediente.findChild(Sidebar)
         assert not sidebar.isHidden()
 
@@ -350,7 +352,7 @@ class TestTituloDinamico:
             estado_condicao=True, status_decisao_jogador="OTIMA",
             tempo_resposta_segundos=10.0, pontuacao_final=500.0,
         )
-        expediente.exibir_tela_diagnostico(dto)
+        expediente.exibir_tela_diagnostico(ResultadoDiagnosticoDTO(pontuacao=dto, feedback=DiagnosticoFeedbackDTO()))
         bar = expediente.findChild(WindowTitleBar)
         label = bar.findChild(QLabel, "window_title_text")
         assert "Resultado" in label.text()

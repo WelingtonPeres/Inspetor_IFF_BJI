@@ -47,7 +47,9 @@ def test_mascarar_perfil_redireciona_para_DEFAULT():
         assert resultado == "DEFAULT", f"{curso} deveria ser mascarado para DEFAULT"
 
 from application.controllers.game_manager import GameManager
+from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
 from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
+from core.dtos.resultado_diagnostico import ResultadoDiagnosticoDTO
 
 
 @pytest.fixture
@@ -64,16 +66,19 @@ def gm(view_mock):
 
 @pytest.fixture
 def diagnostico_dto_fake():
-    """DiagnosticoPontuacaoDTO fake com pontuacao_final=1500.0 para testes de submissao."""
-    return DiagnosticoPontuacaoDTO(
-        qnt_riscos_marcados=1,
-        qnt_riscos_gabarito=1,
-        qnt_riscos_corretos_marcados=1,
-        estado_ato=True,
-        estado_condicao=True,
-        status_decisao_jogador="OTIMA",
-        tempo_resposta_segundos=45.0,
-        pontuacao_final=1500.0,
+    """ResultadoDiagnosticoDTO fake com pontuacao_final=1500.0 para testes de submissao."""
+    return ResultadoDiagnosticoDTO(
+        pontuacao=DiagnosticoPontuacaoDTO(
+            qnt_riscos_marcados=1,
+            qnt_riscos_gabarito=1,
+            qnt_riscos_corretos_marcados=1,
+            estado_ato=True,
+            estado_condicao=True,
+            status_decisao_jogador="OTIMA",
+            tempo_resposta_segundos=45.0,
+            pontuacao_final=1500.0,
+        ),
+        feedback=DiagnosticoFeedbackDTO(),
     )
 
 

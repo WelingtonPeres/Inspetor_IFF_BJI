@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
-from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
+from core.dtos.resultado_diagnostico import ResultadoDiagnosticoDTO
 from infrastructure.repository.repositorio_pareceres_cipa import RepositorioDePareceresCIPA
 from infrastructure.repository.repositorio_pareceres_cipavitoria import RepositorioDePareceresCIPAVitoria
 from view.expediente.widgets.sidebar import Sidebar
@@ -219,10 +219,10 @@ class TelaDeExpediente(QFrame):
         self.__pagina_inspecao.renderizar_relatorio(dados_relatorio)
         self.__stack.setCurrentIndex(self.IDX_INSPECAO)
 
-    def exibir_tela_diagnostico(self, diagnostico: DiagnosticoPontuacaoDTO) -> None:
-        logger.info("Exibindo diagnostico: %s", diagnostico)
+    def exibir_tela_diagnostico(self, resultado: ResultadoDiagnosticoDTO) -> None:
+        logger.info("Exibindo diagnostico: %s", resultado)
         self.__title_bar.definir_titulo("Resultado da Inspeção")
-        self.__pagina_diagnostico.exibir_diagnostico(diagnostico)
+        self.__pagina_diagnostico.exibir_diagnostico(resultado.pontuacao)
         self.__stack.setCurrentIndex(self.IDX_DIAGNOSTICO)
 
     def exibir_tela_endgame(self, pontuacao_global: float, dias_concluidos: int, venceu: bool) -> None:

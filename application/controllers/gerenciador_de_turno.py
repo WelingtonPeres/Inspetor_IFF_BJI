@@ -3,6 +3,8 @@ from typing import List, Optional
 
 from config.constants import DIRETORIO_BASE, QUANTIDADE_GERACAO
 from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
+from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
+from core.dtos.resultado_diagnostico import ResultadoDiagnosticoDTO
 from core.model.relatorio import Relatorio
 from core.model.folha_de_resposta import FolhaDeResposta
 from core.services.motor_de_pontuacao import MotorDePontuacao
@@ -85,7 +87,7 @@ class GerenciadorDeTurno:
                                   riscos_marcados: List[str],
                                   fatores_marcados: List[str],
                                   decisao: str,
-                                  tempo_segundos: int) -> DiagnosticoPontuacaoDTO:
+                                  tempo_segundos: int) -> ResultadoDiagnosticoDTO:
         """Calcula a pontuacao do relatorio respondido e acumula no turno."""
 
         if not self.__turno_iniciado:
@@ -100,25 +102,32 @@ class GerenciadorDeTurno:
             gabarito=self.__relatorio_atual.folha_gabarito,
             respostas=folha_respostas,
         )
-
-        v_max = self.__motor_pontuacao.calcular_vmax_relatorio(self.__relatorio_atual)
-        pontuacao_final = self.__motor_pontuacao.calcular_pontuacao_relatorio(v_max, dados_pontuacao)
-
-        diagnostico_com_nota = DiagnosticoPontuacaoDTO(
-            qnt_riscos_marcados=dados_pontuacao.qnt_riscos_marcados,
-            qnt_riscos_gabarito=dados_pontuacao.qnt_riscos_gabarito,
-            qnt_riscos_corretos_marcados=dados_pontuacao.qnt_riscos_corretos_marcados,
-            estado_ato=dados_pontuacao.estado_ato,
-            estado_condicao=dados_pontuacao.estado_condicao,
-            status_decisao_jogador=dados_pontuacao.status_decisao_jogador,
-            tempo_resposta_segundos=dados_pontuacao.tempo_resposta_segundos,
-            pontuacao_final=pontuacao_final,
+        feedback = self.__diagnostico_resposta.gerar_feedback(
+            gabarito=self.__relatorio_atual.folha_gabarito,
+            respostas=folha_respostas,
         )
 
-        self.__pontuacao_acumulada_turno += pontuacao_final
+        v_max = self.__motor_pontuacao.calcular_vmax_relatorio(self.__relatorio_atual)
+        score_por_risco, score_por_fator = self.__motor_pontuacao.calcular_scores_por_item(v_max, feedback)
+        feedback = DiagnosticoFeedbackDTO(
+            riscos_acertados=feedback.riscos_acertados,
+            riscos_esquecidos=feedback.riscos_esquecidos,
+            riscos_inventados=feedback.riscos_inventados,
+            fatores_acertados=feedback.fatores_acertados,
+            fatores_esquecidos=feedback.fatores_esquecidos,
+            fatores_inventados=feedback.fatores_inventados,
+            decisao_tomada=feedback.decisao_tomada,
+            decisao_esperada=feedback.decisao_esperada,
+            score_por_risco=score_por_risco,
+            score_por_fator=score_por_fator,
+        )
+
+        pontuacao = self.__motor_pontuacao.calcular_pontuacao_detalhada(v_max, dados_pontuacao, feedback)
+
+        self.__pontuacao_acumulada_turno += pontuacao.pontuacao_final
         self.__relatorio_atual = None
 
-        return diagnostico_com_nota
+        return ResultadoDiagnosticoDTO(pontuacao=pontuacao, feedback=feedback)
 
     def __processar_submissao_jogador(self,
                                       riscos_marcados: List[str],

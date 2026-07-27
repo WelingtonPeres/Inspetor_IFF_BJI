@@ -6,7 +6,7 @@ from PySide6.QtCore import QRect, Signal, Slot
 from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QVBoxLayout, QWidget
 
 from application.interfaces.i_game_view import IGameView
-from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
+from core.dtos.resultado_diagnostico import ResultadoDiagnosticoDTO
 from view.desktop.taskbar import Taskbar
 from view.expediente.tela import TelaDeExpediente
 from view.desktop.menu import TelaMenuPrincipal
@@ -174,9 +174,9 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
         logger.info("Exibindo expediente (tela de inspecao).")
         self.__tela_expediente.show()
 
-    def exibir_tela_diagnostico(self, diagnostico: DiagnosticoPontuacaoDTO) -> None:
+    def exibir_tela_diagnostico(self, resultado: ResultadoDiagnosticoDTO) -> None:
         logger.info("Exibindo diagnostico no expediente.")
-        self.__tela_expediente.exibir_tela_diagnostico(diagnostico)
+        self.__tela_expediente.exibir_tela_diagnostico(resultado)
 
     def renderizar_relatorio(self, dados_relatorio: Dict[str, Any]) -> None:
         logger.info("Renderizando relatorio no expediente.")

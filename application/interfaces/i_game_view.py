@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+from typing import Any
 
-from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
+from core.dtos.resultado_diagnostico import ResultadoDiagnosticoDTO
 
 
 class IGameView(ABC):
@@ -26,11 +26,11 @@ class IGameView(ABC):
         pass
 
     @abstractmethod
-    def renderizar_relatorio(self, dados_relatorio: Dict[str, Any]) -> None:
+    def renderizar_relatorio(self, dados_relatorio: dict[str, Any]) -> None:
         pass
 
     @abstractmethod
-    def exibir_tela_diagnostico(self, diagnostico: DiagnosticoPontuacaoDTO) -> None:
+    def exibir_tela_diagnostico(self, resultado: ResultadoDiagnosticoDTO) -> None:
         pass
 
     @abstractmethod
