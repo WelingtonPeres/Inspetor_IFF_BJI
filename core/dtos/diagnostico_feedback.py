@@ -22,3 +22,4 @@ class DiagnosticoFeedbackDTO:
 
     score_por_risco: dict[str, float] = field(default_factory=dict)
     score_por_fator: dict[str, float] = field(default_factory=dict)
+
