@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 class _MetadadosInspecao(NamedTuple):
     """Conjuntos extraídos de gabarito e respostas, consumidos pelos
     métodos públicos de diagnóstico."""
+
     riscos_set_marcados: set[str]
     riscos_set_gabarito: set[str]
     fatores_set_marcados: set[str]
@@ -26,12 +27,11 @@ class DiagnosticoDeResposta:
     consumidas.
     """
 
-    def __extrair_metadados(
-        self, gabarito: FolhaDeGabarito, respostas: FolhaDeResposta
-    ) -> _MetadadosInspecao:
+    def __extrair_metadados(self, gabarito: FolhaDeGabarito, respostas: FolhaDeResposta) -> _MetadadosInspecao:
         """Extrai os conjuntos de riscos e factores do gabarito e das
         respostas, servindo como fonte única para ambos os métodos
         públicos de diagnóstico."""
+        
         return _MetadadosInspecao(
             riscos_set_marcados=set(respostas.riscos),
             riscos_set_gabarito=set(gabarito.riscos),
@@ -39,9 +39,7 @@ class DiagnosticoDeResposta:
             fatores_set_gabarito=set(gabarito.fatores_inseguranca),
         )
 
-    def gerar_diagnostico_pontuacao(
-        self, gabarito: FolhaDeGabarito, respostas: FolhaDeResposta
-    ) -> DiagnosticoPontuacaoDTO:
+    def gerar_diagnostico_pontuacao(self, gabarito: FolhaDeGabarito, respostas: FolhaDeResposta) -> DiagnosticoPontuacaoDTO:
         """
         Gerar um diagnóstico de pontuação a partir do confronto entre o gabarito e as respostas do jogador. 
         
