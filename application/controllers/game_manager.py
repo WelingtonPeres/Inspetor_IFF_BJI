@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from application.controllers.gerenciador_de_turno import GerenciadorDeTurno
 from application.interfaces.i_game_view import IGameView
