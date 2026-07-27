@@ -175,7 +175,36 @@
     "spacing": 16,
     "btn_altura": 40,
     "btn_largura_min": 110,
-    "font_size": 13
+    "font_size": 13,
+    "card": {
+      "padding_h": 12,
+      "padding_v": 10,
+      "gap": 10,
+      "header_font_size": 11,
+      "body_font_size": 11
+    },
+    "header": {
+      "label_size": 11,
+      "valor_size": 34
+    },
+    "tile": {
+      "size": 56,
+      "border_radius": 8,
+      "badge_size": 18,
+      "icon_size": 22,
+      "label_size": 10,
+      "score_size": 9
+    },
+    "decisao": {
+      "opcao_font_size": 12,
+      "opcao_padding_h": 14,
+      "opcao_padding_v": 8,
+      "border_radius": 4
+    },
+    "total": {
+      "label_size": 13,
+      "valor_size": 13
+    }
   },
   "game_win": {
     "spacing": 16,

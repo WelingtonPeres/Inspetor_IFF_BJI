@@ -704,9 +704,60 @@ PaginaInspecao #prancheta {
 }
 
 /* --- PaginaDiagnostico --- */
-PaginaDiagnostico #label_diagnostico {
+.diagnostico_header_label {
     font-family: "Open Sans";
-    font-size: 16px;
+    font-size: 11px;
+    color: #6f7a6b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.diagnostico_header_valor {
+    font-family: "Open Sans";
+    font-size: 34px;
+    font-weight: 800;
+    color: #006b21;
+}
+.diagnostico_card {
+    background-color: #eeeeee;
+    border: 1px solid #6f7a6b;
+    border-radius: 6px;
+}
+.diagnostico_card_header {
+    background-color: #e8e8e8;
+    color: #3f4a3d;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 6px 12px;
+}
+.diagnostico_total {
+    border-top: 1px solid #6f7a6b;
+    padding-top: 10px;
+}
+.diagnostico_total_label {
+    font-family: "Open Sans";
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a1c1c;
+}
+.diagnostico_total_valor {
+    font-family: "Open Sans";
+    font-size: 13px;
+    font-weight: 700;
+    color: #006b21;
+}
+#btn_continuar_diagnostico {
+    background-color: #09872d;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 11px;
+    font-size: 13px;
+    font-weight: 700;
+}
+#btn_continuar_diagnostico:hover {
+    background-color: #006b21;
 }
 
 /* --- GameWin / GameOver --- */
