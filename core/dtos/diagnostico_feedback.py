@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from typing import Dict, List
 
 
 @dataclass(frozen=True)
@@ -15,16 +14,16 @@ class DiagnosticoFeedbackDTO:
     evitar logica de dominio na View.
     """
 
-    riscos_acertados: List[str] = field(default_factory=list)
-    riscos_esquecidos: List[str] = field(default_factory=list)
-    riscos_inventados: List[str] = field(default_factory=list)
+    riscos_acertados: list[str] = field(default_factory=list)
+    riscos_esquecidos: list[str] = field(default_factory=list)
+    riscos_inventados: list[str] = field(default_factory=list)
 
-    fatores_acertados: List[str] = field(default_factory=list)
-    fatores_esquecidos: List[str] = field(default_factory=list)
-    fatores_inventados: List[str] = field(default_factory=list)
+    fatores_acertados: list[str] = field(default_factory=list)
+    fatores_esquecidos: list[str] = field(default_factory=list)
+    fatores_inventados: list[str] = field(default_factory=list)
 
     decisao_tomada: str = ""
     decisao_esperada: str = ""
 
-    score_por_risco: Dict[str, float] = field(default_factory=dict)
-    score_por_fator: Dict[str, float] = field(default_factory=dict)
+    score_por_risco: dict[str, float] = field(default_factory=dict)
+    score_por_fator: dict[str, float] = field(default_factory=dict)
