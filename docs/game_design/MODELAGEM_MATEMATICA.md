@@ -38,18 +38,24 @@ Se o cenário for isento de riscos (`Total de Riscos no Gabarito == 0`):
 
 ### 2.2. Diagnóstico de Fatores de Insegurança (15% do $V_{max}$)
 
-Avalia a capacidade do jogador de identificar a causa raiz do problema ambiental (se derivou de um **Ato Inseguro** do funcionário ou de uma **Condição Insegura** do ambiente). Diferente dos riscos, esta etapa possui uma natureza binária, sendo avaliada por um coeficiente de exatidão ($C_{exatidao}$).
+Avalia a capacidade do jogador de identificar a causa raiz do problema ambiental (se derivou de um **Ato Inseguro** do funcionário ou de uma **Condição Insegura** do ambiente). Apenas factores presentes no gabarito são pontuáveis — a ausência correcta de um factor não gera pontos.
 
 A nota parcial de insegurança ($P_{inseg}$) é calculada por:
 
 $$P_{inseg} = (V_{max} \times 0.15) \times C_{exatidao}$$
 
-Onde o coeficiente de Exatidão ($C_{exatidao}$) é a média dos acertos de estado:
+Onde o coeficiente de Exatidão ($C_{exatidao}$) é a proporção de factores do gabarito que o jogador correctamente identificou, penalizada por invenções (factores marcados sem existirem no gabarito):
 
-* $S_{ato} = 1$ (se acertou o estado do Ato) ou $0$ (se errou)
-* $S_{cond} = 1$ (se acertou o estado da Condição) ou $0$ (se errou)
+* $S_{ato} = 1$ se ATO_INSEGURO está presente **tanto no gabarito quanto na resposta do jogador**; caso contrário $0$.
+* $S_{cond} = 1$ se CONDICAO_INSEGURA está presente **tanto no gabarito quanto na resposta do jogador**; caso contrário $0$.
+* $g$ = quantidade de factores no gabarito (0, 1 ou 2).
+* $m$ = quantidade de factores marcados pelo jogador (0, 1 ou 2).
 
-$$C_{exatidao} = \frac{S_{ato} + S_{cond}}{2}$$
+$$C_{exatidao} = \frac{S_{ato} + S_{cond}}{\max(1, g, m)}$$
+
+**Exemplo:** Se o gabarito possui apenas ATO_INSEGURO ($g = 1$) e o jogador marca apenas ATO_INSEGURO ($m = 1$), então $S_{ato}=1$, $S_{cond}=0$, denominador $= 1$, $C_{exatidao}=1$, e $P_{inseg} = V_{max} \times 0.15$. Se o jogador também inventar CONDICAO_INSEGURA ($m = 2$), o denominador sobe para $2$ e $C_{exatidao}=0.5$, reduzindo a nota para metade — a invenção penaliza o score.
+
+Se o gabarito não tem nenhum factor ($g = 0$), $P_{inseg} = 0$ independentemente das marcações do jogador.
 
 
 ### 2.3. Decisão Administrativa (25% do $V_{max}$)
@@ -60,24 +66,21 @@ Avalia a proporcionalidade da ação corretiva tomada pelo técnico em relação
 * **Ação Subótima (Excesso ou falta leve de zelo):** $P_{decisao} = V_{max} \times 0.125$
 * **Ação Incorreta (Erro Técnico Grave):** $P_{decisao} = 0$
 
+Se o jogador não identifica nenhum risco nem fator ($P_{risco} = 0$ e $P_{inseg} = 0$), a decisão é **anulada**: $P_{decisao} = 0$ mesmo quando a ação escolhida seria pontuável, pois não há diagnóstico que a sustente. O flag de domínio `decisao_anulada` expõe essa condição no `DiagnosticoPontuacaoDTO`.
+
 ### 2.4. Fator Tempo (Multiplicador de Decaimento)
 
 O tempo investido na inspeção ($t$) atua como um coeficiente multiplicador $f(t)$ sobre a nota bruta acumulada. Se o jogador resolve dentro do tempo ideal ($T_{ideal}$), retém 100% da nota. Ultrapassado o limite, a nota decai linearmente a uma taxa de rigor $\alpha$, até um limite mínimo de retenção $L_{min}$.
 
-O comportamento temporal atua em três zonas distintas:
-
-* **O Cenário Perfeito (1ª linha):** O jogador entregou em tempo hábil. O multiplicador é constante em 1.0, o que significa que ele não perde pontos.
-* **A Zona de Punição (2ª linha):** O jogador demorou, mas ainda está dentro da margem de tolerância de 50% de tempo extra (1.5 vezes o $T_{ideal}$). A nota cai um pouquinho a cada segundo extra passado, decaimento este regido pela taxa $\alpha$.
-* **O Limite de Falha (3ª linha):** O jogador demorou mais do que a tolerância máxima permitida. O multiplicador congela no fundo do poço ($L_{min}$), garantindo que ele não tira nota "negativa" e fica com um mínimo garantido (por exemplo, retém apenas 20% dos pontos da fase).
-
-Matematicamente, a função de decaimento de eficiência temporal $f(t)$ é expressa da seguinte forma:
+Matematicamente, a função de decaimento de eficiência temporal $f(t)$ é expressa por:
 
 $$f(t) =
 \begin{cases} 
 1.0, & \text{se } t \le T_{ideal} \\
-1.0 - \alpha \times (t - T_{ideal}), & \text{se } T_{ideal} < t \le 1.5 \times T_{ideal} \\
-L_{min}, & \text{se } t > 1.5 \times T_{ideal}
+\max\big(L_{min},\ 1.0 - \alpha \times (t - T_{ideal})\big), & \text{se } t > T_{ideal}
 \end{cases}$$
+
+O piso $L_{min}$ garante que a nota nunca caia abaixo de um mínimo garantido, e a função `max` remove a necessidade de um terceiro ramo explícito — assim que o decaimento linear atinge $L_{min}$, o valor congela naturalmente.
 
 ### 2.5. Equação Final Consolidada
 
@@ -160,5 +163,74 @@ Cenário: *Laboratório de Química*
 
 A fim de manter a consistência do fluxo de jogo e simular uma rotina de inspeção padronizada, o Tempo Ideal concedido para a resolução do relatório sem penalidades é estático para todos os cenários, independentemente da dificuldade.
 
-$$T_{ideal} = 60\ segundos\ (1\ minutos)$$
+$$T_{ideal} = 45\ segundos$$
+
+
+## 5. Decomposição Item-a-Item (Scores da Tela de Diagnóstico)
+
+Enquanto as seções anteriores definem a nota agregada de cada eixo (riscos e fatores), a tela de diagnóstico exibe a contribuição individual de cada risco e fator para o jogador. A decomposição deve respeitar uma restrição fundamental: **a soma dos scores por item deve ser exatamente igual à nota real do eixo correspondente**.
+
+### 5.1. Decomposição de Riscos ($S_{risco}$)
+
+Dado um cenário com $g$ riscos no gabarito, onde o jogador acertou $k$ riscos e marcou $m$ riscos no total ($m = k + \text{inventados}$), a nota real de riscos é:
+
+$$P_{risco} = (V_{max} \times 0.60) \times \frac{k}{g} \times \frac{k}{m}$$
+
+A decomposição item-a-item que preserva o somatório é:
+
+| Tipo de item | Score individual |
+|---|---|
+| Risco **acertado** | $+ \dfrac{V_{max} \times 0.60}{g}$ |
+| Risco **inventado** | $- \dfrac{V_{max} \times 0.60 \times k}{g \times m}$ |
+| Risco **esquecido** | $0$ |
+
+**Prova de fechamento:**
+
+$$\sum S_{risco} = k \times \frac{V_{max} \times 0.60}{g} - (m - k) \times \frac{V_{max} \times 0.60 \times k}{g \times m}$$
+
+$$= \frac{V_{max} \times 0.60 \times k}{g} \times \left(1 - \frac{m - k}{m}\right) = \frac{V_{max} \times 0.60 \times k}{g} \times \frac{k}{m} = P_{risco} \quad \checkmark$$
+
+**Casos especiais:**
+
+* Se o jogador não acertou nenhum risco ($k = 0$): a nota real já é $0$, e todos os scores individuais são $0$. Não há penalidade negativa visível — o total zerado é a penalidade máxima.
+* Se o gabarito não possui riscos ($g = 0$) e o jogador não marcou nada ($m = 0$): não há itens a decompor; a nota é integral ($V_{max} \times 0.60$).
+* Se o gabarito não possui riscos ($g = 0$) e o jogador marcou algo ($m > 0$): a nota real é $0$, e todos os scores são $0$.
+
+### 5.2. Decomposição de Fatores de Insegurança ($S_{fator}$)
+
+Os factores são avaliados como dois estados binários independentes: **Ato Inseguro** e **Condição Insegura**. Apenas factores presentes no gabarito são pontuados. A nota real, dado $g$ factores no gabarito e $m$ factores marcados, é:
+
+$$P_{inseg} = (V_{max} \times 0.15) \times \frac{S_{ato} + S_{cond}}{\max(1, g, m)}$$
+
+A decomposição item-a-item:
+
+| Tipo de item | Score individual |
+|---|---|
+| Fator **acertado** (presente no gabarito e correctamente marcado) | $+ \dfrac{V_{max} \times 0.15}{\max(1, g, m)}$ |
+| Fator **errado** (no gabarito mas não marcado, ou marcado sem estar no gabarito) | $0$ |
+| Fator **correctamente ausente** (ausente no gabarito e não marcado) | $0$ |
+
+**Prova de fechamento:**
+
+$$\sum S_{fator} = S_{ato} \times \frac{V_{max} \times 0.15}{D} + S_{cond} \times \frac{V_{max} \times 0.15}{D}\quad\text{onde } D = \max(1, g, m)$$
+
+$$= (V_{max} \times 0.15) \times \frac{S_{ato} + S_{cond}}{D} = P_{inseg} \quad \checkmark$$
+
+Factores errados ou inventados não geram score próprio — a penalidade por invenção está embutida no denominador $D$, que dilui o valor de cada acerto quando $m > g$.
+
+### 5.3. Valores de Calibragem (Constantes do Motor)
+
+| Constante | Valor | Descrição |
+|---|---|---|
+| $T_{ideal}$ | $45\text{s}$ | Tempo sem penalidade |
+| $\alpha$ | $0.007$ | Taxa de decaimento por segundo extra |
+| $L_{min}$ | $0.50$ | Piso de retenção temporal (50%) |
+| $V_{base}$ | $1000$ | Pontos de participação |
+| $B_{risco}$ | $250$ | Bônus por risco no gabarito |
+| $B_{fator}$ | $250$ | Bônus por fator no gabarito |
+| $B_{imagem}$ | $100$ | Bônus por anexo de imagem |
+| $B_{video}$ | $300$ | Bônus por anexo de vídeo |
+| $B_{audio}$ | $200$ | Bônus por anexo de áudio |
+| $B_{contexto}$ | $100$ | Bônus por pessoa envolvida |
+| Limiar de Vitória | $60\%$ | Percentual mínimo de $V_{total\_turno}$ |
 
