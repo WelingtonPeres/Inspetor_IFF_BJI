@@ -448,3 +448,113 @@ class TesteSuite7DiagnosticoNone:
         """respostas=None deve levantar ValueError."""
         with pytest.raises(ValueError, match="DiagnosticoDeResposta"):
             diagnostico_servico.gerar_diagnostico_pontuacao(gabarito_simples, None)
+
+
+class TestGerarFeedback:
+    """
+    Testes do novo metodo publico gerar_feedback(gabarito, respostas).
+    """
+
+    def test_categoriza_riscos_corretamente(self, diagnostico_servico, gabarito_simples):
+        """Feedback deve separar riscos em acertados, esquecidos e inventados."""
+        # Arrange
+        resposta = FolhaDeResposta(
+            riscos=["FISICO", "ACIDENTE"],
+            fatores_inseguranca=["ATO_INSEGURO", "CONDICAO_INSEGURA"],
+            decisao_tomada="INTERDITAR",
+            tempo_gasto_segundos=30,
+        )
+        # Act
+        f = diagnostico_servico.gerar_feedback(gabarito_simples, resposta)
+        # Assert
+        assert f.riscos_acertados == ["FISICO"]
+        assert f.riscos_esquecidos == ["BIOLOGICO", "QUIMICO"]
+        assert f.riscos_inventados == ["ACIDENTE"]
+
+    def test_categoriza_fatores_corretamente(self, diagnostico_servico, gabarito_simples):
+        """Feedback deve separar factores em acertados, esquecidos e inventados."""
+        # Arrange
+        resposta = FolhaDeResposta(
+            riscos=["FISICO", "QUIMICO", "BIOLOGICO"],
+            fatores_inseguranca=["ATO_INSEGURO"],
+            decisao_tomada="INTERDITAR",
+            tempo_gasto_segundos=30,
+        )
+        # Act
+        f = diagnostico_servico.gerar_feedback(gabarito_simples, resposta)
+        # Assert
+        assert f.fatores_acertados == ["ATO_INSEGURO"]
+        assert f.fatores_esquecidos == ["CONDICAO_INSEGURA"]
+        assert f.fatores_inventados == []
+
+    def test_decisoes_preservadas(self, diagnostico_servico, gabarito_simples):
+        """decisao_tomada e decisao_esperada devem reflectir resposta e gabarito."""
+        # Arrange
+        resposta = FolhaDeResposta(
+            riscos=["FISICO", "QUIMICO", "BIOLOGICO"],
+            fatores_inseguranca=["ATO_INSEGURO", "CONDICAO_INSEGURA"],
+            decisao_tomada="ADVERTIR",
+            tempo_gasto_segundos=30,
+        )
+        # Act
+        f = diagnostico_servico.gerar_feedback(gabarito_simples, resposta)
+        # Assert
+        assert f.decisao_tomada == "ADVERTIR"
+        assert f.decisao_esperada == "INTERDITAR"
+
+    def test_retorna_diagnostico_feedback_dto(self, diagnostico_servico, gabarito_simples):
+        """O retorno deve ser uma instancia de DiagnosticoFeedbackDTO."""
+        # Arrange
+        from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
+        resposta = FolhaDeResposta(
+            riscos=["FISICO"], fatores_inseguranca=[],
+            decisao_tomada="INTERDITAR", tempo_gasto_segundos=10,
+        )
+        # Act
+        f = diagnostico_servico.gerar_feedback(gabarito_simples, resposta)
+        # Assert
+        assert isinstance(f, DiagnosticoFeedbackDTO)
+
+    def test_scores_vazios_por_default(self, diagnostico_servico, gabarito_simples):
+        """score_por_risco e score_por_fator devem vir como dicts vazios."""
+        # Arrange
+        resposta = FolhaDeResposta(
+            riscos=["FISICO"], fatores_inseguranca=["ATO_INSEGURO"],
+            decisao_tomada="INTERDITAR", tempo_gasto_segundos=10,
+        )
+        # Act
+        f = diagnostico_servico.gerar_feedback(gabarito_simples, resposta)
+        # Assert
+        assert f.score_por_risco == {}
+        assert f.score_por_fator == {}
+
+    def test_riscos_duplicados_tratados_como_unicos(self, diagnostico_servico, gabarito_simples):
+        """Riscos duplicados na resposta nao devem gerar duplicatas no feedback."""
+        # Arrange
+        resposta = FolhaDeResposta(
+            riscos=["FISICO", "FISICO", "QUIMICO"],
+            fatores_inseguranca=["ATO_INSEGURO", "CONDICAO_INSEGURA"],
+            decisao_tomada="INTERDITAR", tempo_gasto_segundos=20,
+        )
+        # Act
+        f = diagnostico_servico.gerar_feedback(gabarito_simples, resposta)
+        # Assert
+        assert f.riscos_acertados == sorted(["FISICO", "QUIMICO"])
+        assert "FISICO" not in f.riscos_inventados
+
+    def test_gabarito_none_lanca_value_error(self, diagnostico_servico):
+        """gabarito=None deve lancar ValueError com tagged message."""
+        # Arrange
+        resposta = FolhaDeResposta(
+            riscos=["FISICO"], fatores_inseguranca=[],
+            decisao_tomada="ADVERTIR", tempo_gasto_segundos=10,
+        )
+        # Act & Assert
+        with pytest.raises(ValueError, match="DiagnosticoDeResposta"):
+            diagnostico_servico.gerar_feedback(None, resposta)
+
+    def test_respostas_none_lanca_value_error(self, diagnostico_servico, gabarito_simples):
+        """respostas=None deve lancar ValueError com tagged message."""
+        # Act & Assert
+        with pytest.raises(ValueError, match="DiagnosticoDeResposta"):
+            diagnostico_servico.gerar_feedback(gabarito_simples, None)

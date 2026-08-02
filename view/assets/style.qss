@@ -698,9 +698,116 @@ PaginaInspecao #prancheta {
 }
 
 /* --- PaginaDiagnostico --- */
-PaginaDiagnostico #label_diagnostico {
+.diagnostico_header_label {
     font-family: "Open Sans";
-    font-size: 16px;
+    font-size: 11px;
+    color: #889484;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.diagnostico_header_valor {
+    font-family: "Open Sans";
+    font-size: 34px;
+    font-weight: 800;
+    color: #71dd77;
+}
+.diagnostico_card {
+    background-color: #1e2020;
+    border: 1px solid #3f4a3d;
+    border-radius: 4px;
+}
+.diagnostico_card[decisao_qualidade="otima"] {
+    border-left: 3px solid #71dd77;
+}
+.diagnostico_card[decisao_qualidade="boa"] {
+    border-left: 3px solid #d9a824;
+}
+.diagnostico_card[decisao_qualidade="incorreta"] {
+    border-left: 3px solid #ffb4ab;
+}
+.diagnostico_card_header {
+    background-color: #282a2b;
+    color: #becab9;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 6px 12px;
+}
+.diagnostico_card_pontos {
+    font-weight: 800;
+    color: #71dd77;
+}
+.diagnostico_total {
+    border-top: 1px solid #3f4a3d;
+    padding-top: 10px;
+}
+.diagnostico_total_label {
+    font-family: "Open Sans";
+    font-size: 13px;
+    font-weight: 700;
+    color: #e2e2e2;
+}
+.diagnostico_total_valor {
+    font-family: "Open Sans";
+    font-size: 13px;
+    font-weight: 700;
+    color: #71dd77;
+}
+#btn_continuar_diagnostico {
+    background-color: #2F9E41;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    padding: 11px;
+    font-size: 13px;
+    font-weight: 700;
+}
+#btn_continuar_diagnostico:hover {
+    background-color: #37a547;
+}
+.diagnostico_tile {
+    border-radius: 8px;
+}
+.diagnostico_tile[tile_state="esquecido"] {
+    background-color: transparent;
+}
+.diagnostico_tile_nome {
+    font-size: 11px;
+    color: #e2e2e2;
+}
+.diagnostico_tile_score {
+    font-size: 12px;
+    font-weight: 700;
+}
+.diagnostico_tempo_label {
+    font-size: 11px;
+    color: #889484;
+    padding: 10px 14px;
+}
+.diagnostico_decisao_resultado {
+    font-size: 10px;
+    padding: 6px 0 10px;
+}
+.diagnostico_decisao_opcao {
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    border-radius: 4px;
+    min-width: 80px;
+}
+.diagnostico_decisao_opcao QLabel {
+    color: #5f5e5a;
+}
+.diagnostico_decisao_opcao[decisao_state="nao_escolhida"] {
+    border: 2px solid #3f4a3d;
+    background-color: transparent;
+}
+.diagnostico_decisao_opcao[decisao_state="escolhida"] QLabel {
+    color: #ffffff;
+}
+.diagnostico_decisao_opcao[decisao_state="correta_nao_escolhida"] {
+    background-color: transparent;
 }
 
 /* --- GameWin / GameOver --- */

@@ -7,6 +7,7 @@ from unittest.mock import patch, MagicMock
 
 from config.constants import DIRETORIO_BASE, QUANTIDADE_GERACAO
 from application.controllers.gerenciador_de_turno import GerenciadorDeTurno
+from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
 from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
 from core.model.relatorio import Relatorio
 from core.model.folha_de_gabarito import FolhaDeGabarito
@@ -357,14 +358,16 @@ class TestAvaliacaoDeRespostas:
         with pytest.raises(RuntimeError, match="Nenhum relatório foi obtido"):
             g.avaliar_respostas_jogador(["FISICO"], ["ATO_INSEGURO"], "ADVERTIR", 45)
 
-    @patch("application.controllers.gerenciador_de_turno.MotorDePontuacao.calcular_pontuacao_relatorio")
+    @patch("application.controllers.gerenciador_de_turno.MotorDePontuacao.calcular_pontuacao_detalhada")
+    @patch("application.controllers.gerenciador_de_turno.MotorDePontuacao.calcular_scores_por_item")
     @patch("application.controllers.gerenciador_de_turno.MotorDePontuacao.calcular_vmax_relatorio")
     @patch("application.controllers.gerenciador_de_turno.DiagnosticoDeResposta")
     def test_avaliar_respostas_jogador_acumula_pontuacao_com_sucesso(
         self,
         mock_diagnostico_cls,
         mock_calc_vmax,
-        mock_calc_pontuacao,
+        mock_calc_scores,
+        mock_calc_detalhada,
         relatorio_fake,
         diagnostico_fake,
     ):
@@ -373,15 +376,23 @@ class TestAvaliacaoDeRespostas:
 
         Mockar o DiagnosticoDeResposta para retornar um DTO fake e o
         MotorDePontuacao para que a nota final retorne 1500.0.
-        O método deve retornar o DTO com pontuacao_final=1500.0 e a
-        pontuação acumulada deve ser incrementada com esse valor.
+        O método deve retornar o ResultadoDiagnosticoDTO com
+        pontuacao_final=1500.0 e a pontuação acumulada deve ser
+        incrementada com esse valor.
         """
         mock_diagnostico = MagicMock()
         mock_diagnostico.gerar_diagnostico_pontuacao.return_value = diagnostico_fake
+        mock_diagnostico.gerar_feedback.return_value = DiagnosticoFeedbackDTO()
         mock_diagnostico_cls.return_value = mock_diagnostico
 
         mock_calc_vmax.return_value = 5000.0
-        mock_calc_pontuacao.return_value = 1500.0
+        mock_calc_scores.return_value = ({}, {})
+        mock_calc_detalhada.return_value = DiagnosticoPontuacaoDTO(
+            qnt_riscos_marcados=1, qnt_riscos_gabarito=1,
+            qnt_riscos_corretos_marcados=1, estado_ato=True,
+            estado_condicao=True, status_decisao_jogador="OTIMA",
+            tempo_resposta_segundos=45.0, pontuacao_final=1500.0,
+        )
 
         g = GerenciadorDeTurno("DEFAULT")
         g._GerenciadorDeTurno__turno_iniciado = True
@@ -394,7 +405,7 @@ class TestAvaliacaoDeRespostas:
             tempo_segundos=45,
         )
 
-        assert resultado.pontuacao_final == 1500.0
+        assert resultado.pontuacao.pontuacao_final == 1500.0
         assert g._GerenciadorDeTurno__pontuacao_acumulada_turno == 1500.0
         assert g._GerenciadorDeTurno__relatorio_atual is None
         mock_diagnostico.gerar_diagnostico_pontuacao.assert_called_once()

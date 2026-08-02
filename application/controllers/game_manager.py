@@ -1,9 +1,9 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 from application.controllers.gerenciador_de_turno import GerenciadorDeTurno
 from application.interfaces.i_game_view import IGameView
-from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
+from core.dtos.resultado_diagnostico import ResultadoDiagnosticoDTO
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +88,7 @@ class GameManager:
         self.__iniciar_campanha(perfil)
 
 
-    def processar_submissao(self, respostas_jogador: Dict[str, Any]) -> None:
+    def processar_submissao(self, respostas_jogador: dict[str, Any]) -> None:
         """
         Recebe as respostas do jogador, delega a avaliação
         e envia o diagnóstico (feedback) para a View.
@@ -107,15 +107,15 @@ class GameManager:
             raise RuntimeError("[Erro - GameManager] Nenhum turno ativo.")
 
         try:
-            diagnostico_dto: DiagnosticoPontuacaoDTO = self.__gerenciador_turno.avaliar_respostas_jogador(
+            resultado: ResultadoDiagnosticoDTO = self.__gerenciador_turno.avaliar_respostas_jogador(
                 riscos_marcados=respostas_jogador["riscos"],
                 fatores_marcados=respostas_jogador["fatores"],
                 decisao=respostas_jogador["decisao"],
                 tempo_segundos=respostas_jogador["tempo_segundos"],
             )
 
-            self.__pontuacao_global += diagnostico_dto.pontuacao_final
-            self.__view.exibir_tela_diagnostico(diagnostico_dto)
+            self.__pontuacao_global += resultado.pontuacao.pontuacao_final
+            self.__view.exibir_tela_diagnostico(resultado)
 
         except ValueError as erro_negocio:
             self.__view.exibir_popup_erro(str(erro_negocio))
@@ -160,7 +160,7 @@ class GameManager:
         else:
             self.__iniciar_dia(self.__dias_concluidos + 1)
             
-    def __requisitar_dados_relatorio_atual(self) -> Dict[str, Any]:
+    def __requisitar_dados_relatorio_atual(self) -> dict[str, Any]:
         """
         Ponte MVP: obtém o próximo relatório da pilha do turno e
         retorna os dados de apresentação para a View renderizar.
