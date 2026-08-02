@@ -173,6 +173,7 @@
   },
   "pagina_diagnostico": {
     "spacing": 16,
+    "margins": {"top": 20, "right": 20, "bottom": 12, "left": 20},
     "btn_altura": 40,
     "btn_largura_min": 110,
     "font_size": 13,
@@ -180,23 +181,26 @@
       "padding_h": 12,
       "padding_v": 10,
       "gap": 10,
-      "header_font_size": 11,
-      "body_font_size": 11
+      "header_font_size": 12,
+      "body_font_size": 12
     },
     "header": {
       "label_size": 11,
       "valor_size": 34
     },
     "tile": {
-      "size": 56,
+      "size": 72,
       "border_radius": 8,
       "badge_size": 18,
-      "icon_size": 22,
-      "label_size": 10,
-      "score_size": 9
+      "icon_size": 48,
+      "container_width": 104,
+      "label_size": 11,
+      "score_size": 12
     },
     "decisao": {
-      "opcao_font_size": 12,
+      "opcao_altura": 42,
+      "opcao_largura_min": 100,
+      "opcao_font_size": 13,
       "opcao_padding_h": 14,
       "opcao_padding_v": 8,
       "border_radius": 4

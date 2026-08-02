@@ -125,7 +125,7 @@ class TestPaginas:
         expediente.exibir_tela_diagnostico(ResultadoDiagnosticoDTO(pontuacao=dto, feedback=DiagnosticoFeedbackDTO()))
         stack = expediente.findChild(QStackedWidget)
         pagina = stack.widget(2)
-        btn = pagina.findChild(QPushButton, "btn_continuar")
+        btn = pagina.findChild(QPushButton, "btn_continuar_diagnostico")
         assert btn is not None
 
     @pytest.mark.parametrize("venceu,indice_esperado", [
@@ -203,7 +203,7 @@ class TestSignals:
             tempo_resposta_segundos=10.0, pontuacao_final=500.0,
         )
         expediente.exibir_tela_diagnostico(ResultadoDiagnosticoDTO(pontuacao=dto, feedback=DiagnosticoFeedbackDTO()))
-        btn = expediente.findChild(QPushButton, "btn_continuar")
+        btn = expediente.findChild(QPushButton, "btn_continuar_diagnostico")
         with qtbot.waitSignal(expediente.continuar_solicitado, timeout=1000):
             qtbot.mouseClick(btn, Qt.MouseButton.LeftButton)
 
