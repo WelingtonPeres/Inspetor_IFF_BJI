@@ -11,8 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class _MetadadosInspecao(NamedTuple):
-    """Conjuntos extraídos de gabarito e respostas, consumidos pelos
-    métodos públicos de diagnóstico."""
+    """Conjuntos extraídos de gabarito e respostas, consumidos pelos métodos públicos de diagnóstico."""
 
     riscos_set_marcados: set[str]
     riscos_set_gabarito: set[str]
@@ -28,10 +27,11 @@ class DiagnosticoDeResposta:
     """
 
     def __extrair_metadados(self, gabarito: FolhaDeGabarito, respostas: FolhaDeResposta) -> _MetadadosInspecao:
-        """Extrai os conjuntos de riscos e factores do gabarito e das
+        """
+        Extrai os conjuntos de riscos e factores do gabarito e das
         respostas, servindo como fonte única para ambos os métodos
-        públicos de diagnóstico."""
-        
+        públicos de diagnóstico.
+        """
         return _MetadadosInspecao(
             riscos_set_marcados=set(respostas.riscos),
             riscos_set_gabarito=set(gabarito.riscos),
@@ -39,30 +39,27 @@ class DiagnosticoDeResposta:
             fatores_set_gabarito=set(gabarito.fatores_inseguranca),
         )
 
-    def gerar_diagnostico_pontuacao(self, gabarito: FolhaDeGabarito, respostas: FolhaDeResposta) -> DiagnosticoPontuacaoDTO:
+    def gerar_diagnostico_pontuacao(
+        self, gabarito: FolhaDeGabarito, respostas: FolhaDeResposta,
+    ) -> DiagnosticoPontuacaoDTO:
         """
-        Gerar um diagnóstico de pontuação a partir do confronto entre o gabarito e as respostas do jogador. 
-        
+        Gerar um diagnóstico de pontuação a partir do confronto entre o gabarito e as respostas do jogador.
+
         Args:
             gabarito (FolhaDeGabarito): O gabarito oficial contendo as respostas corretas.
             respostas (FolhaDeResposta): As respostas fornecidas pelo jogador.
-            
+
         Returns:
-            DiagnosticoPontuacaoDTO: Um objeto contendo as métricas de acertos, falsos alarmes, e outras informações relevantes para a pontuação do jogador.
+            DiagnosticoPontuacaoDTO: Um objeto contendo as métricas de acertos, falsos alarmes, e outras
+            informações relevantes para a pontuação do jogador.
         """
         try:
             meta = self.__extrair_metadados(gabarito, respostas)
 
-            qnt_riscos_corretos_marcados = len(
-                meta.riscos_set_marcados & meta.riscos_set_gabarito
-            )
+            qnt_riscos_corretos_marcados = len(meta.riscos_set_marcados & meta.riscos_set_gabarito)
 
-            estado_ato = ("ATO_INSEGURO" in meta.fatores_set_marcados) == (
-                "ATO_INSEGURO" in meta.fatores_set_gabarito
-            )
-            estado_condicao = ("CONDICAO_INSEGURA" in meta.fatores_set_marcados) == (
-                "CONDICAO_INSEGURA" in meta.fatores_set_gabarito
-            )
+            estado_ato = ("ATO_INSEGURO" in meta.fatores_set_marcados) and ("ATO_INSEGURO" in meta.fatores_set_gabarito)
+            estado_condicao = ("CONDICAO_INSEGURA" in meta.fatores_set_marcados) and ("CONDICAO_INSEGURA" in meta.fatores_set_gabarito)
 
             if respostas.decisao_tomada == gabarito.decisao_otima:
                 decisao_jogador = "OTIMA"
@@ -79,12 +76,12 @@ class DiagnosticoDeResposta:
                 estado_condicao=estado_condicao,
                 status_decisao_jogador=decisao_jogador,
                 tempo_resposta_segundos=respostas.tempo_gasto_segundos,
+                qnt_fatores_gabarito=len(meta.fatores_set_gabarito),
+                qnt_fatores_marcados=len(meta.fatores_set_marcados),
             )
 
         except (AttributeError, TypeError) as e:
-            raise ValueError(
-                f"[Erro - DiagnosticoDeResposta] Falha ao gerar diagnóstico: {e}"
-            )
+            raise ValueError(f"[Erro - DiagnosticoDeResposta] Falha ao gerar diagnóstico: {e}")
 
     def gerar_feedback(
         self, gabarito: FolhaDeGabarito, respostas: FolhaDeResposta
@@ -101,25 +98,13 @@ class DiagnosticoDeResposta:
         try:
             meta = self.__extrair_metadados(gabarito, respostas)
 
-            riscos_acertados = sorted(
-                meta.riscos_set_marcados & meta.riscos_set_gabarito
-            )
-            riscos_esquecidos = sorted(
-                meta.riscos_set_gabarito - meta.riscos_set_marcados
-            )
-            riscos_inventados = sorted(
-                meta.riscos_set_marcados - meta.riscos_set_gabarito
-            )
+            riscos_acertados = sorted(meta.riscos_set_marcados & meta.riscos_set_gabarito)
+            riscos_esquecidos = sorted(meta.riscos_set_gabarito - meta.riscos_set_marcados)
+            riscos_inventados = sorted(meta.riscos_set_marcados - meta.riscos_set_gabarito)
 
-            fatores_acertados = sorted(
-                meta.fatores_set_marcados & meta.fatores_set_gabarito
-            )
-            fatores_esquecidos = sorted(
-                meta.fatores_set_gabarito - meta.fatores_set_marcados
-            )
-            fatores_inventados = sorted(
-                meta.fatores_set_marcados - meta.fatores_set_gabarito
-            )
+            fatores_acertados = sorted(meta.fatores_set_marcados & meta.fatores_set_gabarito)
+            fatores_esquecidos = sorted(meta.fatores_set_gabarito - meta.fatores_set_marcados)
+            fatores_inventados = sorted(meta.fatores_set_marcados - meta.fatores_set_gabarito)
 
             return DiagnosticoFeedbackDTO(
                 riscos_acertados=riscos_acertados,
@@ -133,6 +118,4 @@ class DiagnosticoDeResposta:
             )
 
         except (AttributeError, TypeError) as e:
-            raise ValueError(
-                f"[Erro - DiagnosticoDeResposta] Falha ao gerar feedback: {e}"
-            )
+            raise ValueError(f"[Erro - DiagnosticoDeResposta] Falha ao gerar feedback: {e}")

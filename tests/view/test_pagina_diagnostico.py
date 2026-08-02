@@ -2,6 +2,8 @@
 Suite de testes para a PaginaDiagnostico reescrita.
 """
 
+from dataclasses import replace
+
 import pytest
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel, QPushButton, QScrollArea
@@ -145,6 +147,30 @@ class TestExibirDiagnostico:
         pagina.exibir_diagnostico(resultado_fake)
         pagina.exibir_diagnostico(resultado_fake)
         # Assert — nao lanca excepcao (tiles anteriores foram limpos)
+
+
+class TestCardDecisaoSolucaoSemSentido:
+    """
+    Testes do ramo decisao_anulada=True no card de decisao.
+    """
+
+    def test_exibir_diagnostico_decisao_anulada_mostra_label_solucao_sem_sentido(
+        self, pagina, resultado_fake
+    ):
+        """Com decisao_anulada=True, o label de resultado deve mostrar 'solucao sem sentido'."""
+        # Arrange
+        resultado_anulado = replace(
+            resultado_fake,
+            pontuacao=replace(resultado_fake.pontuacao, decisao_anulada=True),
+        )
+
+        # Act
+        pagina.exibir_diagnostico(resultado_anulado)
+        resultado_label = pagina.findChild(QLabel, "diagnostico_decisao_resultado")
+
+        # Assert
+        assert resultado_label is not None
+        assert resultado_label.text() == "solucao sem sentido"
 
 
 class TestSignals:

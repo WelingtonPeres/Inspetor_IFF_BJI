@@ -80,7 +80,7 @@ _TILE_STYLE = {
 
 _SCORE_FORMAT = {
     _TILE_STATE_CORRETO: ("+{score:.0f} pts", _SCORE_COR_POSITIVO),
-    _TILE_STATE_INDEVIDO: ("0 pts", _SCORE_COR_NEGATIVO),
+    _TILE_STATE_INDEVIDO: ("{score:+.0f} pts", _SCORE_COR_NEGATIVO),
     _TILE_STATE_ESQUECIDO: ("+0 pts", _SCORE_COR_NEUTRO),
 }
 
@@ -500,6 +500,8 @@ class PaginaDiagnostico(QFrame):
         qualidade = "otima" if status == "OTIMA" else "boa" if status == "BOA" else "incorreta"
         self.__card_decisao.setProperty("decisao_qualidade", qualidade)
 
+        decisao_anulada = p.decisao_anulada
+
         for nome in ("ADVERTIR", "INTERDITAR", "IGNORAR"):
             cor = _DECISAO_CORES[nome]
             opcao = _DecisionOption(nome, cor)
@@ -510,6 +512,10 @@ class PaginaDiagnostico(QFrame):
             self.__card_decisao.adicionar_widget(opcao)
 
         texto, cor = _DECISAO_STATUS.get(status, ("decisao incorreta", _SCORE_COR_NEGATIVO))
+
+        if decisao_anulada:
+            texto = "solucao sem sentido"
+            cor = _SCORE_COR_NEGATIVO
 
         resultado_label = QLabel(texto)
         resultado_label.setObjectName("diagnostico_decisao_resultado")

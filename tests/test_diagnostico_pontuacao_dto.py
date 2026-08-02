@@ -82,12 +82,12 @@ class TestDiagnosticoPontuacaoDTONovosCampos:
         with pytest.raises(FrozenInstanceError):
             dto_12_campos.nota_riscos = 999.0
 
-    def test_doze_campos_no_total(self):
-        """O DTO completo deve ter 12 campos (8 originais + 4 novos)."""
+    def test_quinze_campos_no_total(self):
+        """O DTO completo deve ter 15 campos (8 originais + 7 novos)."""
         # Arrange & Act
         nomes = [f.name for f in fields(DiagnosticoPontuacaoDTO)]
         # Assert
-        assert len(nomes) == 12
+        assert len(nomes) == 15
 
     def test_subtotais_sao_float(self, dto_12_campos):
         """Os 4 novos campos devem ser do tipo float."""
@@ -109,3 +109,31 @@ class TestDiagnosticoPontuacaoDTONovosCampos:
         )
         # Assert
         assert dto.pontuacao_final == 0.0
+
+
+class TestDecisaoAnulada:
+    """
+    Testes do novo campo decisao_anulada (default False, 15.º campo do DTO).
+    """
+
+    def test_decisao_anulada_default_false(self, dto_original_8_campos):
+        """Instanciar sem o campo deve atribuir default False."""
+        # Arrange — fixture dto_original_8_campos
+        # Assert
+        assert dto_original_8_campos.decisao_anulada is False
+
+    def test_decisao_anulada_populado_explicitamente(self):
+        """Passar decisao_anulada=True deve preservar o valor True no DTO."""
+        # Arrange & Act
+        dto = DiagnosticoPontuacaoDTO(
+            qnt_riscos_marcados=2,
+            qnt_riscos_gabarito=3,
+            qnt_riscos_corretos_marcados=2,
+            estado_ato=True,
+            estado_condicao=False,
+            status_decisao_jogador="OTIMA",
+            tempo_resposta_segundos=45.0,
+            decisao_anulada=True,
+        )
+        # Assert
+        assert dto.decisao_anulada is True

@@ -102,9 +102,10 @@ class TesteSuite1CaminhoFeliz:
         assert resultado.qnt_riscos_corretos_marcados == 0
         assert resultado.qnt_riscos_gabarito == 0
         assert resultado.qnt_riscos_marcados == 0
-        assert resultado.estado_ato is True  
-        assert resultado.estado_condicao is True  
+        assert resultado.estado_ato is False
+        assert resultado.estado_condicao is False
         assert resultado.status_decisao_jogador == "OTIMA"
+        assert resultado.tempo_resposta_segundos == 12.0
 
 
 class TesteSuite2MatematicaDosRiscos:
@@ -384,8 +385,8 @@ class TesteSuite5EdgeCases:
         assert resultado.qnt_riscos_marcados == 0
         assert resultado.qnt_riscos_gabarito == 0
         assert resultado.qnt_riscos_corretos_marcados == 0
-        assert resultado.estado_ato is True
-        assert resultado.estado_condicao is True
+        assert resultado.estado_ato is False
+        assert resultado.estado_condicao is False
         assert resultado.status_decisao_jogador == "OTIMA"
         assert resultado.tempo_resposta_segundos == 0.0
 
@@ -398,8 +399,8 @@ class TesteSuite6FixturesNaoUtilizadas:
     def test_diagnostico_apenas_ato(self, diagnostico_servico, gabarito_apenas_ato):
         """
         Gabarito com apenas ATO_INSEGURO, sem CONDICAO_INSEGURA.
-        Jogador acerta Ato e não marca Condição → estado_ato True,
-        estado_condicao True (condição ausente no gabarito, não marcada = correto).
+        Jogador acerta Ato → estado_ato True. Condicao ausente no
+        gabarito nao e pontuada → estado_condicao False.
         """
         resposta = FolhaDeResposta(
             riscos=["FISICO"],
@@ -409,12 +410,13 @@ class TesteSuite6FixturesNaoUtilizadas:
         )
         resultado = diagnostico_servico.gerar_diagnostico_pontuacao(gabarito_apenas_ato, resposta)
         assert resultado.estado_ato is True
-        assert resultado.estado_condicao is True
+        assert resultado.estado_condicao is False
 
     def test_diagnostico_apenas_condicao(self, diagnostico_servico, gabarito_apenas_condicao):
         """
         Gabarito com apenas CONDICAO_INSEGURA, sem ATO_INSEGURO.
-        Jogador acerta Condição e não marca Ato → ambos True.
+        Jogador acerta Condicao → estado_condicao True. Ato ausente
+        no gabarito nao e pontuado → estado_ato False.
         """
         resposta = FolhaDeResposta(
             riscos=["ERGONOMICO"],
@@ -423,7 +425,7 @@ class TesteSuite6FixturesNaoUtilizadas:
             tempo_gasto_segundos=40.0
         )
         resultado = diagnostico_servico.gerar_diagnostico_pontuacao(gabarito_apenas_condicao, resposta)
-        assert resultado.estado_ato is True
+        assert resultado.estado_ato is False
         assert resultado.estado_condicao is True
 
 

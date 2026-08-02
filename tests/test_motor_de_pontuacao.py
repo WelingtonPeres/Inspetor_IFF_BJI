@@ -64,9 +64,11 @@ def dto_inspetor_perfeito():
         qnt_riscos_gabarito=2,
         qnt_riscos_corretos_marcados=2,
         estado_ato=True,
-        estado_condicao=True,
+        estado_condicao=False,
         status_decisao_jogador="OTIMA",
-        tempo_resposta_segundos=45.0
+        tempo_resposta_segundos=45.0,
+        qnt_fatores_gabarito=1,
+        qnt_fatores_marcados=1,
     )
 
 
@@ -79,7 +81,25 @@ def dto_inspetor_negligente():
         estado_ato=False,
         estado_condicao=False,
         status_decisao_jogador="INCORRETA",
-        tempo_resposta_segundos=30.0
+        tempo_resposta_segundos=30.0,
+        qnt_fatores_gabarito=1,
+        qnt_fatores_marcados=0,
+    )
+
+
+@pytest.fixture
+def dto_zerado_decisao_otima():
+    """Zeros em riscos e fatores com decisao OTIMA: flag decisao_anulada deve anular a nota de decisao."""
+    return DiagnosticoPontuacaoDTO(
+        qnt_riscos_marcados=0,
+        qnt_riscos_gabarito=2,
+        qnt_riscos_corretos_marcados=0,
+        estado_ato=False,
+        estado_condicao=False,
+        status_decisao_jogador="OTIMA",
+        tempo_resposta_segundos=30.0,
+        qnt_fatores_gabarito=1,
+        qnt_fatores_marcados=0,
     )
 
 
@@ -90,9 +110,11 @@ def dto_inspetor_desesperado():
         qnt_riscos_gabarito=1,
         qnt_riscos_corretos_marcados=1,
         estado_ato=True,
-        estado_condicao=True,
+        estado_condicao=False,
         status_decisao_jogador="OTIMA",
-        tempo_resposta_segundos=45.0
+        tempo_resposta_segundos=45.0,
+        qnt_fatores_gabarito=1,
+        qnt_fatores_marcados=1,
     )
 
 
@@ -103,9 +125,11 @@ def dto_inspetor_lento():
         qnt_riscos_gabarito=2,
         qnt_riscos_corretos_marcados=2,
         estado_ato=True,
-        estado_condicao=True,
+        estado_condicao=False,
         status_decisao_jogador="OTIMA",
-        tempo_resposta_segundos=120.0
+        tempo_resposta_segundos=120.0,
+        qnt_fatores_gabarito=1,
+        qnt_fatores_marcados=1,
     )
 
 
@@ -231,7 +255,7 @@ class TestInspetorLento:
         assert nota < v_max_por_relatorio
 
     def test_nota_final_igual_v_max_vezes_limite(self, motor, v_max_por_relatorio, dto_inspetor_lento):
-        """Nota final deve ser exatamente v_max * LIMITE_MINIMO_RETENCAO (0.20)."""
+        """Nota final deve ser exatamente v_max * LIMITE_MINIMO_RETENCAO (0.50)."""
         
         nota = motor.calcular_pontuacao_relatorio(v_max_por_relatorio, dto_inspetor_lento)
         assert nota == pytest.approx(v_max_por_relatorio * MotorDePontuacao.LIMITE_MINIMO_RETENCAO)
@@ -433,8 +457,8 @@ class TestMetodosInternos:
         (False, False, 0.0),
     ])
     def test_coeficiente_exatidao(self, motor, v_max_por_relatorio, ato, cond, esperado):
-        """Matriz de exatidão 2x2: valida o coeficiente para cada combinação de Ato e Condição."""
-        nota = motor._calcular_pontuacao_inseguranca(v_max_por_relatorio, ato, cond)
+        """Matriz de exatidao 2x2: valida o coeficiente para cada combinacao de Ato e Condicao."""
+        nota = motor._calcular_pontuacao_inseguranca(v_max_por_relatorio, ato, cond, qnt_fatores_gabarito=2, qnt_fatores_marcados=2)
         assert nota == pytest.approx(v_max_por_relatorio * MotorDePontuacao.PESO_FATORES * esperado)
 
     @pytest.mark.parametrize("status,multiplicador", [
@@ -450,12 +474,12 @@ class TestMetodosInternos:
 
     @pytest.mark.parametrize("tempo,esperado", [
         (30.0, 1.0),
-        (60.0, 1.0),
-        (75.0, 1.0 - 0.01 * 15),
-        (90.0, 1.0 - 0.01 * 30),
-        (91.0, MotorDePontuacao.LIMITE_MINIMO_RETENCAO),
-        (120.0, MotorDePontuacao.LIMITE_MINIMO_RETENCAO),
-        (999.0, MotorDePontuacao.LIMITE_MINIMO_RETENCAO),
+        (45.0, 1.0),
+        (60.0, 1.0 - 0.007 * 15),
+        (90.0, 1.0 - 0.007 * 45),
+        (110.0, max(0.50, 1.0 - 0.007 * 65)),
+        (120.0, 0.50),
+        (999.0, 0.50),
     ])
     def test_fator_tempo(self, motor, tempo, esperado):
         """Decaimento temporal: testa as 3 faixas (ideal, decaimento linear, limite mínimo)."""
@@ -527,13 +551,18 @@ class TestCondicaoVitoriaExatamenteNoLimiar:
         """600/1000 = 60% → deve retornar True."""
         assert motor.conferir_condicao_vitoria(600.0, 1000.0) is True
 
+    def test_v_max_zero_retorna_false(self, motor):
+        """Vmax=0 (todos os relatorios quebrados) → deve retornar False."""
+        assert motor.conferir_condicao_vitoria(0.0, 0.0) is False
+        assert motor.conferir_condicao_vitoria(100.0, 0.0) is False
+
 
 class TestCalcularPontuacaoDetalhada:
     """
     Testes do novo metodo calcular_pontuacao_detalhada().
     """
 
-    def test_retorna_dto_com_12_campos(self, motor, v_max_por_relatorio, dto_inspetor_perfeito):
+    def test_retorna_dto_com_13_campos(self, motor, v_max_por_relatorio, dto_inspetor_perfeito):
         """O retorno deve ser DiagnosticoPontuacaoDTO com nota_riscos, nota_fatores, etc."""
         # Arrange
         from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
@@ -579,6 +608,64 @@ class TestCalcularPontuacaoDetalhada:
         assert detalhada.pontuacao_final == pytest.approx(original)
 
 
+class TestDecisaoAnulada:
+    """
+    Testa o flag decisao_anulada do DiagnosticoPontuacaoDTO: verdade pura de
+    dominio (nota_riscos == 0.0 e nota_fatores == 0.0), independente do
+    status_decisao_jogador, e o guard que zera a nota de decisao.
+    """
+
+    def test_calcular_pontuacao_detalhada_zeros_riscos_fatores_com_decisao_otima_anula_nota_decisao(
+        self, motor, v_max_por_relatorio, dto_zerado_decisao_otima
+    ):
+        """Zeros em riscos e fatores com decisao OTIMA devem anular a nota de decisao pelo guard."""
+        # Arrange
+        from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
+        f = DiagnosticoFeedbackDTO()
+        # Act
+        r = motor.calcular_pontuacao_detalhada(v_max_por_relatorio, dto_zerado_decisao_otima, f)
+        # Assert
+        assert r.decisao_anulada is True
+        assert r.nota_decisao == pytest.approx(0.0)
+
+    def test_calcular_pontuacao_detalhada_zeros_riscos_fatores_com_decisao_incorreta_flag_true(
+        self, motor, v_max_por_relatorio, dto_inspetor_negligente
+    ):
+        """Zeros em riscos e fatores com decisao INCORRETA devem manter o flag True (independe do status)."""
+        # Arrange
+        from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
+        f = DiagnosticoFeedbackDTO()
+        # Act
+        r = motor.calcular_pontuacao_detalhada(v_max_por_relatorio, dto_inspetor_negligente, f)
+        # Assert
+        assert r.decisao_anulada is True
+
+    def test_calcular_pontuacao_detalhada_com_acertos_riscos_fatores_flag_false(
+        self, motor, v_max_por_relatorio, dto_inspetor_perfeito
+    ):
+        """Acertos em riscos e fatores devem manter o flag False."""
+        # Arrange
+        from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
+        f = DiagnosticoFeedbackDTO()
+        # Act
+        r = motor.calcular_pontuacao_detalhada(v_max_por_relatorio, dto_inspetor_perfeito, f)
+        # Assert
+        assert r.decisao_anulada is False
+
+    def test_calcular_pontuacao_detalhada_zeros_incorreta_flag_true_e_pontuacao_final_zero(
+        self, motor, v_max_por_relatorio, dto_inspetor_negligente
+    ):
+        """Com zeros e INCORRETA, o flag deve viajar preenchido e a pontuacao final ser 0.0."""
+        # Arrange
+        from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
+        f = DiagnosticoFeedbackDTO()
+        # Act
+        r = motor.calcular_pontuacao_detalhada(v_max_por_relatorio, dto_inspetor_negligente, f)
+        # Assert
+        assert r.decisao_anulada is True
+        assert r.pontuacao_final == pytest.approx(0.0)
+
+
 class TestCalcularScoresPorItem:
     """
     Testes do novo metodo calcular_scores_por_item().
@@ -606,10 +693,13 @@ class TestCalcularScoresPorItem:
         assert sr.get("FISICO", 0.0) > 0.0
 
     def test_risco_inventado_score_negativo(self, motor, v_max_por_relatorio):
-        """Riscos em riscos_inventados devem ter score < 0."""
+        """Riscos em riscos_inventados devem ter score < 0 quando ha pelo menos um acerto."""
         # Arrange
         from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
-        f = DiagnosticoFeedbackDTO(riscos_inventados=["ACIDENTE"])
+        f = DiagnosticoFeedbackDTO(
+            riscos_acertados=["FISICO"],
+            riscos_inventados=["ACIDENTE"],
+        )
         # Act
         sr, _ = motor.calcular_scores_por_item(v_max_por_relatorio, f)
         # Assert
@@ -626,7 +716,7 @@ class TestCalcularScoresPorItem:
         assert sr.get("BIOLOGICO", 0.0) == pytest.approx(0.0)
 
     def test_lista_vazia_nao_crasha(self, motor, v_max_por_relatorio):
-        """Feedback com todas as listas vazias nao deve lancar excepcao."""
+        """Feedback com todas as listas vazias nao deve lancar excepcao. Factores ausentes no gabarito nao pontuam."""
         # Arrange
         from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
         f = DiagnosticoFeedbackDTO()
@@ -634,4 +724,185 @@ class TestCalcularScoresPorItem:
         sr, sf = motor.calcular_scores_por_item(v_max_por_relatorio, f)
         # Assert
         assert sr == {}
-        assert sf == {}
+        assert len(sf) == 2
+        assert sf.get("ATO_INSEGURO", 0.0) == pytest.approx(0.0)
+        assert sf.get("CONDICAO_INSEGURA", 0.0) == pytest.approx(0.0)
+
+    def test_soma_riscos_iguala_nota_real(self, motor, v_max_por_relatorio):
+        """A soma dos scores de risco deve igualar P_risco (Td × Tp)."""
+        # Arrange
+        from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
+        from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
+        dto = DiagnosticoPontuacaoDTO(
+            qnt_riscos_marcados=3,
+            qnt_riscos_gabarito=2,
+            qnt_riscos_corretos_marcados=1,
+            estado_ato=True,
+            estado_condicao=False,
+            status_decisao_jogador="OTIMA",
+            tempo_resposta_segundos=30,
+        )
+        f = DiagnosticoFeedbackDTO(
+            riscos_acertados=["A"],
+            riscos_esquecidos=["B"],
+            riscos_inventados=["X", "Y"],
+        )
+        # Act
+        sr, _ = motor.calcular_scores_por_item(v_max_por_relatorio, f)
+        soma = sum(sr.values())
+        nota_real = motor._calcular_pontuacao_riscos(
+            v_max=v_max_por_relatorio,
+            riscos_corretos_marcados=dto.qnt_riscos_corretos_marcados,
+            riscos_no_gabarito=dto.qnt_riscos_gabarito,
+            riscos_marcados=dto.qnt_riscos_marcados,
+        )
+        # Assert
+        assert soma == pytest.approx(nota_real)
+
+    def test_inventados_sem_acertos_score_zero(self, motor, v_max_por_relatorio):
+        """Quando k=0, inventados recebem 0 (nota real ja e zero)."""
+        # Arrange
+        from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
+        f = DiagnosticoFeedbackDTO(riscos_inventados=["X", "Y"])
+        # Act
+        sr, _ = motor.calcular_scores_por_item(v_max_por_relatorio, f)
+        # Assert
+        assert sr.get("X", 0.0) == pytest.approx(0.0)
+        assert sr.get("Y", 0.0) == pytest.approx(0.0)
+
+    def test_gabarito_vazio_mas_marcou_score_zero(self, motor, v_max_por_relatorio):
+        """Quando g=0 e m>0, todos os scores sao 0 (gabarito sem riscos)."""
+        # Arrange
+        from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
+        f = DiagnosticoFeedbackDTO(riscos_inventados=["X"])
+        # Act
+        sr, _ = motor.calcular_scores_por_item(v_max_por_relatorio, f)
+        # Assert
+        assert sr.get("X", 0.0) == pytest.approx(0.0)
+
+    def test_fator_acertado_score_positivo(self, motor, v_max_por_relatorio):
+        """Fator em fatores_acertados deve ter score = Vmax * 0.15 / total_gabarito."""
+        # Arrange
+        from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
+        f = DiagnosticoFeedbackDTO(fatores_acertados=["ATO_INSEGURO"])
+        esperado = v_max_por_relatorio * motor.PESO_FATORES / 1.0
+        # Act
+        _, sf = motor.calcular_scores_por_item(v_max_por_relatorio, f)
+        # Assert
+        assert sf.get("ATO_INSEGURO", 0.0) == pytest.approx(esperado)
+        assert sf.get("CONDICAO_INSEGURA", 0.0) == pytest.approx(0.0)
+
+    def test_fator_inventado_score_zero(self, motor, v_max_por_relatorio):
+        """Fator inventado deve ter score 0 (penalidade ja esta na ausencia de acerto)."""
+        # Arrange
+        from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
+        f = DiagnosticoFeedbackDTO(
+            fatores_inventados=["ATO_INSEGURO"],
+        )
+        # Act
+        _, sf = motor.calcular_scores_por_item(v_max_por_relatorio, f)
+        # Assert
+        assert sf.get("ATO_INSEGURO", 0.0) == pytest.approx(0.0)
+
+    def test_fator_esquecido_score_zero(self, motor, v_max_por_relatorio):
+        """Fator esquecido deve ter score 0."""
+        # Arrange
+        from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
+        f = DiagnosticoFeedbackDTO(
+            fatores_esquecidos=["CONDICAO_INSEGURA"],
+        )
+        # Act
+        _, sf = motor.calcular_scores_por_item(v_max_por_relatorio, f)
+        # Assert
+        assert sf.get("CONDICAO_INSEGURA", 0.0) == pytest.approx(0.0)
+
+    def test_fator_corretamente_ausente_score_zero(self, motor, v_max_por_relatorio):
+        """Fator correctamente ausente (nem gabarito nem resposta) nao pontua."""
+        # Arrange
+        from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
+        f = DiagnosticoFeedbackDTO(
+            fatores_acertados=["ATO_INSEGURO"],
+        )
+        # Act
+        _, sf = motor.calcular_scores_por_item(v_max_por_relatorio, f)
+        # Assert
+        assert sf.get("CONDICAO_INSEGURA", 0.0) == pytest.approx(0.0)
+
+    def test_fator_ambos_ausentes_score_zero(self, motor, v_max_por_relatorio):
+        """Quando ambos os factores estao ausentes do gabarito, ambos recebem 0."""
+        # Arrange
+        from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
+        f = DiagnosticoFeedbackDTO()
+        # Act
+        _, sf = motor.calcular_scores_por_item(v_max_por_relatorio, f)
+        # Assert
+        assert sf.get("ATO_INSEGURO", 0.0) == pytest.approx(0.0)
+        assert sf.get("CONDICAO_INSEGURA", 0.0) == pytest.approx(0.0)
+
+    def test_soma_fatores_iguala_nota_real(self, motor, v_max_por_relatorio):
+        """A soma dos scores de factor deve igualar P_inseg."""
+        # Arrange
+        from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
+        from core.dtos.diagnostico_pontuacao import DiagnosticoPontuacaoDTO
+        dto = DiagnosticoPontuacaoDTO(
+            qnt_riscos_marcados=0,
+            qnt_riscos_gabarito=0,
+            qnt_riscos_corretos_marcados=0,
+            estado_ato=True,
+            estado_condicao=False,
+            status_decisao_jogador="OTIMA",
+            tempo_resposta_segundos=30,
+            qnt_fatores_gabarito=2,
+            qnt_fatores_marcados=1,
+        )
+        f = DiagnosticoFeedbackDTO(
+            fatores_acertados=["ATO_INSEGURO"],
+            fatores_esquecidos=["CONDICAO_INSEGURA"],
+        )
+        # Act
+        _, sf = motor.calcular_scores_por_item(v_max_por_relatorio, f)
+        soma = sum(sf.values())
+        nota_real = motor._calcular_pontuacao_inseguranca(
+            v_max=v_max_por_relatorio,
+            acertou_ato=dto.estado_ato,
+            acertou_condicao=dto.estado_condicao,
+            qnt_fatores_gabarito=dto.qnt_fatores_gabarito,
+            qnt_fatores_marcados=dto.qnt_fatores_marcados,
+        )
+        # Assert
+        assert soma == pytest.approx(nota_real)
+
+
+class TestPenalidadeFatorInventado:
+    """
+    B7: Inventar um factor que nao esta no gabarito deve reduzir
+    a nota via denominador max(g, m).
+    """
+
+    def test_fator_inventado_reduz_nota(self, motor, v_max_por_relatorio):
+        """Gabarito [ATO] vs marcados [ATO, COND] → nota < gabarito [ATO] vs [ATO]."""
+        # Arrange & Act
+        nota_sem = motor._calcular_pontuacao_inseguranca(
+            v_max_por_relatorio, True, False, qnt_fatores_gabarito=1, qnt_fatores_marcados=1,
+        )
+        nota_com = motor._calcular_pontuacao_inseguranca(
+            v_max_por_relatorio, True, False, qnt_fatores_gabarito=1, qnt_fatores_marcados=2,
+        )
+        # Assert
+        assert nota_com < nota_sem
+        assert nota_com == pytest.approx(nota_sem / 2.0)
+
+    def test_fator_inventado_score_individual_reduzido(self, motor, v_max_por_relatorio):
+        """Score do factor acertado deve ser menor quando ha factores inventados."""
+        # Arrange
+        from core.dtos.diagnostico_feedback import DiagnosticoFeedbackDTO
+        f = DiagnosticoFeedbackDTO(
+            fatores_acertados=["ATO_INSEGURO"],
+            fatores_inventados=["CONDICAO_INSEGURA"],
+        )
+        esperado = v_max_por_relatorio * motor.PESO_FATORES / 2.0
+        # Act
+        _, sf = motor.calcular_scores_por_item(v_max_por_relatorio, f)
+        # Assert
+        assert sf.get("ATO_INSEGURO", 0.0) == pytest.approx(esperado)
+        assert sf.get("CONDICAO_INSEGURA", 0.0) == pytest.approx(0.0)
