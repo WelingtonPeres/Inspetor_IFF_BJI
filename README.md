@@ -8,25 +8,119 @@
 
 ## Sumário
 
-- [1. Instalação Rápida](#1-instalação-rápida)
+- [1. Instalação](#1-instalação)
 - [2. Documentação e Guias](#2-documentação-e-guias)
 - [3. Arquitetura do Projeto](#3-arquitetura-do-projeto)
 
-## 1. Instalação Rápida
+## 1. Instalação
 
-Pré-requisitos: **Python 3.11+** e **Git**.
+### Pré-requisitos
+
+| Recurso | Necessário para | Como verificar |
+|---|---|---|
+| **Python 3.11+** | Executar o jogo | `python --version` (Windows/Linux) ou `python3 --version` (macOS) |
+| **Git** | Opção A (clone) | `git --version` |
+
+> O **Git não é obrigatório**: quem prefere não instalar pode usar a **Opção B (ZIP)**.
+> Em qualquer opção, o jogo é instalado numa pasta própria sem alterar o resto do sistema.
+
+### Opção A — Instalar com Git (recomendado)
+
+Recomendado porque facilita atualizar o jogo (`git pull`) e acompanhar o desenvolvimento.
+
+**1. Abra o terminal** e clone o repositório:
 
 ```bash
 git clone https://github.com/WelingtonPeres/Inspetor_IFF_BJI.git
 cd Inspetor_IFF_BJI
+```
+
+**2. Crie o ambiente virtual** (isolamento das dependências do sistema):
+
+```bash
 python -m venv venv
-# Windows (PowerShell): .\venv\Scripts\Activate.ps1
-# Linux/macOS:          source venv/bin/activate
+```
+
+**3. Ative o ambiente virtual** — o comando muda conforme o sistema:
+
+| Sistema | Comando |
+|---|---|
+| Windows (PowerShell) | `.\venv\Scripts\Activate.ps1` |
+| Windows (Prompt de Comando) | `.\venv\Scripts\activate.bat` |
+| Linux/macOS | `source venv/bin/activate` |
+
+Depois de ativar, o terminal passa a exibir `(venv)` no início da linha.
+
+**4. Instale as dependências:**
+
+```bash
 pip install -r requirements.txt
+```
+
+**5. Inicie o jogo:**
+
+```bash
 python main.py
 ```
 
-Quem nunca instalou Python, não sabe o que é `venv` ou trava em alguma etapa encontra o passo a passo em [docs/INSTALACAO.md](docs/INSTALACAO.md).
+**Atualizar o jogo depois** (dentro da pasta, com o `venv` ativado):
+
+```bash
+git pull
+```
+
+### Opção B — Instalar pelo arquivo ZIP (sem Git)
+
+**1. Baixe o arquivo ZIP:** acesse [github.com/WelingtonPeres/Inspetor_IFF_BJI](https://github.com/WelingtonPeres/Inspetor_IFF_BJI), clique no botão verde **"Code"** e escolha **"Download ZIP"**. O link direto é:
+
+```
+https://github.com/WelingtonPeres/Inspetor_IFF_BJI/archive/refs/heads/main.zip
+```
+
+**2. Extraia o conteúdo** do ZIP para uma pasta de sua preferência (ex.: `C:\Inspetor_IFF_BJI` ou `~/Inspetor_IFF_BJI`). A pasta extraída contém o projeto completo.
+
+**3. Abra o terminal na pasta extraída** (dentro de `Inspetor_IFF_BJI-main`, a pasta que contém o `requirements.txt`):
+
+```bash
+cd caminho/para/Inspetor_IFF_BJI-main
+```
+
+**4. Crie o ambiente virtual:**
+
+```bash
+python -m venv venv
+```
+
+**5. Ative o ambiente virtual:**
+
+| Sistema | Comando |
+|---|---|
+| Windows (PowerShell) | `.\venv\Scripts\Activate.ps1` |
+| Windows (Prompt de Comando) | `.\venv\Scripts\activate.bat` |
+| Linux/macOS | `source venv/bin/activate` |
+
+**6. Instale as dependências:**
+
+```bash
+pip install -r requirements.txt
+```
+
+**7. Inicie o jogo:**
+
+```bash
+python main.py
+```
+
+> **Nota:** com o ZIP, atualizar o jogo significa baixar o ZIP novamente e repetir os passos 1–6. Para receber atualizações com um único comando, prefira a Opção A.
+
+### Solução de problemas
+
+| Problema | Causa provável | Solução |
+|---|---|---|
+| `'python' não é reconhecido` | Python fora do `PATH` | Reinstale o Python marcando **"Add Python to PATH"** ou use `py -m venv venv` no Windows |
+| `Não é possível carregar ... porque a execução de scripts está desabilitada` (PowerShell) | Execution Policy do Windows | Rode `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` e tente de novo |
+| `pip` acusa versão antiga | `pip` desatualizado | `python -m pip install --upgrade pip` |
+| Erros de importação ao iniciar | Dependências incompletas | Reexecute `pip install -r requirements.txt` com o `venv` ativado |
 
 
 ## 2. Documentação do Projeto e Guias
