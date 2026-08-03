@@ -1144,3 +1144,309 @@ GameOver #gameover_footer_indicator {
 GameOver #gameover_footer_label {
     color: #a04040;
 }
+
+/* ============================================================
+   TelaTutorial — Janela Flutuante do Tutorial (z=2, irma do expediente)
+   ============================================================ */
+
+QFrame#tela_tutorial {
+    background-color: #ffffff;
+    border: 2px solid #2F9E41;
+    border-radius: 4px;
+}
+
+QFrame#tutorial_sombra {
+    background-color: #888888;
+    border: none;
+}
+
+QLabel#tutorial_contador {
+    color: #57606A;
+    font-family: "Open Sans";
+}
+
+QPushButton#tutorial_pular {
+    background-color: transparent;
+    color: #57606A;
+    border: none;
+    font-family: "Open Sans";
+}
+
+QPushButton#tutorial_pular:hover {
+    color: #1a1c1c;
+}
+
+QLabel#tutorial_briefing {
+    background-color: #f2f2f2;
+    border-top: 1px solid #2F9E41;
+    border-bottom: 1px solid #d0d7de;
+    color: #57606A;
+    font-family: "Open Sans";
+}
+
+QPushButton#tutorial_nav_prev,
+QPushButton#tutorial_nav_next {
+    background-color: #eaeaea;
+    color: #1a1c1c;
+    border: 1px solid #d0d7de;
+    border-radius: 50%;
+    font-size: 20px;
+    font-family: "Open Sans";
+}
+
+QPushButton#tutorial_nav_prev:hover,
+QPushButton#tutorial_nav_next:hover {
+    border-color: #2F9E41;
+}
+
+QPushButton#tutorial_nav_prev:disabled,
+QPushButton#tutorial_nav_next:disabled {
+    background-color: transparent;
+    color: #c0c0c0;
+    border-color: #eaeaea;
+}
+
+QPushButton#tutorial_dot {
+    background-color: #d0d7de;
+    border: none;
+    border-radius: 50%;
+}
+
+QPushButton#tutorial_dot[active="true"] {
+    background-color: #2F9E41;
+}
+
+QPushButton#tutorial_cta {
+    background-color: #2F9E41;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    font-family: "Open Sans";
+    padding: 13px 26px;
+}
+
+QPushButton#tutorial_cta:hover {
+    background-color: #006b21;
+    color: #FFFFFF;
+}
+
+QPushButton#tutorial_cta:pressed {
+    background-color: #004d18;
+    color: #FFFFFF;
+}
+
+QPushButton#tutorial_cta:focus {
+    border: 1px solid #006b21;
+}
+
+QLabel#tutorial_eyebrow {
+    color: #006b21;
+    font-size: 14px;
+    font-weight: bold;
+    font-family: "Open Sans";
+}
+
+QLabel#tutorial_titulo {
+    color: #1a1c1c;
+    font-size: 22px;
+    font-weight: bold;
+    font-family: "Open Sans";
+}
+
+QLabel#tutorial_paragrafo {
+    color: #57606A;
+    font-size: 14px;
+    font-family: "Open Sans";
+}
+
+QLabel#tutorial_aviso {
+    color: #57606A;
+    font-size: 13px;
+    font-style: italic;
+    font-family: "Open Sans";
+}
+
+QWidget#tutorial_riscos_grupo QToolButton[riscoTile="true"] {
+    min-width: 98px;
+    min-height: 90px;
+}
+
+QFrame#tutorial_credential {
+    background-color: #eeeae2;
+    border: 1px solid #B9B4A8;
+    border-radius: 8px;
+}
+
+QFrame#credential_selo {
+    background-color: #ffffff;
+    border: 2px solid #B9B4A8;
+    border-radius: 50%;
+}
+
+QLabel#credential_selo_icone {
+    background-image: url(icons/tutorial/pessoa.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 50%;
+}
+
+QLabel#credential_nome {
+    color: #1a1c1c;
+    font-weight: bold;
+    font-family: "Open Sans";
+}
+
+QLabel#credential_cargo {
+    color: #6b6b66;
+    font-family: "Open Sans";
+}
+
+QLabel#credential_logo {
+    background-image: url(icons/iff_Icons/logo-iff.png);
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+QFrame#credential_separador {
+    background-color: #B9B4A8;
+    border: none;
+}
+
+QLabel#tutorial_item_num {
+    background-color: #006b21;
+    color: #FFFFFF;
+    border-radius: 50%;
+    font-weight: bold;
+    font-family: "Open Sans";
+}
+
+QLabel#tutorial_item_titulo {
+    color: #1a1c1c;
+    font-weight: bold;
+    font-family: "Open Sans";
+}
+
+QLabel#tutorial_item_descricao {
+    color: #57606A;
+    font-family: "Open Sans";
+}
+
+QFrame#tutorial_mini_relatorio {
+    background-color: #eeeae2;
+    border: 1px solid #B9B4A8;
+    border-radius: 8px;
+}
+
+QLabel#tutorial_relatorio_titulo {
+    color: #1a1c1c;
+    font-weight: bold;
+    font-family: "Open Sans";
+}
+
+QLabel#tutorial_relatorio_campo {
+    color: #8a8475;
+    font-weight: bold;
+    font-family: "Open Sans";
+}
+
+QLabel#tutorial_relatorio_valor {
+    color: #1a1c1c;
+    font-family: "Open Sans";
+}
+
+QFrame[class="tutorial_fator_tile"] {
+    background-color: #f9f9f9;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+}
+
+QLabel#tutorial_fator_titulo {
+    color: #1a1c1c;
+    font-weight: bold;
+    font-family: "Open Sans";
+}
+
+QLabel#tutorial_fator_subtitulo {
+    color: #57606A;
+    font-family: "Open Sans";
+}
+
+QFrame#tutorial_exemplo {
+    background-color: #eeeeee;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+}
+
+QLabel#tutorial_exemplo_titulo {
+    color: #006b21;
+    font-weight: bold;
+    font-family: "Open Sans";
+}
+
+QLabel#tutorial_exemplo_linha {
+    color: #57606A;
+    font-family: "Open Sans";
+}
+
+QFrame#tutorial_carimbo {
+    border-radius: 50%;
+}
+
+QFrame#tutorial_carimbo[estado="marcado"] {
+    background-color: #006b21;
+    border: 2px solid #37a547;
+}
+
+QFrame#tutorial_carimbo[estado="vazio"] {
+    background-color: #f9f9f9;
+    border: 2px dashed #B9B4A8;
+}
+
+QFrame#tutorial_carimbo[estado="marcado"] QLabel#tutorial_carimbo_nome {
+    color: #FFFFFF;
+    font-family: "Open Sans";
+}
+
+QFrame#tutorial_carimbo[estado="vazio"] QLabel#tutorial_carimbo_nome {
+    color: #57606A;
+    font-family: "Open Sans";
+}
+
+QLabel#tutorial_decisao_legenda {
+    color: #57606A;
+    font-style: italic;
+    font-family: "Open Sans";
+}
+
+QFrame#tutorial_mini_tela {
+    border-radius: 8px;
+}
+
+QFrame#tutorial_mini_tela[estado="win"] {
+    background-color: #e8f5e9;
+    border: 1px solid #37a547;
+}
+
+QFrame#tutorial_mini_tela[estado="over"] {
+    background-color: #fde8e8;
+    border: 1px solid #bb0213;
+}
+
+QLabel#tutorial_mini_tela_titulo {
+    font-weight: bold;
+    font-family: "Open Sans";
+}
+
+QFrame#tutorial_mini_tela[estado="win"] QLabel#tutorial_mini_tela_titulo {
+    color: #006b21;
+}
+
+QFrame#tutorial_mini_tela[estado="over"] QLabel#tutorial_mini_tela_titulo {
+    color: #bb0213;
+}
+
+QLabel#tutorial_mini_tela_subtitulo {
+    color: #57606A;
+    font-family: "Open Sans";
+}

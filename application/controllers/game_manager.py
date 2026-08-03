@@ -2,7 +2,7 @@ import logging
 from typing import Any
 
 from application.controllers.gerenciador_de_turno import GerenciadorDeTurno
-from application.interfaces.i_game_view import IGameView
+from application.interfaces.i_game_view import IGameView, MotivoTutorial
 from core.dtos.resultado_diagnostico import ResultadoDiagnosticoDTO
 
 logger = logging.getLogger(__name__)
@@ -29,6 +29,7 @@ class GameManager:
 
         self.__estado_atual: str = self.ESTADO_MENU
         self.__gerenciador_turno = None
+        self.__encerrado: bool = False
 
         self.__perfil_selecionado: str = ""
         self.__dias_concluidos: int = 0
@@ -44,7 +45,13 @@ class GameManager:
     def encerrar_aplicacao(self) -> None:
         """
         Instrui a View a fechar a janela e encerrar o processo.
+
+        Idempotente: a segunda chamada (ex: aboutToQuit apos o botao
+        "Sair do Jogo") e ignorada.
         """
+        if self.__encerrado:
+            return
+        self.__encerrado = True
         self.__view.fechar()
 
     def reiniciar_expediente(self) -> None:
@@ -70,9 +77,34 @@ class GameManager:
     def on_iniciar_solicitado(self) -> None:
         """
         Recebe o sinal ``btn_iniciar_clicado`` da ``ViewMenuInicial``.
-        Instrui a View a exibir a tela de seleção de perfil.
+        Instrui a View a exibir o tutorial em modo novo jogo; só depois
+        do tutorial finalizado é que a seleção de perfil é aberta.
         """
         if self.__estado_atual != self.ESTADO_MENU:
+            return
+        self.__view.exibir_tutorial(MotivoTutorial.NOVO_JOGO)
+
+    def on_help_solicitado(self) -> None:
+        """
+        Recebe o sinal ``help_solicitado`` da Taskbar.
+        Abre o tutorial em modo consulta, a partir de qualquer estado.
+        """
+        self.__view.exibir_tutorial(MotivoTutorial.CONSULTA)
+
+    def on_tutorial_finalizado(self, motivo: MotivoTutorial) -> None:
+        """
+        Recebe o sinal ``tutorial_finalizado`` da View.
+
+        Só o motivo ``novo_jogo`` avança para a seleção de perfil;
+        ``consulta`` encerra sem ação e motivos desconhecidos são
+        registados como aviso e ignorados.
+        """
+        if motivo == MotivoTutorial.CONSULTA:
+            return
+        if motivo != MotivoTutorial.NOVO_JOGO:
+            logger.warning(
+                "[Erro - GameManager] Motivo de tutorial desconhecido: %s", motivo
+            )
             return
         self.__view.exibir_selecao_perfil()
 
@@ -137,8 +169,8 @@ class GameManager:
 
         if self.__gerenciador_turno.qnt_relatorios() == 0:
             self.__avancar_dia()
-        else:
-            self.__avancar_fila()
+            return
+        self.__avancar_fila()
 
     def __avancar_fila(self) -> None:
         """
@@ -157,8 +189,8 @@ class GameManager:
         self.__dias_concluidos += 1
         if self.__dias_concluidos >= self.CAMPANHA_DURACAO_DIAS:
             self.__encerrar_campanha()
-        else:
-            self.__iniciar_dia(self.__dias_concluidos + 1)
+            return
+        self.__iniciar_dia(self.__dias_concluidos + 1)
             
     def __requisitar_dados_relatorio_atual(self) -> dict[str, Any]:
         """

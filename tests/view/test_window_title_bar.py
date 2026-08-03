@@ -110,3 +110,44 @@ class TestWindowTitleBar:
         btn = title_bar.findChild(QPushButton, "window_close_button")
         qtbot.mouseClick(btn, Qt.MouseButton.LeftButton)
         assert len(signals) == 0
+
+
+class TestWindowTitleBarSemMinMax:
+    """
+    Testes da flag mostrar_min_max=False.
+
+    O tutorial nao usa botoes min/max; a flag evita cria-los e o
+    set_maximizado nao deve rebentar sem o botao presente.
+    """
+
+    @pytest.fixture
+    def title_bar_sem_min_max(self):
+        """WindowTitleBar sem botoes minimize/maximize."""
+        LayoutLoader._instance = None
+        LayoutLoader.instance().set_screen(1920, 1080)
+        return WindowTitleBar(
+            titulo="Tutorial",
+            altura=32,
+            mostrar_min_max=False,
+        )
+
+    def test_minimize_e_maximize_ausentes(self, title_bar_sem_min_max):
+        """Com mostrar_min_max=False nao deve haver botoes min/max."""
+        assert (
+            title_bar_sem_min_max.findChild(QPushButton, "window_minimize_button")
+            is None
+        )
+        assert (
+            title_bar_sem_min_max.findChild(QPushButton, "window_maximize_button")
+            is None
+        )
+
+    def test_close_ainda_existe(self, title_bar_sem_min_max):
+        """O botao fechar deve existir mesmo sem min/max."""
+        btn = title_bar_sem_min_max.findChild(QPushButton, "window_close_button")
+        assert btn is not None
+
+    def test_set_maximizado_nao_rebenta_sem_botao(self, title_bar_sem_min_max):
+        """set_maximizado deve ser seguro quando o botao maximizar nao existe."""
+        title_bar_sem_min_max.set_maximizado(True)
+        title_bar_sem_min_max.set_maximizado(False)

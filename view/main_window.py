@@ -3,14 +3,15 @@ import logging
 from typing import Any, Dict, List, Optional, Tuple
 
 from PySide6.QtCore import QRect, Signal, Slot
-from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QApplication, QFrame, QMainWindow, QMessageBox, QVBoxLayout, QWidget
 
-from application.interfaces.i_game_view import IGameView
+from application.interfaces.i_game_view import IGameView, MotivoTutorial
 from core.dtos.resultado_diagnostico import ResultadoDiagnosticoDTO
 from view.desktop.taskbar import Taskbar
 from view.expediente.tela import TelaDeExpediente
 from view.desktop.menu import TelaMenuPrincipal
 from view.infrastructure.layout_loader import LayoutLoader
+from view.tutorial.tela_tutorial import TelaTutorial
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,7 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
     arquivos_solicitado = Signal()
     help_solicitado = Signal()
     wallpapers_solicitado = Signal()
+    tutorial_finalizado = Signal(MotivoTutorial)
 
     def __init__(self):
         super().__init__()
@@ -70,6 +72,9 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
 
         self.__tela_expediente = self.__build_tela_expediente()
         self.__overlay_area.add_overlay(self.__tela_expediente, auto_resize=False)
+
+        self.__tela_tutorial = self.__build_tela_tutorial()
+        self.__overlay_area.add_overlay(self.__tela_tutorial, auto_resize=False)
 
     def __build_container(self) -> QWidget:
         container = QWidget()
@@ -109,6 +114,32 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
         )
         return tela_expediente
 
+    def __build_tela_tutorial(self) -> TelaTutorial:
+        # Sombra 6x6 solida: QFrame irmao com z abaixo do tutorial — QSS nao
+        # suporta box-shadow (padrao #expediente_sombra). Registada primeiro
+        # para ficar sob a janela flutuante.
+        self.__sombra_tutorial = QFrame()
+        self.__sombra_tutorial.setObjectName("tutorial_sombra")
+        self.__overlay_area.add_overlay(self.__sombra_tutorial, auto_resize=False)
+
+        tela_tutorial = TelaTutorial()
+        tela_tutorial.finalizado_solicitado.connect(self.tutorial_finalizado.emit)
+        # auto_resize=False: a geometria 80% so recalcula via overlay_resized.
+        self.__overlay_area.add_overlay(tela_tutorial, auto_resize=False)
+        self.__overlay_area.overlay_resized.connect(
+            tela_tutorial.redimensionar_com_overlay
+        )
+        tela_tutorial.geometria_alterada.connect(self.__sincronizar_geometria_sombra)
+        tela_tutorial.visibilidade_alterada.connect(self.__sombra_tutorial.setVisible)
+        return tela_tutorial
+
+    @Slot()
+    def __sincronizar_geometria_sombra(self) -> None:
+        """Espelha a geometria da sombra na janela do tutorial (offset 6, 6)."""
+        self.__sombra_tutorial.setGeometry(
+            self.__tela_tutorial.geometry().translated(6, 6)
+        )
+
     def __sincronizar_escala_com_tela(self) -> None:
         """Alimenta o LayoutLoader com a resolucao real do monitor.
 
@@ -144,6 +175,7 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
     @Slot()
     def __on_help_solicitado(self) -> None:
         logger.info("Help solicitado via taskbar.")
+        self.help_solicitado.emit()
 
     @Slot()
     def __on_wallpapers_solicitado(self) -> None:
@@ -164,11 +196,22 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
     def exibir_menu(self) -> None:
         logger.info("Exibindo menu principal (desktop).")
         self.__tela_expediente.hide()
+        self.__tela_tutorial.hide()
 
     def exibir_selecao_perfil(self) -> None:
         logger.info("Exibindo selecao de perfil no expediente.")
         self.__tela_expediente.exibir_selecao_perfil()
         self.__tela_expediente.exibir_com_tamanho_inicial(self.__overlay_area.rect())
+
+    def exibir_tutorial(self, motivo: "MotivoTutorial") -> None:
+        logger.info("Exibindo tutorial (motivo=%s).", motivo.name)
+        self.__tela_tutorial.exibir_tutorial(motivo)
+        # Rect de referencia geometrico: menu -> overlay; consulta sobre o
+        # expediente visivel -> rect actual do expediente (nunca maior que ele).
+        rect_ref = self.__overlay_area.rect()
+        if motivo == MotivoTutorial.CONSULTA and self.__tela_expediente.isVisible():
+            rect_ref = self.__tela_expediente.geometry()
+        self.__tela_tutorial.exibir_com_tamanho_inicial(rect_ref)
 
     def trocar_para_tela_inspecao(self) -> None:
         logger.info("Exibindo expediente (tela de inspecao).")

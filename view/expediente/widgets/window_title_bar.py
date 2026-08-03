@@ -19,6 +19,7 @@ class WindowTitleBar(QFrame):
         titulo: str = "Expediente",
         altura: int = 32,
         altura_keys: Optional[Tuple[str, ...]] = None,
+        mostrar_min_max: bool = True,
         parent=None,
     ):
         super().__init__(parent)
@@ -27,6 +28,7 @@ class WindowTitleBar(QFrame):
         self.__dragging = False
         self.__drag_offset = QPoint()
         self.__altura_keys = altura_keys
+        self.__mostrar_min_max = mostrar_min_max
         self.__main_layout: Optional[QHBoxLayout] = None
         self.__title_label: Optional[QLabel] = None
         self.__btn_minimize: Optional[QPushButton] = None
@@ -56,19 +58,20 @@ class WindowTitleBar(QFrame):
         btn_w = L.scaled("window_title_bar", "btn_tamanho")
         btn_h = L.scaled("window_title_bar", "btn_altura")
 
-        self.__btn_minimize = QPushButton("\u2014")
-        self.__btn_minimize.setObjectName("window_minimize_button")
-        self.__btn_minimize.setProperty("class", "window_minimize_button")
-        self.__btn_minimize.setFixedSize(btn_w, btn_h)
-        self.__btn_minimize.clicked.connect(self.minimized_solicitado.emit)
-        layout.addWidget(self.__btn_minimize)
+        if self.__mostrar_min_max:
+            self.__btn_minimize = QPushButton("\u2014")
+            self.__btn_minimize.setObjectName("window_minimize_button")
+            self.__btn_minimize.setProperty("class", "window_minimize_button")
+            self.__btn_minimize.setFixedSize(btn_w, btn_h)
+            self.__btn_minimize.clicked.connect(self.minimized_solicitado.emit)
+            layout.addWidget(self.__btn_minimize)
 
-        self.__btn_maximize = QPushButton("\u25a1")
-        self.__btn_maximize.setObjectName("window_maximize_button")
-        self.__btn_maximize.setProperty("class", "window_maximize_button")
-        self.__btn_maximize.setFixedSize(btn_w, btn_h)
-        self.__btn_maximize.clicked.connect(self.maximized_solicitado.emit)
-        layout.addWidget(self.__btn_maximize)
+            self.__btn_maximize = QPushButton("\u25a1")
+            self.__btn_maximize.setObjectName("window_maximize_button")
+            self.__btn_maximize.setProperty("class", "window_maximize_button")
+            self.__btn_maximize.setFixedSize(btn_w, btn_h)
+            self.__btn_maximize.clicked.connect(self.maximized_solicitado.emit)
+            layout.addWidget(self.__btn_maximize)
 
         self.__close_btn = QPushButton("\u2715")
         self.__close_btn.setObjectName("window_close_button")
@@ -79,7 +82,11 @@ class WindowTitleBar(QFrame):
 
         self.installEventFilter(self)
         for child in self.findChildren(QWidget):
-            if child is not self.__close_btn and child is not self.__btn_minimize and child is not self.__btn_maximize:
+            if (
+                child is not self.__close_btn
+                and child is not self.__btn_minimize
+                and child is not self.__btn_maximize
+            ):
                 child.installEventFilter(self)
 
     @Slot()
@@ -115,7 +122,8 @@ class WindowTitleBar(QFrame):
             label.setText(titulo)
 
     def set_maximizado(self, maximizado: bool) -> None:
-        self.__btn_maximize.setText("\u2750" if maximizado else "\u25a1")
+        if self.__btn_maximize is not None:
+            self.__btn_maximize.setText("\u2750" if maximizado else "\u25a1")
 
     def eventFilter(self, obj: QWidget, event: QEvent) -> bool:
         parent = self.parentWidget()

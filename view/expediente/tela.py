@@ -166,7 +166,11 @@ class TelaDeExpediente(QFrame):
 
     @Slot(int)
     def __on_page_changed(self, index: int) -> None:
-        self.__sidebar.setVisible(index in [self.IDX_INSPECAO, self.IDX_DIAGNOSTICO])
+        # Guard defensivo: durante o teardown (destruicao do widget) o Qt pode
+        # emitir currentChanged(-1) com o wrapper Python ja em finalizacao.
+        sidebar = getattr(self, "_TelaDeExpediente__sidebar", None)
+        if sidebar is not None:
+            sidebar.setVisible(index in [self.IDX_INSPECAO, self.IDX_DIAGNOSTICO])
 
     @Slot()
     def __on_minimizar(self) -> None:
