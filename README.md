@@ -226,21 +226,24 @@ classDiagram
     %% ==================== Core Services Layer ====================
     class MotorDePontuacao {
         +calcular_vmax_relatorio(relatorio) float
-        +calcular_pontuacao_relatorio(v_max, dto) float
         +calcular_meta_turno(relatorios) float
-        +conferir_condicao_vitoria(nota, v_max) bool
+        +calcular_pontuacao_relatorio(v_max, dados) float
+        +calcular_pontuacao_detalhada(v_max, dados) ResultadoDiagnosticoDTO
+        +calcular_scores_por_item(v_max, dados) dict
+        +conferir_condicao_vitoria(nota, maxima) bool
+        -__calcular_subtotais(...) _Subtotais
         -_calcular_pontuacao_riscos(...) float
         -_calcular_pontuacao_inseguranca(...) float
-        -_calcular_pontuacao_decisao(...) float
-        -_calcular_fator_tempo(tempo) float
+        -_calcular_pontuacao_decisao(v_max, status) float
+        -_calcular_fator_tempo(t) float
     }
     class DiagnosticoDeResposta {
         +gerar_diagnostico_pontuacao(gabarito, respostas) DiagnosticoPontuacaoDTO
-    }
-    class DiagnosticoFeedback {
-        <<stub>>
+        +gerar_feedback(gabarito, respostas) DiagnosticoFeedbackDTO
+        -__extrair_metadados(gabarito, respostas) _MetadadosInspecao
     }
     MotorDePontuacao ..> DiagnosticoPontuacaoDTO : depende
+    MotorDePontuacao ..> ResultadoDiagnosticoDTO : produz
     DiagnosticoDeResposta ..> DiagnosticoPontuacaoDTO : cria
     DiagnosticoDeResposta --> FolhaDeGabarito : usa
     DiagnosticoDeResposta --> FolhaDeResposta : usa
@@ -251,10 +254,50 @@ classDiagram
         qnt_riscos_marcados: int
         qnt_riscos_gabarito: int
         qnt_riscos_corretos_marcados: int
+        qnt_fatores_gabarito: int
+        qnt_fatores_marcados: int
         estado_ato: bool
         estado_condicao: bool
         status_decisao_jogador: str
         tempo_resposta_segundos: float
+        pontuacao_final: float
+        nota_riscos: float
+        nota_fatores: float
+        nota_decisao: float
+        pontos_bonus_tempo: float
+        decisao_anulada: bool
+    }
+    class DiagnosticoFeedbackDTO {
+        <<dataclass frozen>>
+        riscos_acertados: List[str]
+        riscos_esquecidos: List[str]
+        riscos_inventados: List[str]
+        fatores_acertados: List[str]
+        fatores_esquecidos: List[str]
+        fatores_inventados: List[str]
+        decisao_tomada: str
+        decisao_esperada: str
+        score_por_risco: dict
+        score_por_fator: dict
+    }
+    class ResultadoDiagnosticoDTO {
+        <<dataclass frozen>>
+        pontuacao: DiagnosticoPontuacaoDTO
+        feedback: DiagnosticoFeedbackDTO
+    }
+    class ParecerCIPA {
+        <<dataclass frozen>>
+        numero: str
+        referencia: str
+        texto: str
+    }
+    ResultadoDiagnosticoDTO *-- DiagnosticoPontuacaoDTO
+    ResultadoDiagnosticoDTO *-- DiagnosticoFeedbackDTO
+
+    %% ==================== Core Interfaces ====================
+    class IPareceresCIPA {
+        <<interface>>
+        +obter_parecer_para_curso(curso) ParecerCIPA*
     }
 
     %% ==================== Infrastructure Layer ====================
@@ -273,6 +316,13 @@ classDiagram
         +construir_pilha(dados) List[Relatorio]
         -__instanciar_relatorio_unico(dto) Relatorio
         -__extrair_instanciar_anexos(dto) List[Anexo]
+    }
+    class RepositorioDePareceresCIPA {
+        -__caminho_ficheiro: Path
+        +obter_parecer_para_curso(curso) ParecerCIPA
+        +cursos_disponiveis() List[str]
+        -__carregar_pareceres() dict
+        -__gerar_numero() str
     }
     class DadosCenarioDTO {
         <<dataclass>>
@@ -301,6 +351,7 @@ classDiagram
     FabricaDeRelatorios ..> DadosCenarioDTO : consome
     FabricaDeRelatorios ..> Relatorio : produz
     FabricaDeRelatorios ..> Anexo : instancia
+    RepositorioDePareceresCIPA --|> IPareceresCIPA : implementa
 
     %% ==================== Application Layer ====================
     class GerenciadorDeTurno {
@@ -320,13 +371,65 @@ classDiagram
         -__processar_submissao_jogador(...) FolhaDeResposta
     }
     class GameManager {
-        <<stub>>
+        -__view: IGameView
+        +iniciar_aplicacao() void
+        +encerrar_aplicacao() void
+        +reiniciar_expediente() void
+        +carregar_menu_principal() void
+        +on_iniciar_solicitado() void
+        +iniciar_expediente(perfil) void
+        +processar_submissao(respostas) void
+        +avancar_fila_ou_dia() void
+        -__iniciar_campanha(perfil) void
+        -__encerrar_campanha() void
+        -__iniciar_dia(dia) void
     }
+    class IGameView {
+        <<interface>>
+        +inicializar() void*
+        +fechar() void*
+        +exibir_menu() void*
+        +exibir_selecao_perfil() void*
+        +trocar_para_tela_inspecao() void*
+        +renderizar_relatorio(dados) void*
+        +exibir_tela_diagnostico(resultado) void*
+        +exibir_resultado(pontuacao, dias, venceu) void*
+        +exibir_popup_erro(mensagem) void*
+    }
+    GerenciadorDeTurno ..> MotorDePontuacao : usa
+    GerenciadorDeTurno ..> DiagnosticoDeResposta : usa
+    GerenciadorDeTurno ..> Relatorio : manipula
+    GerenciadorDeTurno ..> FabricaDeRelatorios : usa
+    GerenciadorDeTurno ..> RepositorioJSON : usa
+    GerenciadorDeTurno ..> ResultadoDiagnosticoDTO : produz
+    GameManager ..> IGameView : coordena
+    GameManager ..> GerenciadorDeTurno : instancia
 
-    %% ==================== Config ====================
-    class LoggingConfig {
-        +setup_logging() void
+    %% ==================== View Layer ====================
+    class JanelaPrincipal {
+        +iniciar_solicitado: Signal
+        +perfil_confirmado: Signal
+        +submeter_respostas: Signal
+        +continuar_solicitado: Signal
+        +voltar_menu_solicitado: Signal
+        +sair_solicitado: Signal
+        +inicializar() void
+        +fechar() void
+        +exibir_menu() void
+        +exibir_selecao_perfil() void
+        +exibir_tela_diagnostico(resultado) void
     }
+    class TelaDeExpediente {
+        +exibir_selecao_perfil() void
+        +renderizar_relatorio(dados) void
+        +exibir_tela_diagnostico(resultado) void
+        +exibir_tela_endgame(pontos, dias, venceu) void
+        -__on_page_changed(index) void
+    }
+    JanelaPrincipal --|> IGameView : implementa
+    JanelaPrincipal ..> TelaDeExpediente : compõe
+    TelaDeExpediente "1" *-- "1" pagina_inspecao
+    TelaDeExpediente "1" *-- "1" pagina_diagnostico
 ```
 
 ### Legenda das Camadas
@@ -334,7 +437,7 @@ classDiagram
 | Camada | Diretório | Responsabilidade |
 |--------|-----------|------------------|
 | **Core (Domain)** | `core/model/`, `core/services/`, `core/dtos/` | Regras de negócio e entidades: **sem dependências externas** |
-| **Infrastructure** | `infrastructure/` | Repositório, fábrica e DTOs de persistência |
-| **Application** | `application/controllers/` | Orquestração dos casos de uso (em implementação) |
-| **View** | `view/` | Interface com o utilizador (PySide6) |
-| **Config** | `config/` | Configuração centralizada (logging, etc.) |
+| **Infrastructure** | `infrastructure/` | Repositórios, fábrica e DTOs de persistência |
+| **Application** | `application/controllers/`, `application/interfaces/` | Orquestração dos casos de uso e contratos da View |
+| **View** | `view/` | Interface com o utilizador (PySide6, MVP) |
+| **Config** | `config/` | Configuração centralizada (logging, constantes) |
