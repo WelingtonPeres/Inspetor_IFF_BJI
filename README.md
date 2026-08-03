@@ -128,10 +128,17 @@ python main.py
 Para manter este ficheiro principal conciso, toda a documentação técnica, especificações matemáticas e guias de desenvolvimento foram modularizados. Consulte os links abaixo para compreender a fundo os detalhes do projeto:
 
 * **[Guia de Contribuição (CONTRIBUTING.md)](CONTRIBUTING.md)**: Como configurar o ambiente local, pré-requisitos e regras para submissão de Pull Requests.
+* **[Arquitetura Limpa](docs/CLEAN_ARCHITECTURE.md)**: Mapa de camadas, responsabilidades, regras de dependência e organização do código-fonte.
+* **[Manual de Revisão de Arquitetura](docs/CLEAN_ARCHITECTURE_CHECKLIST.md)**: Guia de code review com as 5 Perguntas Fundamentais antes de qualquer merge.
+* **[Arquitetura da Camada View (MVP)](docs/ARQUITETURA_VIEW.md)**: Padrões de apresentação em PySide6 — widgets, signals/slots e contratos de interface.
+* **[Git Flow (Versionamento)](docs/GITFLOW.md)**: Fluxo de branches eternas e efémeras adotado pela equipa.
 * **[Modelagem Matemática e Algoritmos](docs/game_design/MODELAGEM_MATEMATICA.md)**: Detalhamento das equações de pontuação, cálculo de exatidão e fator de decaimento temporal.
 * **[Estrutura de Dados e Schema JSON](docs/ESTRUTURA_JSON.md)**: Arquitetura e tipagem dos ficheiros de persistência de cenários e relatórios.
 * **[Level Design e Fluxos do Jogo](docs/game_design/Level_Design.md)**: Mapeamento da experiência do utilizador, progressão de dificuldade e mecânicas de feedback.
 * **[Padrões de Nomenclatura e PEP-8](docs/PADROES_NOMENCLATURA_PEP8.md)**: Diretrizes estritas de estilo de código adotadas pela equipa de engenharia.
+* **[Diretrizes de Design Visual](docs/visual/DESIGN.md)**: Tokens de cor, temas claro/escuro e especificações da interface.
+* **[Identidade Institucional](docs/visual/IDENTIDADE.md)**: Regras de uso da marca, cores e tipografia do IFFluminense.
+* **[Atribuição dos Ícones de Risco](view/assets/icons/riscos/ATTRIBUTION.md)**: Origem (Font Awesome) e licença CC BY 4.0 dos ícones utilizados.
 
 ## 3. Arquitetura do Projeto (Diagrama de Classes)
 
