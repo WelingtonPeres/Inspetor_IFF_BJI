@@ -1,0 +1,805 @@
+{
+  "meta": {
+    "resolucao_base": "1920x1080",
+    "proporcao": "16:9"
+  },
+  "fontes": {
+    "ocorrencias": {
+      "taskbar_texto": {
+        "size": 9
+      },
+      "modal_titulo_janela": {
+        "size": 9
+      }
+    }
+  },
+  "desktop_shortcut": {
+    "largura": 100,
+    "altura": 100,
+    "icone": {
+      "largura": 48,
+      "altura": 48,
+      "border_radius": 4,
+      "font_size": 24,
+      "font_family": "Open Sans"
+    },
+    "legenda": {
+      "word_wrap": true,
+      "font_size": 9,
+      "font_family": "Open Sans"
+    },
+    "spacing": {
+      "icone_legenda": 5,
+      "entre_atalhos": 16
+    }
+  },
+  "taskbar": {
+    "altura": 44,
+    "margens": {
+      "top": 2,
+      "right": 12,
+      "bottom": 2,
+      "left": 12
+    },
+    "start": {
+      "icone_arquivo": "iffOS.png",
+      "icone_tamanho": 64,
+      "tooltip": "Iniciar",
+      "margens": {
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "left": 0
+      },
+      "spacing": 8
+    },
+    "separator": {
+      "largura": 1
+    },
+    "atalhos": {
+      "margens": {
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "left": 0
+      },
+      "spacing_entre_atalhos": 16,
+      "icone": {
+        "largura": 32,
+        "altura": 32
+      },
+      "shortcut_margens": {
+        "top": 4,
+        "right": 4,
+        "bottom": 4,
+        "left": 4
+      }
+    },
+    "system_tray": {
+      "relogio_formato": "HH:mm",
+      "atualizacao_segundos": 1
+    }
+  },
+  "tela": {
+    "margens": {
+      "desktop": {
+        "top": 48,
+        "right": 48,
+        "bottom": 8,
+        "left": 48
+      }
+    }
+  },
+  "wallpaper": {
+    "arquivo": "view/assets/images/wallpapers/wallpaper_fundo.jpg",
+    "scaled_contents": true
+  },
+  "logo": {
+    "arquivo": "view/assets/icons/iff_Icons/logo-iff.png",
+    "largura_maxima": 300
+  },
+  "sidebar": {
+    "largura": 200,
+    "item_altura": 48,
+    "item_font_size": 13,
+    "item_padding": {
+      "top": 12,
+      "right": 16,
+      "bottom": 12,
+      "left": 16
+    },
+    "icone_tamanho": 20,
+    "logo_tamanho": 40,
+    "header_margens": {
+      "top": 20,
+      "right": 0,
+      "bottom": 16,
+      "left": 0
+    },
+    "titulo_font_size": 11,
+    "divider_altura": 1,
+    "itens": [
+      {
+        "id": "dashboard",
+        "label": "Dashboard",
+        "inativo": true
+      },
+      {
+        "id": "reports",
+        "label": "Reports",
+        "inativo": false
+      },
+      {
+        "id": "logs",
+        "label": "Logs",
+        "inativo": true
+      },
+      {
+        "id": "settings",
+        "label": "Settings",
+        "inativo": true
+      }
+    ]
+  },
+  "stamp_button": {
+    "largura": 160,
+    "altura": 52,
+    "font_size": 20,
+    "margem_horizontal": 16
+  },
+  "anexo_preview": {
+    "altura": 120,
+    "thumbnail_largura": 160,
+    "thumbnail_altura": 90,
+    "margens": {
+      "top": 8,
+      "right": 16,
+      "bottom": 8,
+      "left": 16
+    }
+  },
+  "pagina_loading": {
+    "titulo": {
+      "fonte": "Courier New",
+      "tamanho": 16
+    },
+    "progress_bar": {
+      "altura": 20
+    },
+    "texto": {
+      "fonte": "Open Sans",
+      "tamanho": 14
+    }
+  },
+  "pagina_diagnostico": {
+    "spacing": 16,
+    "margins": {"top": 20, "right": 20, "bottom": 12, "left": 20},
+    "btn_altura": 40,
+    "btn_largura_min": 110,
+    "font_size": 13,
+    "card": {
+      "padding_h": 12,
+      "padding_v": 10,
+      "gap": 10,
+      "header_font_size": 12,
+      "body_font_size": 12
+    },
+    "header": {
+      "label_size": 11,
+      "valor_size": 34
+    },
+    "tile": {
+      "size": 72,
+      "border_radius": 8,
+      "badge_size": 18,
+      "icon_size": 48,
+      "container_width": 104,
+      "label_size": 11,
+      "score_size": 12
+    },
+    "decisao": {
+      "opcao_altura": 42,
+      "opcao_largura_min": 100,
+      "opcao_font_size": 13,
+      "opcao_padding_h": 14,
+      "opcao_padding_v": 8,
+      "border_radius": 4
+    },
+    "total": {
+      "label_size": 13,
+      "valor_size": 13
+    }
+  },
+  "game_win": {
+    "spacing": 16,
+    "btn_altura": 40,
+    "btn_largura_min": 110,
+    "font_size": 13,
+    "titulo_size": 24,
+    "pontuacao_size": 16
+  },
+  "gamewin": {
+    "card": {
+      "largura_min": 330,
+      "largura_max": 620,
+      "fator_largura": 0.58,
+      "altura_minima": 270,
+      "parecer_max_height": 150,
+      "padding": {
+        "top": 22,
+        "right": 20,
+        "bottom": 22,
+        "left": 20
+      }
+    },
+    "spacing": {
+      "entre_titulo_card": 16,
+      "entre_card_score": 18,
+      "entre_score_botoes": 18,
+      "margem": 20,
+      "entre_botoes_row": 8,
+      "card_divider_altura": 2,
+      "spacers_top": 8,
+      "spacers_mid": 12,
+      "spacers_ref": 10
+    },
+    "fontes": {
+      "header": {
+        "size": 14,
+        "letter_spacing": 0.5
+      },
+      "timestamp": {
+        "size": 12
+      },
+      "titulo": {
+        "size": 40,
+        "letter_spacing": 2.4
+      },
+      "subtitulo": {
+        "size": 14,
+        "letter_spacing": 0.9
+      },
+      "trophy": {
+        "size": 80
+      },
+      "card_cabecalho": {
+        "size": 10,
+        "letter_spacing": 0.6
+      },
+      "card_subcabecalho": {
+        "size": 12
+      },
+      "card_parecer_num": {
+        "size": 12
+      },
+      "card_parecer_texto": {
+        "size": 13
+      },
+      "score_label": {
+        "size": 14,
+        "letter_spacing": 0.5
+      },
+      "score_valor": {
+        "size": 30
+      },
+      "botao": {
+        "size": 13
+      }
+    },
+    "botoes": {
+      "altura": 40,
+      "largura_min": 55,
+      "padding_y": 8,
+      "border_radius": 6
+    },
+    "shadow": {
+      "blur": 4,
+      "offset_x": 5,
+      "offset_y": 5
+    },
+    "pictogramas": {
+      "size_base_max": 130,
+      "size_base_min": 60,
+      "opacity": 0.07
+    },
+    "confetti": {
+      "num_particulas": 26
+    }
+  },
+  "pagina_inspecao": {
+    "deck": {
+      "spacing": 12
+    },
+    "info_block": {
+      "spacing": 12
+    },
+    "grupo_info": {
+      "margens": {
+        "top": 12,
+        "right": 8,
+        "bottom": 8,
+        "left": 8
+      }
+    },
+    "grupo_riscos": {
+      "spacing": 10,
+      "margens": {
+        "top": 8,
+        "right": 0,
+        "bottom": 0,
+        "left": 0
+      }
+    },
+    "tile_risco": {
+      "tamanho_minimo": 96,
+      "icone_tamanho": 64
+    },
+    "grupo_fatores": {
+      "spacing": 12
+    },
+    "fator_tile": {
+      "icone_tamanho": 48,
+      "margens": {
+        "top": 8,
+        "right": 6,
+        "bottom": 8,
+        "left": 6
+      },
+      "spacing": 10
+    },
+    "fontes": {
+      "fator_titulo": {
+        "size": 16
+      },
+      "fator_subtitulo": {
+        "size": 13
+      },
+      "titulo_relatorio": {
+        "size": 60
+      }
+    },
+    "grupo_decisao": {
+      "spacing": 12
+    },
+    "botao_submeter": {
+      "margem_top": 12
+    },
+    "prancheta": {
+      "spacing": 12
+    }
+  },
+  "character_carousel": {
+    "card": {
+      "largura_base": 260,
+      "altura_base": 460
+    },
+    "slot_spacing": 340,
+    "anim_duration": 350,
+    "bump_duration": 200,
+    "depth_decay": 0.6,
+    "max_visible_slots": 3,
+    "max_lift": 15,
+    "scale": {
+      "centro": 1.0,
+      "slot": 0.72,
+      "min": 0.45
+    },
+    "opacity": {
+      "centro": 1.0,
+      "slot": 0.5,
+      "min": 0.2
+    },
+    "nav_btn": {
+      "tamanho": 52,
+      "margem": 16
+    },
+    "name_bar_ratio": 0.17,
+    "cores": {
+      "card_bg": "#12121e",
+      "accent": "#2F9E41",
+      "accent_glow": "#2F9E41",
+      "text_white": "#ffffff",
+      "text_muted": "#7777aa"
+    },
+    "ref_area": {
+      "largura": 1000,
+      "altura": 600
+    }
+  },
+  "anexo_gallery": {
+    "seta_largura": 48,
+    "opacidade_fundo": 0.7,
+    "indicador_altura": 24
+  },
+  "media_viewer": {
+    "opacidade_fundo": 0.9
+  },
+  "video_player": {
+    "controls_altura": 36,
+    "progress_altura": 6,
+    "icone_tamanho": 20,
+    "font_size": 9
+  },
+  "window_title_bar": {
+    "altura": 32,
+    "margens": {
+      "top": 0,
+      "right": 8,
+      "bottom": 0,
+      "left": 12
+    },
+    "btn_tamanho": 36,
+    "btn_altura": 28
+  },
+  "tela_de_expediente": {
+    "proporcao_tela": 0.8,
+    "title_bar": {
+      "altura": 32,
+      "margens": {
+        "top": 0,
+        "right": 8,
+        "bottom": 0,
+        "left": 12
+      }
+    },
+    "body": {
+      "margens": {
+        "top": 16,
+        "right": 24,
+        "bottom": 16,
+        "left": 24
+      },
+      "spacing_entre_elementos": 12
+    }
+  },
+  "tutorial": {
+    "proporcao_tela": 0.8,
+    "proporcao_sobre_expediente": 0.8,
+    "font_familia": "Open Sans",
+    "slide": {
+      "margens": {
+        "top": 8,
+        "right": 0,
+        "bottom": 8,
+        "left": 0
+      },
+      "colunas_spacing": 24,
+      "texto_max_largura": 640
+    },
+    "chrome": {
+      "margens": {
+        "top": 12,
+        "right": 16,
+        "bottom": 12,
+        "left": 16
+      },
+      "header_spacing": 10,
+      "contador_font_size": 12,
+      "pular_font_size": 12,
+      "briefing_altura": 44,
+      "briefing_font_size": 14,
+      "briefing_icone_tamanho": 26,
+      "briefing_spacing": 12,
+      "footer_gap": 20
+    },
+    "dot": {
+      "largura": 7,
+      "largura_ativo": 20,
+      "altura": 7,
+      "gap": 7
+    },
+    "nav_arrow": {
+      "tamanho": 34
+    },
+    "cta_btn": {
+      "altura": 52,
+      "font_size": 14,
+      "padding": {
+        "left": 26,
+        "top": 13,
+        "right": 26,
+        "bottom": 13
+      }
+    },
+    "credential": {
+      "largura": 280,
+      "altura": 380,
+      "selo": 100,
+      "selo_icone": 50,
+      "logo": 26,
+      "nome": 18,
+      "cargo": 12,
+      "label": 10,
+      "padding": {
+        "left": 24,
+        "top": 26,
+        "right": 24,
+        "bottom": 22
+      }
+    },
+    "item_numerado": {
+      "badge_tamanho": 28,
+      "badge_font_size": 14,
+      "titulo_font_size": 14,
+      "descricao_font_size": 13,
+      "spacing": 10
+    },
+    "mini_relatorio": {
+      "largura": 430,
+      "titulo_font_size": 11,
+      "campo_font_size": 10,
+      "valor_font_size": 11,
+      "campo_spacing": 10,
+      "badge_tamanho": 22,
+      "badge_font_size": 11,
+      "bloco_padding": {
+        "left": 14,
+        "top": 10,
+        "right": 14,
+        "bottom": 10
+      },
+      "padding": {
+        "left": 20,
+        "top": 18,
+        "right": 20,
+        "bottom": 18
+      }
+    },
+    "anexos_visual": {
+      "largura": 560,
+      "spacing": 14,
+      "imagem_largura": 540,
+      "imagem_altura": 300,
+      "botao_largura": 540,
+      "botao_altura": 90
+    },
+    "riscos_grupo": {
+      "largura": 380,
+      "spacing": 10
+    },
+    "risco_tile": {
+      "tamanho_minimo": 110,
+      "icone_tamanho": 44,
+      "font_size": 11
+    },
+    "fatores_visual": {
+      "largura": 420,
+      "spacing": 14
+    },
+    "fator_tile": {
+      "icone_tamanho": 40,
+      "titulo_font_size": 13,
+      "subtitulo_font_size": 10,
+      "spacing": 14,
+      "margens": {
+        "left": 20,
+        "top": 16,
+        "right": 20,
+        "bottom": 16
+      }
+    },
+    "exemplo": {
+      "titulo_font_size": 13,
+      "linha_font_size": 12,
+      "margens": {
+        "left": 14,
+        "top": 10,
+        "right": 14,
+        "bottom": 10
+      }
+    },
+    "decisao_visual": {
+      "largura": 500,
+      "spacing": 18,
+      "legenda_font_size": 11,
+      "padding": {
+        "left": 24,
+        "top": 26,
+        "right": 24,
+        "bottom": 26
+      }
+    },
+    "carimbo": {
+      "altura": 52,
+      "font_size": 11
+    },
+    "vitoria_visual": {
+      "largura": 480,
+      "spacing": 16
+    },
+    "mini_tela": {
+      "icone_tamanho": 44,
+      "titulo_font_size": 13,
+      "subtitulo_font_size": 10,
+      "margens": {
+        "left": 14,
+        "top": 22,
+        "right": 14,
+        "bottom": 22
+      }
+    },
+    "aviso": {
+      "texto_font_size": 12,
+      "icone_font_size": 15,
+      "spacing": 10,
+      "margens": {
+        "left": 14,
+        "top": 10,
+        "right": 14,
+        "bottom": 10
+      }
+    }
+  },
+  "janela_sistema": {
+    "largura": 480,
+    "altura": 340,
+    "title_bar": {
+      "altura": 32,
+      "margens": {
+        "top": 0,
+        "right": 12,
+        "bottom": 0,
+        "left": 12
+      }
+    },
+    "body": {
+      "margens": {
+        "top": 24,
+        "right": 40,
+        "bottom": 24,
+        "left": 40
+      },
+      "spacing_entre_elementos": 16
+    }
+  },
+  "atalhos_lista": [
+    {
+      "icone_arquivo": "game.png",
+      "legenda": "Iniciar",
+      "action": "iniciar"
+    },
+    {
+      "icone_arquivo": "pasta_verde.png",
+      "legenda": "Arquivos",
+      "action": "info_arquivos"
+    },
+    {
+      "icone_arquivo": "help.png",
+      "legenda": "Help",
+      "action": "info_help"
+    },
+    {
+      "icone_arquivo": "image.png",
+      "legenda": "Wallpapers",
+      "action": "wallpaper"
+    }
+  ],
+  "wallpaper_selector": {
+    "dialog": {
+      "largura_minima": 640,
+      "altura_minima": 420
+    },
+    "thumbnail": {
+      "largura": 160,
+      "altura": 90,
+      "frame_padding": 16,
+      "frame_altura_extra": 40,
+      "grid_gap": 24,
+      "margem_container": 32
+    },
+    "preview": {
+      "altura": 120,
+      "largura_max": 400
+    },
+    "layout": {
+      "margens": {
+        "top": 16,
+        "right": 16,
+        "bottom": 16,
+        "left": 16
+      },
+      "spacing": 12
+    },
+    "fontes": {
+      "instrucao": {
+        "size": 9
+      },
+      "nome": {
+        "size": 9
+      }
+    }
+  },
+  "gameover": {
+    "card": {
+      "largura_min": 330,
+      "largura_max": 620,
+      "fator_largura": 0.58,
+      "altura_minima": 270,
+      "parecer_max_height": 150,
+      "padding": {
+        "top": 22,
+        "right": 20,
+        "bottom": 22,
+        "left": 20
+      }
+    },
+    "spacing": {
+      "entre_titulo_card": 16,
+      "entre_card_score": 18,
+      "entre_score_botoes": 18,
+      "entre_botoes_footer": 0,
+      "margem": 20,
+      "entre_botoes_row": 8,
+      "entre_footer": 10,
+      "spacers_top": 8,
+      "card_divider_altura": 2,
+      "spacers_mid": 12,
+      "spacers_ref": 10
+    },
+    "fontes": {
+      "header": {
+        "size": 14,
+        "letter_spacing": 0.5
+      },
+      "timestamp": {
+        "size": 12
+      },
+      "titulo": {
+        "size": 40,
+        "letter_spacing": 2.4
+      },
+      "subtitulo": {
+        "size": 14,
+        "letter_spacing": 0.9
+      },
+      "card_cabecalho": {
+        "size": 10,
+        "letter_spacing": 0.6
+      },
+      "card_subcabecalho": {
+        "size": 12
+      },
+      "card_parecer_num": {
+        "size": 12
+      },
+      "card_parecer_texto": {
+        "size": 13
+      },
+      "score_label": {
+        "size": 14,
+        "letter_spacing": 0.5
+      },
+      "score_valor": {
+        "size": 30
+      },
+      "footer_label": {
+        "size": 13,
+        "letter_spacing": 1.4
+      },
+      "botao": {
+        "size": 13
+      }
+    },
+    "botoes": {
+      "altura": 40,
+      "largura_min": 55,
+      "padding_y": 8,
+      "border_radius": 6
+    },
+    "footer": {
+      "indicator_size": 8,
+      "padding_y": 8,
+      "padding_x": 14
+    },
+    "pictogramas": {
+      "size_base_max": 130,
+      "size_base_min": 60,
+      "opacity": 0.07
+    },
+    "shadow": {
+      "blur": 4,
+      "offset_x": 5,
+      "offset_y": 5
+    }
+  }
+}

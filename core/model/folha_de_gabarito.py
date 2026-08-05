@@ -18,6 +18,9 @@ class FolhaDeGabarito(FolhaDeInspecao):
         if decisao_boa.upper() not in FolhaDeGabarito.LISTA_DECISOES_VALIDAS:
             raise ValueError(f"[Erro] Decisão subótima inválida: {decisao_boa}")
         
+        if decisao_otima.upper() == decisao_boa.upper():
+            raise ValueError(f"[Erro] Decisão ótima e decisão boa não podem ser iguais: {decisao_otima}")
+        
         self.__decisao_otima = decisao_otima
         self.__decisao_boa = decisao_boa
         

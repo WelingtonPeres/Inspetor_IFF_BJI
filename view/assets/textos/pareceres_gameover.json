@@ -1,0 +1,47 @@
+{
+  "T_QUIMICA": [
+    "A reação entre 'atenção' e 'responsabilidade' deveria ter ocorrido nesta inspeção — mas o resultado foi, lamentavelmente, inerte. Recomenda-se repetir o experimento com mais rigor da próxima vez.",
+    "Identificamos uma substância rara nesta inspeção: pressa em excesso e cautela em quantidade insuficiente. Mistura perigosa, resultado explosivo.",
+    "O inspetor titulou a situação como 'sob controle'. O indicador de pH discordou veementemente. Recomenda-se refazer a análise com mais calma."
+  ],
+  "T_INFORMATICA": [
+    "Encontramos um bug crítico nesta inspeção: o inspetor. Sugerimos rodar novamente o processo, de preferência sem pular as validações.",
+    "O sistema de atenção do inspetor retornou erro 404: cuidado não encontrado. Recomenda-se reinicializar antes da próxima tentativa.",
+    "Compilamos o desempenho desta inspeção e o resultado veio cheio de warnings ignorados. Recomenda-se revisar o código antes de rodar em produção de novo."
+  ],
+  "T_AGROPECUARIA": [
+    "O terreno estava cheio de riscos visíveis a olho nu, mas o inspetor colheu apenas desculpas. Recomenda-se replantar a atenção antes da próxima safra de inspeções.",
+    "Nesta inspeção, o único item bem irrigado foi a criatividade nas justificativas. O cuidado, esse ficou em solo seco.",
+    "O inspetor arou rápido demais e não viu as pedras no caminho. Literalmente. Recomenda-se um ritmo mais cauteloso na próxima colheita."
+  ],
+  "T_ALIMENTOS": [
+    "Esta inspeção foi avaliada e reprovada no controle de qualidade: prazo de validade da atenção vencido antes mesmo do relatório começar. Recomenda-se novo lote, com mais cuidado no preparo.",
+    "A análise sensorial deste parecer aponta um forte sabor de pressa, com notas de descuido e um final amargo. Recomenda-se rever a receita antes de servir de novo.",
+    "Encontramos contaminação cruzada entre 'vontade de terminar rápido' e 'atenção aos detalhes'. Resultado: impróprio para consumo administrativo."
+  ],
+  "T_MEIO_AMBIENTE": [
+    "O único impacto ambiental identificado nesta inspeção foi o tamanho do estrago causado pela distração do inspetor. Recomenda-se reflorestar o senso de responsabilidade antes da próxima tentativa.",
+    "Esta comissão detectou um índice preocupante de poluição visual: excesso de pressa cobrindo qualquer vestígio de cautela. Recomenda-se despoluir o processo antes da próxima inspeção.",
+    "O relatório desta inspeção tem uma pegada de carbono enorme: todo esse esforço gasto justificando o que deveria ter sido simplesmente bem observado."
+  ],
+  "T_ZOOTECNIA": [
+    "Nesta inspeção, o inspetor demonstrou menos instinto de proteção que o próprio rebanho sob sua responsabilidade. Recomenda-se retomar o manejo — desta vez, prestando atenção em quem precisa ser cuidado.",
+    "O comportamento do inspetor durante a inspeção foi classificado como 'errático e sem manejo adequado'. Recomenda-se um retorno ao curral da atenção básica.",
+    "Identificamos um padrão preocupante: o rebanho estava mais alerta aos riscos do que o próprio inspetor. Recomenda-se rever as prioridades antes da próxima ronda."
+  ],
+  "DEFAULT": [
+    "Esta comissão avaliou a inspeção e concluiu que 'boa vontade' não é sinônimo de 'atenção aos detalhes'. Recomenda-se tentar novamente, desta vez prestando atenção de verdade.",
+    "O relatório foi entregue no prazo, o que só torna mais impressionante o tanto de coisa que passou despercebida. Recomenda-se rever o processo com calma.",
+    "Registramos, para constar, que todas as informações necessárias estavam disponíveis. O que faltou foi, digamos, usá-las."
+  ],
+  "CT_ALIMENTOS": [
+    "A análise físico-química desta inspeção detectou uma concentração alarmante de pressa e traços insuficientes de rigor metodológico. Recomenda-se nova coleta de amostra, com protocolo revisado.",
+    "O controle de qualidade classificou esta inspeção como não conforme, com desvio significativo entre o procedimento esperado e o efetivamente executado.",
+    "Identificamos, em análise laboratorial, que o índice de atenção do inspetor esteve abaixo do limite mínimo aceitável para liberação do lote."
+  ],
+  "E_COMPUTACAO": [
+    "O circuito de atenção do inspetor apresentou um curto — energia sobrando em pressa, faltando em cautela. Recomenda-se verificar as conexões antes de ligar o sistema de novo.",
+    "Nesta inspeção, o sensor de risco do inspetor claramente não estava calibrado. Recomenda-se recalibração completa antes da próxima execução.",
+    "O firmware de bom senso não respondeu aos comandos durante esta inspeção. Recomenda-se reiniciar o sistema — de preferência com atenção ligada desta vez."
+  ]
+}

@@ -1,0 +1,430 @@
+[
+  {
+    "id_cenario": 1,
+    "titulo": "Aula sobre Água Destilada",
+    "dificuldade": 2,
+    "relatorio": {
+      "atividade": "Prática com Água Destilada",
+      "local": "Laboratório de Solos - IFFBJI",
+      "envolvidos": [
+        "Prof. R. Gardoni",
+        "Tec. Bigodin",
+        "Pietra (EC)",
+        "PP (EC)"
+      ],
+      "texto_descricao": "Foi relatado que um indivíduo ingeriu água destilada direto do bico de uma pisseta. Ressalta-se que o ambiente dispunha de todos os equipamentos de proteção obrigatórios exigidos para a permanência segura no local.",
+      "riscos": [
+        "QUIMICO"
+      ],
+      "fatores_inseguranca": [
+        "ATO_INSEGURO"
+      ],
+      "decisao_administrativa": {
+        "decisao_otima": "ADVERTIR",
+        "decisao_boa": "INTERDITAR"
+      },
+      "curso": [
+        "DEFAULT"
+      ]
+    },
+    "anexos": [
+      {
+        "id_anexo": 101,
+        "tipo": "VIDEO",
+        "caminho_arquivo": "resources/anexos/videos/agua_destilada_beber.mp4"
+      }
+    ]
+  },
+  {
+    "id_cenario": 2,
+    "titulo": "Aula de Técnicas Basicas de Laboratorio",
+    "dificuldade": 2,
+    "relatorio": {
+      "atividade": "Prática com Água Destilada",
+      "local": "Laboratório de Solos - IFFBJI",
+      "envolvidos": [
+        "Prof. R. Gardoni",
+        "Tec. Pietra",
+        "Pedro da Ana (EC)",
+        "Luciano (EC)"
+      ],
+      "texto_descricao": "Foi relatado que pissetas foram utilizadas de forma inadequada em um confronto com esguichos de água destilada.O local dispunha de todos os equipamentos de proteção obrigatórios exigidos para a permanência segura.",
+      "riscos": [
+        "ACIDENTE",
+        "QUIMICO"
+      ],
+      "fatores_inseguranca": [
+        "ATO_INSEGURO"
+      ],
+      "decisao_administrativa": {
+        "decisao_otima": "ADVERTIR",
+        "decisao_boa": "INTERDITAR"
+      },
+      "curso": [
+        "DEFAULT"
+      ]
+    },
+    "anexos": [
+      {
+        "id_anexo": 201,
+        "tipo": "VIDEO",
+        "caminho_arquivo": "resources/anexos/videos/agua_destilada_guerra.mp4"
+      }
+    ]
+  },
+  {
+    "id_cenario": 3,
+    "titulo": "Queda de Alunos",
+    "dificuldade": 4,
+    "relatorio": {
+      "atividade": "Preparo para Titulação com HCl",
+      "local": "Laboratório de Solos - IFFBJI",
+      "envolvidos": [
+        "Bigodin (EC)",
+        "Misericordia(EC)"
+      ],
+      "texto_descricao": "Foi relatado que, ao transferir ácido clorídrico (HCl), líquido altamente corrosivo, de um béquer para uma bureta, utilizou-se uma banqueta de quase um metro de altura como degrau.",
+      "riscos": [
+        "ACIDENTE",
+        "QUIMICO"
+      ],
+      "fatores_inseguranca": [
+        "ATO_INSEGURO",
+        "CONDICAO_INSEGURA"
+      ],
+      "decisao_administrativa": {
+        "decisao_otima": "INTERDITAR",
+        "decisao_boa": "ADVERTIR"
+      },
+      "curso": [
+        "DEFAULT"
+      ]
+    },
+    "anexos": [
+      {
+        "id_anexo": 301,
+        "tipo": "VIDEO",
+        "caminho_arquivo": "resources/anexos/videos/bureta_banco.mp4"
+      }
+    ]
+  },
+  {
+    "id_cenario": 4,
+    "titulo": "Transbordamento na Bureta",
+    "dificuldade": 1,
+    "relatorio": {
+      "atividade": "Titulação com Soda Cáustica (NaOH)",
+      "local": "Laboratório de Solos - IFFBJI",
+      "envolvidos": [
+        "Prof. R. Gardoni",
+        "Pedro da Ana (EC)"
+      ],
+      "texto_descricao": "Foi relatado que, durante a titulação, houve transbordamento de Soda Cáustica (NaOH) de baixa concentração. Mesmo utilizando um funil para abastecer a bureta com o béquer, o líquido vazou. O laboratório disponibilizava os EPIs exigidos.",
+      "riscos": [
+        "QUIMICO",
+        "ACIDENTE"
+      ],
+      "fatores_inseguranca": [
+        "ATO_INSEGURO"
+      ],
+      "decisao_administrativa": {
+        "decisao_otima": "INTERDITAR",
+        "decisao_boa": "ADVERTIR"
+      },
+      "curso": [
+        "DEFAULT"
+      ]
+    },
+    "anexos": [
+      {
+        "id_anexo": 401,
+        "tipo": "VIDEO",
+        "caminho_arquivo": "resources/anexos/videos/bureta_transborda.mp4"
+      }
+    ]
+  },
+  {
+    "id_cenario": 5,
+    "titulo": "Secagem do Cadinho de Porcelana",
+    "dificuldade": 2,
+    "relatorio": {
+      "atividade": "Recolher Cadinho da Estufa",
+      "local": "Laboratório de Solos - IFFBJI",
+      "envolvidos": [
+        "Tec. Welington"
+      ],
+      "texto_descricao": "Relatou-se que, ao recolher o cadinho da estufa (onde a temperatura pode ultrapassar 100°C), o material escorregou e foi amparado por reflexo. Salienta-se que o ambiente mantinha todos os EPIs totalmente disponíveis.",
+      "riscos": [
+        "FISICO",
+        "ACIDENTE"
+      ],
+      "fatores_inseguranca": [
+        "ATO_INSEGURO"
+      ],
+      "decisao_administrativa": {
+        "decisao_otima": "INTERDITAR",
+        "decisao_boa": "ADVERTIR"
+      },
+      "curso": [
+        "DEFAULT"
+      ]
+    },
+    "anexos": [
+      {
+        "id_anexo": 501,
+        "tipo": "VIDEO",
+        "caminho_arquivo": "resources/anexos/videos/cadinho_quente_queda.mp4"
+      }
+    ]
+  },
+  {
+    "id_cenario": 6,
+    "titulo": "Acidente na Capela de Exaustão",
+    "dificuldade": 5,
+    "relatorio": {
+      "atividade": "Diluição de Ácido Sulfúrico",
+      "local": "Laboratório de Solos - IFFBJI",
+      "envolvidos": [
+        "Tec. Misericordia",
+        "Tec. Bigodin"
+      ],
+      "texto_descricao": "Foi relatado que a diluição inadequada de Ácido Sulfúrico na capela gerou uma reação exotérmica violenta, projetando o líquido corrosivo severamente pelo local. O laboratório disponibilizava todos os EPIs obrigatórios para uso.",
+      "riscos": [
+        "QUIMICO",
+        "FISICO",
+        "ACIDENTE"
+      ],
+      "fatores_inseguranca": [
+        "ATO_INSEGURO",
+        "CONDICAO_INSEGURA"
+      ],
+      "decisao_administrativa": {
+        "decisao_otima": "INTERDITAR",
+        "decisao_boa": "ADVERTIR"
+      },
+      "curso": [
+        "DEFAULT"
+      ]
+    },
+    "anexos": [
+      {
+        "id_anexo": 601,
+        "tipo": "VIDEO",
+        "caminho_arquivo": "resources/anexos/videos/capela_chuveiro.mp4"
+      }
+    ]
+  },
+  {
+    "id_cenario": 7,
+    "titulo": "Reagente nos Olhos",
+    "dificuldade": 5,
+    "relatorio": {
+      "atividade": "Identificação de Cátions com NaOH",
+      "local": "Laboratório de Solos - IFFBJI",
+      "envolvidos": [
+        "Tec. Pietra",
+        "Est. Bernado"
+      ],
+      "texto_descricao": "Foi relatado que um indivíduo sofreu respingos de NaOH (1 a 2 mol/L) nos olhos durante a identificação de cátions na capela de exaustão. Ressalta-se que o laboratório disponibilizava todos os equipamentos de proteção obrigatórios.",
+      "riscos": [
+        "QUIMICO",
+        "ACIDENTE"
+      ],
+      "fatores_inseguranca": [
+        "ATO_INSEGURO",
+        "CONDICAO_INSEGURA"
+      ],
+      "decisao_administrativa": {
+        "decisao_otima": "INTERDITAR",
+        "decisao_boa": "ADVERTIR"
+      },
+      "curso": [
+        "DEFAULT"
+      ]
+    },
+    "anexos": [
+      {
+        "id_anexo": 701,
+        "tipo": "VIDEO",
+        "caminho_arquivo": "resources/anexos/videos/capela_lavador_de_olhos.mp4"
+      }
+    ]
+  },
+  {
+    "id_cenario": 8,
+    "titulo": "Queimadura Quimica",
+    "dificuldade": 3,
+    "relatorio": {
+      "atividade": "Adição de Ácido Nítrico para Digestão de Metais",
+      "local": "Laboratório de Solos - IFFBJI",
+      "envolvidos": [
+        "Tec. Pietra"
+      ],
+      "texto_descricao": "Foi relatado que respingos de Ácido Nítrico atingiram as mãos de um indivíduo durante a digestão de metais na capela. Houve imprevistos no trajeto até o chuveiro de emergência. O local disponibilizava todos os EPIs obrigatórios.",
+      "riscos": [
+        "QUIMICO",
+        "ACIDENTE"
+      ],
+      "fatores_inseguranca": [
+        "ATO_INSEGURO",
+        "CONDICAO_INSEGURA"
+      ],
+      "decisao_administrativa": {
+        "decisao_otima": "INTERDITAR",
+        "decisao_boa": "ADVERTIR"
+      },
+      "curso": [
+        "DEFAULT"
+      ]
+    },
+    "anexos": [
+      {
+        "id_anexo": 801,
+        "tipo": "VIDEO",
+        "caminho_arquivo": "resources/anexos/videos/chuveiro_obistruido.mp4"
+      }
+    ]
+  },
+  {
+    "id_cenario": 9,
+    "titulo": "Aluno Curioso",
+    "dificuldade": 2,
+    "relatorio": {
+      "atividade": "Prática sobre a Bureta",
+      "local": "Laboratório de Solos - IFFBJI",
+      "envolvidos": [
+        "Prof. R. Gardoni",
+        "PP (EC)",
+        "Bernado (EC)"
+      ],
+      "texto_descricao": "Foi relatado que um indivíduo tocou, por curiosidade, em uma gota de substância desconhecida pendurada na ponta de uma bureta fechada. O laboratório disponibilizava todos os equipamentos de proteção obrigatórios.",
+      "riscos": [
+        "QUIMICO",
+        "ACIDENTE"
+      ],
+      "fatores_inseguranca": [
+        "ATO_INSEGURO"
+      ],
+      "decisao_administrativa": {
+        "decisao_otima": "ADVERTIR",
+        "decisao_boa": "INTERDITAR"
+      },
+      "curso": [
+        "DEFAULT"
+      ]
+    },
+    "anexos": [
+      {
+        "id_anexo": 901,
+        "tipo": "VIDEO",
+        "caminho_arquivo": "resources/anexos/videos/gota_bureta.mp4"
+      }
+    ]
+  },
+  {
+    "id_cenario": 10,
+    "titulo": "Operando o Forno Mufla",
+    "dificuldade": 3,
+    "relatorio": {
+      "atividade": "Retirada de Amostras Calcinadas",
+      "local": "Laboratório de Solos - IFFBJI",
+      "envolvidos": [
+        "Tec. PP"
+      ],
+      "texto_descricao": "Foi relatado que, ao operar uma mufla alocada no chão, o técnico desequilibrou-se ao levantar, e o cadinho calcinado (A certa de mais de 1000°C) caiu sobre ele. O laboratório disponibilizava todos os equipamentos de proteção obrigatórios para uso.",
+      "riscos": [
+        "ERGONOMICO",
+        "FISICO",
+        "ACIDENTE"
+      ],
+      "fatores_inseguranca": [
+        "ATO_INSEGURO",
+        "CONDICAO_INSEGURA"
+      ],
+      "decisao_administrativa": {
+        "decisao_otima": "INTERDITAR",
+        "decisao_boa": "ADVERTIR"
+      },
+      "curso": [
+        "DEFAULT"
+      ]
+    },
+    "anexos": [
+      {
+        "id_anexo": 1001,
+        "tipo": "VIDEO",
+        "caminho_arquivo": "resources/anexos/videos/mufra_queda.mp4"
+      }
+    ]
+  },
+  {
+    "id_cenario": 11,
+    "titulo": "Pipetagem Raiz",
+    "dificuldade": 2,
+    "relatorio": {
+      "atividade": "Pipetagem de Soda Cáustica (NaOH)",
+      "local": "Laboratório de Solos - IFFBJI",
+      "envolvidos": [
+        "Tec. Welington"
+      ],
+      "texto_descricao": "Observou-se a prática inadequada de pipetagem com a boca durante o manuseio de Soda Cáustica (NaOH) em baixa concentração. Salienta-se que o ambiente mantinha todos os equipamentos de proteção e pipetadores totalmente disponíveis.",
+      "riscos": [
+        "QUIMICO",
+        "ACIDENTE"
+      ],
+      "fatores_inseguranca": [
+        "ATO_INSEGURO"
+      ],
+      "decisao_administrativa": {
+        "decisao_otima": "INTERDITAR",
+        "decisao_boa": "ADVERTIR"
+      },
+      "curso": [
+        "DEFAULT"
+      ]
+    },
+    "anexos": [
+      {
+        "id_anexo": 1101,
+        "tipo": "VIDEO",
+        "caminho_arquivo": "resources/anexos/videos/pipetagem_com_a_boca.mp4"
+      }
+    ]
+  },
+  {
+    "id_cenario": 12,
+    "titulo": "Queda de Vidraria",
+    "dificuldade": 1,
+    "relatorio": {
+      "atividade": "Trasferencia de Liquidos com a Pipeta",
+      "local": "Laboratório de Solos - IFFBJI",
+      "envolvidos": [
+        "Welington (EC)",
+        "PP (EC)",
+        "Pedro da Ana (EC)"
+      ],
+      "texto_descricao": "Observou-se a queda de vidrarias no chão durante a transferência de líquidos com pipeta. O material estava na borda e caiu após um esbarrão por distração.",
+      "riscos": [
+        "ACIDENTE",
+        "QUIMICO"
+      ],
+      "fatores_inseguranca": [
+        "ATO_INSEGURO"
+      ],
+      "decisao_administrativa": {
+        "decisao_otima": "INTERDITAR",
+        "decisao_boa": "ADVERTIR"
+      },
+      "curso": [
+        "DEFAULT"
+      ]
+    },
+    "anexos": [
+      {
+        "id_anexo": 1201,
+        "tipo": "VIDEO",
+        "caminho_arquivo": "resources/anexos/videos/vidraria_caindo.mp4"
+      }
+    ]
+  }
+]

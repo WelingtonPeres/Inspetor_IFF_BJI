@@ -1,0 +1,47 @@
+{
+  "T_QUIMICA": [
+    "A reação entre atenção e responsabilidade finalmente ocorreu como esperado nesta inspeção. Resultado: estável, seguro, e sem nenhum resíduo de negligência.",
+    "Identificamos um composto raro nesta inspeção: rigor técnico em concentração ideal. A Comissão recomenda replicar esse experimento sempre que possível.",
+    "O indicador de pH confirmou: excelente trabalho. Raramente vemos tanta precisão numa única titulação de atenção."
+  ],
+  "T_INFORMATICA": [
+    "Compilamos o desempenho desta inspeção sem nenhum warning. Zero bugs, zero exceções não tratadas — merge aprovado sem ressalvas.",
+    "O sistema de atenção do inspetor respondeu com status 200 em todos os testes. Recomenda-se manter essa versão em produção.",
+    "Encontramos um padrão raro nesta inspeção: código limpo, lógica impecável. A Comissão está considerando seriamente pedir seu repositório."
+  ],
+  "T_AGROPECUARIA": [
+    "A colheita desta inspeção rendeu mais atenção do que qualquer safra registrada até hoje. Parabéns pelo cultivo exemplar de bom senso.",
+    "O terreno foi vasculhado com o cuidado de quem realmente entende de plantio. Nenhum risco escapou ao olhar atento do inspetor.",
+    "Identificamos solo fértil para boas decisões nesta inspeção. Recomenda-se manter esse mesmo ritmo nas próximas safras."
+  ],
+  "T_ALIMENTOS": [
+    "Este lote de inspeção foi aprovado no controle de qualidade sem nenhuma ressalva. Prazo de validade da atenção: indeterminado.",
+    "A análise sensorial deste parecer aponta um sabor impecável de responsabilidade, com notas de precisão e final impecável.",
+    "Nenhuma contaminação cruzada foi encontrada entre pressa e descuido. Resultado: impróprio para crítica."
+  ],
+  "T_MEIO_AMBIENTE": [
+    "O impacto ambiental desta inspeção foi mínimo, exceto pelo tamanho do elogio que a Comissão precisa fazer. Recomenda-se preservar essa postura.",
+    "Detectamos um índice raro nesta inspeção: zero poluição visual de negligência. Ar puro, decisões limpas.",
+    "O relatório desta inspeção tem uma pegada de carbono baixíssima — todo esse cuidado, sem nenhum desperdício de atenção."
+  ],
+  "T_ZOOTECNIA": [
+    "Nesta inspeção, o inspetor demonstrou mais instinto de proteção que o próprio rebanho. Recomenda-se manter esse manejo exemplar.",
+    "O comportamento do inspetor foi classificado como 'seguro e bem conduzido'. Parabéns pela liderança tranquila do curral.",
+    "O rebanho nunca esteve tão bem cuidado quanto sob esta inspeção. Segue recomendação de manter esse padrão."
+  ],
+  "CT_ALIMENTOS": [
+    "A análise físico-química desta inspeção detectou concentração ideal de rigor metodológico. Lote aprovado sem restrições.",
+    "O controle de qualidade classificou esta inspeção como plenamente conforme, sem nenhum desvio entre procedimento e execução.",
+    "Em análise laboratorial, o índice de atenção do inspetor superou o limite mínimo com folga. Amostra liberada com honras."
+  ],
+  "E_COMPUTACAO": [
+    "O circuito de atenção do inspetor funcionou sem nenhum curto. Energia bem distribuída entre pressa e cautela.",
+    "Nesta inspeção, o sensor de risco do inspetor esteve perfeitamente calibrado. Recomenda-se manter as configurações de fábrica.",
+    "O firmware de bom senso respondeu a todos os comandos sem falhas. Sistema pronto para produção."
+  ],
+  "DEFAULT": [
+    "Esta comissão avaliou a inspeção e concluiu que 'boa vontade' e 'atenção aos detalhes' finalmente andaram juntas. Parabéns.",
+    "O relatório foi entregue no prazo, e — surpreendentemente — nada passou despercebido. Recomenda-se repetir a dose.",
+    "Registramos, para constar, que todas as informações necessárias foram usadas com muita competência."
+  ]
+}
