@@ -624,11 +624,6 @@ QFrame[janela_flutuante="true"] {
     border-radius: 4px;
 }
 
-QFrame#expediente_sombra {
-    background-color: #888888;
-    border: none;
-}
-
 /* --- PaginaSelecaoPerfil --- */
 PaginaSelecaoPerfil #label_selecao_perfil {
     font-family: "Open Sans";
