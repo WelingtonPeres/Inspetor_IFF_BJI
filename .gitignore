@@ -25,6 +25,7 @@ Thumbs.db
 .vscode/
 .idea/
 .opencode/
+.claude/
 temp/
 logs/
 docs/.local/
