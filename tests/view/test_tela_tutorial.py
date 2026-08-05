@@ -116,15 +116,16 @@ class TestContratoSlides:
         """Slide 1 aceita definir_motivo sem erro (no-op herdado da ABC)."""
         stack.widget(0).definir_motivo(MotivoTutorial.CONSULTA)
 
-    def test_cta_de_todos_os_slides_ligado_ao_chrome(self, stack, qtbot):
-        """Emitir cta_clicked de qualquer slide deve finalizar o tutorial."""
-        for indice in range(stack.count()):
-            slide = stack.widget(indice)
-            assert isinstance(slide, SlideTutorial)
-            with qtbot.waitSignal(
-                stack.parent().finalizado_solicitado, timeout=1000
-            ):
-                slide.cta_clicked.emit()
+    def test_cta_do_slide_final_ligado_ao_chrome(self, stack, qtbot):
+        """Emitir cta_clicked do slide final deve finalizar o tutorial."""
+        slide = stack.widget(ULTIMO_SLIDE)
+        with qtbot.waitSignal(stack.parent().finalizado_solicitado, timeout=1000):
+            slide.cta_clicked.emit()
+
+    def test_slides_sem_cta_nao_carregam_o_sinal(self, stack):
+        """So o slide final declara cta_clicked (ISP: sinal fora da base)."""
+        for indice in range(ULTIMO_SLIDE):
+            assert not hasattr(stack.widget(indice), "cta_clicked")
 
     def test_validacao_rejeita_slide_sem_contrato(self, tutorial):
         """O registry deve rejeitar slides que nao implementem o contrato."""
@@ -162,7 +163,7 @@ class TestChrome:
 
     def test_navegar_ate_o_ultimo_slide_atualiza_estado(self, tutorial):
         """Ultimo slide: contador '8 de 8', seta anterior habilitada, seta
-        seguinte e dots escondidos, briefing do SlidePronto."""
+        seguinte escondida, dots mantidos (modelo), briefing do SlidePronto."""
         for _ in range(ULTIMO_SLIDE):
             tutorial._TelaTutorial__ir_para_slide_seguinte()
         contador = tutorial.findChild(QLabel, "tutorial_contador")
@@ -173,9 +174,9 @@ class TestChrome:
         btn_prev = tutorial.findChild(QPushButton, "tutorial_nav_prev")
         assert btn_prev.isEnabled()
         btn_next = tutorial.findChild(QPushButton, "tutorial_nav_next")
-        assert not btn_next.isVisible()
+        assert not btn_next.isVisibleTo(tutorial)
         dots = tutorial.findChild(QWidget, "tutorial_dots")
-        assert not dots.isVisible()
+        assert dots.isVisibleTo(tutorial)
         briefing = tutorial.findChild(QLabel, "tutorial_briefing")
         assert "estilo" in briefing.text()
 
@@ -192,10 +193,10 @@ class TestChrome:
 class TestConteudoSlides:
     """Conteudo especifico de cada um dos 8 slides."""
 
-    def test_slide_boas_vindas_tem_quatro_paragrafos(self, stack):
-        """Slide 1 deve ter 4 paragrafos de boas-vindas."""
+    def test_slide_boas_vindas_tem_tres_paragrafos(self, stack):
+        """Slide 1 deve ter 3 paragrafos (o antigo primeiro virou titulo)."""
         labels = stack.widget(0).findChildren(QLabel, "tutorial_paragrafo")
-        assert len(labels) == 4
+        assert len(labels) == 3
 
     def test_slide_anatomia_tem_quatro_itens(self, stack):
         """Slide 2 deve ter 4 ItemNumerado (Local a Descricao)."""
@@ -363,9 +364,9 @@ class TestGeometria:
         recuo = LayoutLoader.instance().get("tutorial", "chrome", "margens")["right"]
         tutorial.resize(1536, 864)
         tutorial.show()
-        briefing = tutorial.findChild(QLabel, "tutorial_briefing")
+        briefing_bar = tutorial.findChild(QWidget, "tutorial_briefing_bar")
         contador = tutorial.findChild(QLabel, "tutorial_contador")
-        x_briefing = briefing.mapTo(tutorial, briefing.rect().topLeft()).x()
+        x_briefing = briefing_bar.mapTo(tutorial, briefing_bar.rect().topLeft()).x()
         x_contador = contador.mapTo(tutorial, contador.rect().topLeft()).x()
         assert x_briefing == x_contador == recuo
         tutorial.hide()

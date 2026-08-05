@@ -462,7 +462,9 @@
         "right": 0,
         "bottom": 8,
         "left": 0
-      }
+      },
+      "colunas_spacing": 24,
+      "texto_max_largura": 640
     },
     "chrome": {
       "margens": {
@@ -474,7 +476,11 @@
       "header_spacing": 10,
       "contador_font_size": 12,
       "pular_font_size": 12,
-      "briefing_altura": 40
+      "briefing_altura": 44,
+      "briefing_font_size": 14,
+      "briefing_icone_tamanho": 26,
+      "briefing_spacing": 12,
+      "footer_gap": 20
     },
     "dot": {
       "largura": 7,
@@ -505,10 +511,10 @@
       "cargo": 12,
       "label": 10,
       "padding": {
-        "left": 28,
-        "top": 24,
-        "right": 28,
-        "bottom": 24
+        "left": 24,
+        "top": 26,
+        "right": 24,
+        "bottom": 22
       }
     },
     "item_numerado": {
@@ -518,27 +524,34 @@
       "descricao_font_size": 13,
       "spacing": 10
     },
-    "nota": {
-      "font_size": 13
-    },
     "mini_relatorio": {
-      "largura": 360,
-      "altura": 430,
-      "titulo_font_size": 14,
-      "campo_font_size": 11,
+      "largura": 430,
+      "titulo_font_size": 11,
+      "campo_font_size": 10,
       "valor_font_size": 11,
-      "campo_spacing": 8,
+      "campo_spacing": 10,
+      "badge_tamanho": 22,
+      "badge_font_size": 11,
+      "bloco_padding": {
+        "left": 14,
+        "top": 10,
+        "right": 14,
+        "bottom": 10
+      },
       "padding": {
-        "left": 18,
-        "top": 16,
-        "right": 18,
-        "bottom": 16
+        "left": 20,
+        "top": 18,
+        "right": 20,
+        "bottom": 18
       }
     },
     "anexos_visual": {
-      "largura": 380,
-      "imagem_largura": 340,
-      "imagem_altura": 260
+      "largura": 560,
+      "spacing": 14,
+      "imagem_largura": 540,
+      "imagem_altura": 300,
+      "botao_largura": 540,
+      "botao_altura": 90
     },
     "riscos_grupo": {
       "largura": 380,
@@ -550,19 +563,19 @@
       "font_size": 11
     },
     "fatores_visual": {
-      "largura": 360,
-      "spacing": 12
+      "largura": 420,
+      "spacing": 14
     },
     "fator_tile": {
       "icone_tamanho": 40,
-      "titulo_font_size": 14,
-      "subtitulo_font_size": 12,
-      "spacing": 10,
+      "titulo_font_size": 13,
+      "subtitulo_font_size": 10,
+      "spacing": 14,
       "margens": {
-        "left": 14,
-        "top": 10,
-        "right": 14,
-        "bottom": 10
+        "left": 20,
+        "top": 16,
+        "right": 20,
+        "bottom": 16
       }
     },
     "exemplo": {
@@ -576,27 +589,44 @@
       }
     },
     "decisao_visual": {
-      "largura": 320,
-      "spacing": 14,
-      "legenda_font_size": 11
+      "largura": 500,
+      "spacing": 18,
+      "legenda_font_size": 11,
+      "padding": {
+        "left": 24,
+        "top": 26,
+        "right": 24,
+        "bottom": 26
+      }
     },
     "carimbo": {
-      "tamanho": 160,
-      "font_size": 10
+      "altura": 52,
+      "font_size": 11
     },
     "vitoria_visual": {
-      "largura": 340,
-      "spacing": 14
+      "largura": 480,
+      "spacing": 16
     },
     "mini_tela": {
-      "icone_tamanho": 36,
-      "titulo_font_size": 14,
-      "subtitulo_font_size": 11,
+      "icone_tamanho": 44,
+      "titulo_font_size": 13,
+      "subtitulo_font_size": 10,
       "margens": {
-        "left": 16,
-        "top": 14,
-        "right": 16,
-        "bottom": 14
+        "left": 14,
+        "top": 22,
+        "right": 14,
+        "bottom": 22
+      }
+    },
+    "aviso": {
+      "texto_font_size": 12,
+      "icone_font_size": 15,
+      "spacing": 10,
+      "margens": {
+        "left": 14,
+        "top": 10,
+        "right": 14,
+        "bottom": 10
       }
     }
   },

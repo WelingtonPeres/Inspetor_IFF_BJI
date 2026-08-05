@@ -17,9 +17,16 @@ from view.tutorial.slide_tutorial import SlideTutorial
 from view.tutorial.widgets.assets_helper import RAIZ_ASSETS
 from view.tutorial.widgets.item_numerado import ItemNumerado
 
+# O icone acompanha o fundo do tile: escuro sobre o ciano preenchido
+# (marcado), branco sobre o contorno transparente (desmarcado).
 FATORES = (
-    ("ATO_INSEGURO", "Ato Inseguro", "falha de comportamento humano", "ato"),
-    ("CONDICAO_INSEGURA", "Condição Insegura", "falha do ambiente ou equipamento", "condicao"),
+    ("ATO_INSEGURO", "Ato Inseguro", "falha de comportamento humano", "ato_dark.png"),
+    (
+        "CONDICAO_INSEGURA",
+        "Condição Insegura",
+        "falha do ambiente ou equipamento",
+        "condicao_white.png",
+    ),
 )
 
 ITENS = (
@@ -53,12 +60,9 @@ class SlideFatores(SlideTutorial):
         layout.setContentsMargins(*self.margens_slide())
         layout.setSpacing(12)
 
-        conteudo = QHBoxLayout()
-        conteudo.setSpacing(24)
-        layout.addLayout(conteudo)
-
-        conteudo.addWidget(self.__build_visual(), 0, Qt.AlignmentFlag.AlignVCenter)
-        conteudo.addLayout(self.__build_painel_texto(), stretch=1)
+        layout.addLayout(
+            self._montar_conteudo(self.__build_visual(), self.__build_painel_texto())
+        )
 
     def __build_visual(self) -> QWidget:
         L = LayoutLoader.instance()
@@ -129,9 +133,9 @@ class SlideFatores(SlideTutorial):
         tile.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         return tile
 
-    def __carregar_icone_fator(self, chave: str) -> QPixmap:
+    def __carregar_icone_fator(self, arquivo: str) -> QPixmap:
         L = LayoutLoader.instance()
-        caminho = RAIZ_ASSETS / "icons" / "riscos" / f"{chave}_dark.png"
+        caminho = RAIZ_ASSETS / "icons" / "riscos" / arquivo
         pixmap = QPixmap(str(caminho)) if caminho.exists() else QPixmap()
         return pixmap.scaled(
             L.scaled("tutorial", "fator_tile", "icone_tamanho"),

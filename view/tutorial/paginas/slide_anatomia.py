@@ -7,6 +7,7 @@ from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QVBoxLayout, QWidget
 from view.infrastructure.layout_loader import LayoutLoader
 from view.tutorial.slide_tutorial import SlideTutorial
 from view.tutorial.widgets.item_numerado import ItemNumerado
+from view.tutorial.widgets.nota_aviso import NotaAviso
 
 CAMPOS = (
     ("Local", "Laboratório de Solos - IFFBJI"),
@@ -47,24 +48,17 @@ class SlideAnatomia(SlideTutorial):
         layout.setContentsMargins(*self.margens_slide())
         layout.setSpacing(12)
 
-        conteudo = QHBoxLayout()
-        conteudo.setSpacing(24)
-        layout.addLayout(conteudo)
-
-        conteudo.addWidget(
-            self.__build_mini_relatorio(), 0, Qt.AlignmentFlag.AlignVCenter
+        layout.addLayout(
+            self._montar_conteudo(
+                self.__build_mini_relatorio(), self.__build_painel_texto()
+            )
         )
-
-        conteudo.addLayout(self.__build_painel_texto(), stretch=1)
 
     def __build_mini_relatorio(self) -> QFrame:
         L = LayoutLoader.instance()
         relatorio = QFrame()
         relatorio.setObjectName("tutorial_mini_relatorio")
-        relatorio.setFixedSize(
-            L.scaled("tutorial", "mini_relatorio", "largura"),
-            L.scaled("tutorial", "mini_relatorio", "altura"),
-        )
+        relatorio.setFixedWidth(L.scaled("tutorial", "mini_relatorio", "largura"))
 
         coluna = QVBoxLayout(relatorio)
         coluna.setContentsMargins(
@@ -72,7 +66,7 @@ class SlideAnatomia(SlideTutorial):
         )
         coluna.setSpacing(L.scaled("tutorial", "mini_relatorio", "campo_spacing"))
 
-        titulo = QLabel("Relatório: Reagente nos Olhos")
+        titulo = QLabel("RELATÓRIO: REAGENTE NOS OLHOS")
         titulo.setObjectName("tutorial_relatorio_titulo")
         titulo.setWordWrap(True)
         titulo.setFont(
@@ -83,42 +77,59 @@ class SlideAnatomia(SlideTutorial):
         )
         coluna.addWidget(titulo)
 
-        for campo, valor in CAMPOS:
-            coluna.addLayout(self.__build_campo(campo, valor))
+        for numero, (campo, valor) in enumerate(CAMPOS, start=1):
+            coluna.addWidget(self.__build_campo(numero, campo, valor))
 
-        coluna.addStretch()
         return relatorio
 
-    def __build_campo(self, campo: str, valor: str) -> QVBoxLayout:
+    def __build_campo(self, numero: int, campo: str, valor: str) -> QFrame:
         L = LayoutLoader.instance()
-        bloco = QVBoxLayout()
-        bloco.setSpacing(2)
+        familia = L.get("tutorial", "font_familia")
+        bloco = QFrame()
+        bloco.setObjectName("tutorial_relatorio_bloco")
 
-        label_campo = QLabel(campo)
+        coluna = QVBoxLayout(bloco)
+        coluna.setContentsMargins(
+            *L.scaled_margins("tutorial", "mini_relatorio", "bloco_padding")
+        )
+        coluna.setSpacing(2)
+
+        # Linha do label com o badge numerado a direita (modelo poe o
+        # badge sobre o canto do bloco; aqui ele ancora na mesma linha).
+        linha = QHBoxLayout()
+        linha.setSpacing(4)
+
+        label_campo = QLabel(campo.upper())
         label_campo.setObjectName("tutorial_relatorio_campo")
         label_campo.setFont(
-            QFont(
-                L.get("tutorial", "font_familia"),
-                L.scaled("tutorial", "mini_relatorio", "campo_font_size"),
-            )
+            QFont(familia, L.scaled("tutorial", "mini_relatorio", "campo_font_size"))
         )
-        bloco.addWidget(label_campo)
+        linha.addWidget(label_campo)
+        linha.addStretch(1)
+
+        badge = QLabel(str(numero))
+        badge.setObjectName("tutorial_relatorio_badge")
+        badge.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        lado = L.scaled("tutorial", "mini_relatorio", "badge_tamanho")
+        badge.setFixedSize(lado, lado)
+        badge.setFont(
+            QFont(familia, L.scaled("tutorial", "mini_relatorio", "badge_font_size"))
+        )
+        linha.addWidget(badge)
+
+        coluna.addLayout(linha)
 
         label_valor = QLabel(valor)
         label_valor.setObjectName("tutorial_relatorio_valor")
         label_valor.setWordWrap(True)
         label_valor.setFont(
-            QFont(
-                L.get("tutorial", "font_familia"),
-                L.scaled("tutorial", "mini_relatorio", "valor_font_size"),
-            )
+            QFont(familia, L.scaled("tutorial", "mini_relatorio", "valor_font_size"))
         )
-        bloco.addWidget(label_valor)
+        coluna.addWidget(label_valor)
 
         return bloco
 
     def __build_painel_texto(self) -> QVBoxLayout:
-        L = LayoutLoader.instance()
         painel = QVBoxLayout()
         painel.setSpacing(10)
         painel.setAlignment(Qt.AlignmentFlag.AlignVCenter)
@@ -132,17 +143,9 @@ class SlideAnatomia(SlideTutorial):
         for numero, item_titulo, descricao in ITENS:
             painel.addWidget(ItemNumerado(numero, item_titulo, descricao))
 
-        nota = QLabel("Não existe tempo limite para analisar o caso e decidir.")
-        nota.setObjectName("tutorial_aviso")
-        nota.setWordWrap(True)
-        nota.setFont(
-            QFont(
-                L.get("tutorial", "font_familia"),
-                L.scaled("tutorial", "nota", "font_size"),
-            )
+        painel.addWidget(
+            NotaAviso("Não existe tempo limite para analisar o caso e decidir.")
         )
-        nota.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        painel.addWidget(nota)
 
         return painel
 

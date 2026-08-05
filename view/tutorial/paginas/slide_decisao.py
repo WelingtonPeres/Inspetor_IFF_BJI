@@ -7,8 +7,15 @@ from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QVBoxLayout, QWidget
 from view.infrastructure.layout_loader import LayoutLoader
 from view.tutorial.slide_tutorial import SlideTutorial
 from view.tutorial.widgets.item_numerado import ItemNumerado
+from view.tutorial.widgets.nota_aviso import NotaAviso
 
-CARIMBOS = ("Advertir", "Interditar", "Ignorar")
+# (nome, tipo, marcado) — tipo alimenta as cores do QSS, como as vars
+# --cor do modelo (amarelo, vermelho, cinza).
+CARIMBOS = (
+    ("Advertir", "advertir", False),
+    ("Interditar", "interditar", True),
+    ("Ignorar", "ignorar", False),
+)
 
 ITENS = (
     (
@@ -16,17 +23,20 @@ ITENS = (
         "Advertir",
         "— o risco existe, mas é leve. A atividade pode continuar com uma "
         "notificação formal.",
+        "advertir",
     ),
     (
         2,
         "Interditar",
         "— o risco é grave o suficiente para exigir a parada imediata da "
         "atividade.",
+        "interditar",
     ),
     (
         3,
         "Ignorar",
         "— após a análise, não há risco real a ser tratado.",
+        "ignorar",
     ),
 )
 
@@ -46,26 +56,42 @@ class SlideDecisao(SlideTutorial):
         layout.setContentsMargins(*self.margens_slide())
         layout.setSpacing(12)
 
-        conteudo = QHBoxLayout()
-        conteudo.setSpacing(24)
-        layout.addLayout(conteudo)
-
-        conteudo.addWidget(self.__build_visual(), 0, Qt.AlignmentFlag.AlignVCenter)
-        conteudo.addLayout(self.__build_painel_texto(), stretch=1)
+        layout.addLayout(
+            self._montar_conteudo(self.__build_visual(), self.__build_painel_texto())
+        )
 
     def __build_visual(self) -> QWidget:
         L = LayoutLoader.instance()
-        visual = QWidget()
-        visual.setObjectName("tutorial_decisao_visual")
-        visual.setFixedWidth(L.scaled("tutorial", "decisao_visual", "largura"))
+        painel = QFrame()
+        painel.setObjectName("tutorial_painel")
+        painel.setFixedWidth(L.scaled("tutorial", "decisao_visual", "largura"))
 
-        coluna = QVBoxLayout(visual)
-        coluna.setContentsMargins(0, 0, 0, 0)
+        coluna = QVBoxLayout(painel)
+        coluna.setContentsMargins(
+            *L.scaled_margins("tutorial", "decisao_visual", "padding")
+        )
         coluna.setSpacing(L.scaled("tutorial", "decisao_visual", "spacing"))
         coluna.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
-        for indice, nome in enumerate(CARIMBOS):
-            coluna.addWidget(self.__build_carimbo(nome, indice == 1))
+        titulo = QLabel("DECISÃO ADMINISTRATIVA")
+        titulo.setObjectName("tutorial_painel_titulo")
+        titulo.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        titulo.setFont(
+            QFont(
+                L.get("tutorial", "font_familia"),
+                L.scaled("tutorial", "decisao_visual", "legenda_font_size"),
+            )
+        )
+        coluna.addWidget(titulo)
+
+        # Modelo: os tres carimbos lado a lado, centrados.
+        linha = QHBoxLayout()
+        linha.setSpacing(L.scaled("tutorial", "decisao_visual", "spacing"))
+        linha.addStretch(1)
+        for nome, tipo, marcado in CARIMBOS:
+            linha.addWidget(self.__build_carimbo(nome, tipo, marcado))
+        linha.addStretch(1)
+        coluna.addLayout(linha)
 
         legenda = QLabel("carimbo preenchido = decisão escolhida")
         legenda.setObjectName("tutorial_decisao_legenda")
@@ -79,28 +105,28 @@ class SlideDecisao(SlideTutorial):
         )
         coluna.addWidget(legenda)
 
-        return visual
+        return painel
 
-    def __build_carimbo(self, nome: str, marcado: bool) -> QFrame:
+    def __build_carimbo(self, nome: str, tipo: str, marcado: bool) -> QFrame:
         L = LayoutLoader.instance()
         carimbo = QFrame()
         carimbo.setObjectName("tutorial_carimbo")
         carimbo.setProperty("estado", "marcado" if marcado else "vazio")
-        tamanho = L.scaled("tutorial", "carimbo", "tamanho")
-        carimbo.setFixedSize(tamanho, tamanho)
+        carimbo.setProperty("tipo", tipo)
+        carimbo.setFixedHeight(L.scaled("tutorial", "carimbo", "altura"))
 
         layout = QVBoxLayout(carimbo)
-        layout.setContentsMargins(4, 4, 4, 4)
+        layout.setContentsMargins(16, 4, 16, 4)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        nome_label = QLabel(nome)
+        nome_label = QLabel(nome.upper())
         nome_label.setObjectName("tutorial_carimbo_nome")
-        nome_label.setWordWrap(True)
         nome_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         nome_label.setFont(
             QFont(
                 L.get("tutorial", "font_familia"),
                 L.scaled("tutorial", "carimbo", "font_size"),
+                QFont.Weight.Bold,
             )
         )
         layout.addWidget(nome_label)
@@ -108,7 +134,6 @@ class SlideDecisao(SlideTutorial):
         return carimbo
 
     def __build_painel_texto(self) -> QVBoxLayout:
-        L = LayoutLoader.instance()
         painel = QVBoxLayout()
         painel.setSpacing(10)
         painel.setAlignment(Qt.AlignmentFlag.AlignVCenter)
@@ -119,23 +144,19 @@ class SlideDecisao(SlideTutorial):
         titulo.setAlignment(Qt.AlignmentFlag.AlignLeft)
         painel.addWidget(titulo)
 
-        for numero, item_titulo, descricao in ITENS:
-            painel.addWidget(ItemNumerado(numero, item_titulo, descricao))
+        for numero, item_titulo, descricao, tipo in ITENS:
+            painel.addWidget(
+                ItemNumerado(numero, item_titulo, descricao, cor_badge=tipo)
+            )
 
-        nota = QLabel(
-            "A decisão só faz sentido se a análise por trás dela também fizer — "
-            "carimbar certo sem entender o caso não conta."
-        )
-        nota.setObjectName("tutorial_aviso")
-        nota.setWordWrap(True)
-        nota.setFont(
-            QFont(
-                L.get("tutorial", "font_familia"),
-                L.scaled("tutorial", "nota", "font_size"),
+        painel.addWidget(
+            NotaAviso(
+                "A decisão só faz sentido se a análise por trás dela também "
+                "fizer — carimbar certo sem entender o caso não conta.",
+                icone="⚠",
+                erro=True,
             )
         )
-        nota.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        painel.addWidget(nota)
 
         return painel
 
