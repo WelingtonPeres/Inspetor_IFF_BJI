@@ -38,7 +38,7 @@ Para que uma contribuição (Pull Request) seja aprovada, ela deve estar estrita
 >[!WARNING] Alerta 
     Nunca importe bibliotecas externas (como geradores de interface ou bancos de dados específicos) dentro da camada `core`.
 * **Cultura de Testes (Pytest):** A qualidade matemática do simulador é inegável. Qualquer nova funcionalidade, alteração de equação ou entidade de domínio deve ser obrigatoriamente acompanhada de seus respectivos testes unitários na diretoria `test/`. Antes de qualquer submissão, execute o comando `pytest` na raiz, a suíte de testes deve passar com 100% de sucesso.
-* **Padrões de Código (PEP-8):** O código Python submetido deve seguir as diretrizes oficiais de estilo (nomenclatura de classes em *PascalCase*, funções e variáveis em *snake_case*, além de *docstrings* claras para métodos complexos). Consulte a nossa documentação interna sobre [Padrões e Nomenclatura](docs/PADROES_NOMENCLATURA_PEP8.md).
+* **Padrões de Código (PEP-8):** O código Python submetido deve seguir as diretrizes oficiais de estilo (nomenclatura de classes em *PascalCase*, funções e variáveis em *snake_case*, além de *docstrings* claras para métodos complexos). Consulte a nossa documentação interna sobre [Padrões e Nomenclatura](docs/processo/nomenclatura-pep8.md).
 
 ## 4. Fluxo de Submissão (Pull Request)
 

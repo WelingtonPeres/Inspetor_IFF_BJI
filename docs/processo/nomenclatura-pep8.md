@@ -286,7 +286,7 @@ Ao escrever novo código, use este checklist:
 
 - **[PEP 8 - Official Python Style Guide](https://www.python.org/dev/peps/pep-0008/)** - Leitura obrigatória
 - **[PEP 3131 - Supporting Non-ASCII Identifiers](https://www.python.org/dev/peps/pep-3131/)** - Para nomes com acentos
-- **[Code Style Guide for This Project](./PADROES_NOMENCLATURA_PEP8.md)** - Este documento
+- **Code Style Guide for This Project** — este documento
 
 ---
 

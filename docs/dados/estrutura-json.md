@@ -277,7 +277,7 @@ Antes de incluir um novo cenário na aplicação principal:
 ### 5.6 Versionamento e Manutenção
 
 - Mantenha um histórico de versões dos arquivos JSON (use Git);
-- Documente alterações significativas em um arquivo `CHANGELOG.md`;
+- Documente alterações significativas na mensagem de commit — o histórico do Git é o registro de mudanças dos cenários;
 - Evite modificar o `id_cenario` de cenários já publicados (quebra referências externas);
 - Ao descontinuar um cenário, marque-o como archived em vez de deletar.
 
