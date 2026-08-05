@@ -1,9 +1,11 @@
 import abc
+from typing import Tuple
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
 
 from application.interfaces.i_game_view import MotivoTutorial
+from view.infrastructure.layout_loader import LayoutLoader
 
 _ObjectType = type(QWidget)
 
@@ -21,6 +23,11 @@ class SlideTutorial(QWidget, metaclass=_MetaSlideTutorial):
     """
 
     cta_clicked = Signal()
+
+    @staticmethod
+    def margens_slide() -> Tuple[int, int, int, int]:
+        """Margens do esqueleto comum dos slides (token ``tutorial.slide.margens``)."""
+        return LayoutLoader.instance().scaled_margins("tutorial", "slide", "margens")
 
     @abc.abstractmethod
     def texto_briefing(self) -> str:

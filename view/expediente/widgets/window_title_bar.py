@@ -19,6 +19,7 @@ class WindowTitleBar(QFrame):
         titulo: str = "Expediente",
         altura: int = 32,
         altura_keys: Optional[Tuple[str, ...]] = None,
+        margens_keys: Optional[Tuple[str, ...]] = None,
         mostrar_min_max: bool = True,
         parent=None,
     ):
@@ -28,6 +29,7 @@ class WindowTitleBar(QFrame):
         self.__dragging = False
         self.__drag_offset = QPoint()
         self.__altura_keys = altura_keys
+        self.__margens_keys = margens_keys
         self.__mostrar_min_max = mostrar_min_max
         self.__main_layout: Optional[QHBoxLayout] = None
         self.__title_label: Optional[QLabel] = None
@@ -43,7 +45,7 @@ class WindowTitleBar(QFrame):
         self.setFixedHeight(altura)
 
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(*L.scaled_margins("tela_de_expediente", "title_bar", "margens"))
+        layout.setContentsMargins(*self.__margens_scaled())
         self.__main_layout = layout
 
         font = L.scaled("fontes", "ocorrencias", "modal_titulo_janela", "size")
@@ -89,6 +91,15 @@ class WindowTitleBar(QFrame):
             ):
                 child.installEventFilter(self)
 
+    @staticmethod
+    def __margens_default() -> Tuple[str, ...]:
+        return ("tela_de_expediente", "title_bar", "margens")
+
+    def __margens_scaled(self) -> Tuple[int, int, int, int]:
+        L = LayoutLoader.instance()
+        chaves = self.__margens_keys or self.__margens_default()
+        return L.scaled_margins(*chaves)
+
     @Slot()
     def __on_escala_atualizada(self) -> None:
         if self.__altura_keys is not None:
@@ -102,9 +113,7 @@ class WindowTitleBar(QFrame):
         L = LayoutLoader.instance()
         self.setFixedHeight(altura)
         if self.__main_layout is not None:
-            self.__main_layout.setContentsMargins(
-                *L.scaled_margins("tela_de_expediente", "title_bar", "margens")
-            )
+            self.__main_layout.setContentsMargins(*self.__margens_scaled())
         if self.__title_label is not None:
             font = L.scaled("fontes", "ocorrencias", "modal_titulo_janela", "size")
             self.__title_label.setFont(QFont("Courier New", font))

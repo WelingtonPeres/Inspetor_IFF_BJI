@@ -3,7 +3,7 @@ import logging
 from typing import Any, Dict, List, Optional, Tuple
 
 from PySide6.QtCore import QRect, Signal, Slot
-from PySide6.QtWidgets import QApplication, QFrame, QMainWindow, QMessageBox, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QVBoxLayout, QWidget
 
 from application.interfaces.i_game_view import IGameView, MotivoTutorial
 from core.dtos.resultado_diagnostico import ResultadoDiagnosticoDTO
@@ -115,13 +115,6 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
         return tela_expediente
 
     def __build_tela_tutorial(self) -> TelaTutorial:
-        # Sombra 6x6 solida: QFrame irmao com z abaixo do tutorial — QSS nao
-        # suporta box-shadow (padrao #expediente_sombra). Registada primeiro
-        # para ficar sob a janela flutuante.
-        self.__sombra_tutorial = QFrame()
-        self.__sombra_tutorial.setObjectName("tutorial_sombra")
-        self.__overlay_area.add_overlay(self.__sombra_tutorial, auto_resize=False)
-
         tela_tutorial = TelaTutorial()
         tela_tutorial.finalizado_solicitado.connect(self.tutorial_finalizado.emit)
         # auto_resize=False: a geometria 80% so recalcula via overlay_resized.
@@ -129,16 +122,7 @@ class JanelaPrincipal(QMainWindow, IGameView, metaclass=_MetaInterface):
         self.__overlay_area.overlay_resized.connect(
             tela_tutorial.redimensionar_com_overlay
         )
-        tela_tutorial.geometria_alterada.connect(self.__sincronizar_geometria_sombra)
-        tela_tutorial.visibilidade_alterada.connect(self.__sombra_tutorial.setVisible)
         return tela_tutorial
-
-    @Slot()
-    def __sincronizar_geometria_sombra(self) -> None:
-        """Espelha a geometria da sombra na janela do tutorial (offset 6, 6)."""
-        self.__sombra_tutorial.setGeometry(
-            self.__tela_tutorial.geometry().translated(6, 6)
-        )
 
     def __sincronizar_escala_com_tela(self) -> None:
         """Alimenta o LayoutLoader com a resolucao real do monitor.

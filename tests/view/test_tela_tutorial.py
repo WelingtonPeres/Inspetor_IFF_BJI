@@ -3,12 +3,13 @@ Suite de testes da TelaTutorial (8 slides).
 
 Cobre estrutura do chrome, navegacao (contador, setas, dots), sinais de
 finalizacao (Pular, X, CTA), reentrancia, geometria 80% + fallback,
-maximizar/restaurar e o conteudo de cada um dos 8 slides.
+maximizar/restaurar, o padrao de janela partilhado (JanelaFlutuante) e o
+conteudo de cada um dos 8 slides.
 """
 
 import pytest
 from PySide6.QtCore import QRect, Qt
-from PySide6.QtWidgets import QLabel, QPushButton, QStackedWidget, QToolButton, QWidget
+from PySide6.QtWidgets import QFrame, QLabel, QPushButton, QStackedWidget, QToolButton, QWidget
 
 from application.interfaces.i_game_view import MotivoTutorial
 from view.expediente.widgets.window_title_bar import WindowTitleBar
@@ -246,6 +247,32 @@ class TestConteudoSlides:
         """Slide 8 deve manter o CTA de finalizacao."""
         assert stack.widget(7).findChild(QPushButton, "tutorial_cta") is not None
 
+    def test_item_numerado_dimensoes_aplicadas_na_construcao(self, stack):
+        """Badge e fontes devem valer ja na construcao, sem esperar escala.
+
+        Regressao: escala_atualizada so dispara em mudanca real de
+        resolucao, logo um item criado depois do set_screen nunca a recebe.
+        """
+        from view.infrastructure.layout_loader import LayoutLoader
+        L = LayoutLoader.instance()
+        item = stack.widget(1).findChildren(ItemNumerado)[0]
+        badge = item.findChild(QLabel, "tutorial_item_num")
+        titulo = item.findChild(QLabel, "tutorial_item_titulo")
+        tamanho = L.scaled("tutorial", "item_numerado", "badge_tamanho")
+        assert badge.width() == badge.height() == tamanho
+        assert badge.minimumSize() == badge.maximumSize()
+        assert titulo.font().pointSize() == L.scaled(
+            "tutorial", "item_numerado", "titulo_font_size"
+        )
+
+    def test_slides_usam_margens_do_token(self, stack):
+        """Todos os slides devem ler tutorial.slide.margens (sem hardcode)."""
+        from view.infrastructure.layout_loader import LayoutLoader
+        esperado = LayoutLoader.instance().scaled_margins("tutorial", "slide", "margens")
+        for i in range(stack.count()):
+            m = stack.widget(i).layout().contentsMargins()
+            assert (m.left(), m.top(), m.right(), m.bottom()) == esperado
+
 
 class TestFinalizacao:
     """Pular, X e CTA devem emitir finalizado_solicitado com o motivo."""
@@ -318,7 +345,30 @@ class TestReentrancia:
 
 
 class TestGeometria:
-    """Tamanho 80% centrado, fallback ecra pequeno, maximizar/restaurar."""
+    """Tamanho 80% centrado, full-bleed da barra, recuo do body, desaparecimento das fatias."""
+
+    def test_title_bar_ocupa_largura_total(self, tutorial):
+        """A faixa da title bar deve ser full-bleed como a da irma."""
+        tutorial.resize(1536, 864)
+        tutorial.show()
+        bar = tutorial.findChild(WindowTitleBar)
+        x_bar = bar.mapTo(tutorial, bar.rect().topLeft()).x()
+        assert x_bar == 0
+        assert bar.width() == 1536
+        tutorial.hide()
+
+    def test_body_recuado_pelo_chrome(self, tutorial):
+        """O recuo lateral do chrome deve viver dentro do body, nao no raiz."""
+        from view.infrastructure.layout_loader import LayoutLoader
+        recuo = LayoutLoader.instance().get("tutorial", "chrome", "margens")["right"]
+        tutorial.resize(1536, 864)
+        tutorial.show()
+        briefing = tutorial.findChild(QLabel, "tutorial_briefing")
+        contador = tutorial.findChild(QLabel, "tutorial_contador")
+        x_briefing = briefing.mapTo(tutorial, briefing.rect().topLeft()).x()
+        x_contador = contador.mapTo(tutorial, contador.rect().topLeft()).x()
+        assert x_briefing == x_contador == recuo
+        tutorial.hide()
 
     def test_exibir_com_tamanho_inicial_80_porcento_centrado(self, tutorial):
         """Com parent 1920x1080 a janela deve ter 80% do rect."""
@@ -342,11 +392,11 @@ class TestGeometria:
         parent_rect = QRect(0, 0, 1920, 1080)
         tutorial.exibir_com_tamanho_inicial(parent_rect)
         tamanho_normal = tutorial.geometry()
-        tutorial._TelaTutorial__on_maximizar_restaurar()
-        assert tutorial._TelaTutorial__maximizado
+        tutorial._alternar_maximizar()
+        assert tutorial._maximizado
         assert tutorial.geometry() == parent_rect
-        tutorial._TelaTutorial__on_maximizar_restaurar()
-        assert not tutorial._TelaTutorial__maximizado
+        tutorial._alternar_maximizar()
+        assert not tutorial._maximizado
         assert tutorial.geometry() == tamanho_normal
         tutorial.hide()
 
@@ -369,7 +419,27 @@ class TestGeometria:
         """Maximizado, redimensionar_com_overlay deve manter o rect completo."""
         parent_rect = QRect(0, 0, 1920, 1080)
         tutorial.exibir_com_tamanho_inicial(parent_rect)
-        tutorial._TelaTutorial__on_maximizar_restaurar()
+        tutorial._alternar_maximizar()
         tutorial.redimensionar_com_overlay(QRect(0, 0, 1600, 900))
         assert tutorial.geometry() == QRect(0, 0, 1600, 900)
         tutorial.hide()
+
+
+class TestJanelaPadrao:
+    """A janela do tutorial deve seguir o padrao unico (JanelaFlutuante)."""
+
+    def test_tutorial_e_uma_janela_flutuante(self, tutorial):
+        """A tela herda de JanelaFlutuante e carrega a property do QSS."""
+        from view.widgets.janela_flutuante import JanelaFlutuante
+
+        assert isinstance(tutorial, JanelaFlutuante)
+        assert tutorial.property("janela_flutuante") is True
+
+    def test_sem_fundo_dedicado(self, tutorial):
+        """O fundo/moldura vem da regra partilhada; nao ha filho tutorial_corpo."""
+        assert tutorial.findChild(QFrame, "tutorial_corpo") is None
+
+    def test_title_bar_sem_property_de_excecao(self, tutorial):
+        """A title bar nao abre excecao de estilo (linha verde padrao mantida)."""
+        bar = tutorial.findChild(WindowTitleBar)
+        assert bar.property("tutorial") is None

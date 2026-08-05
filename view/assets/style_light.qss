@@ -613,9 +613,14 @@ QFrame#media_viewer {
    TelaDeExpediente — Janela Flutuante do Expediente (z=2)
    ============================================================ */
 
-QFrame#tela_de_expediente {
+/* Moldura unica de todas as janelas flutuantes do sistema
+   (JanelaFlutuante): como num SO, o estilo da "janela" nunca muda
+   entre telas — so o conteudo e as regras de sobreposicao. */
+QFrame[janela_flutuante="true"] {
     background-color: #ffffff;
-    border: 2px solid #2F9E41;
+    /* Moldura discreta (20% do verde IFF); o verde 100% fica so na
+       linha da base da title bar. */
+    border: 2px solid rgba(47, 158, 65, 51);
     border-radius: 4px;
 }
 
@@ -1149,16 +1154,8 @@ GameOver #gameover_footer_label {
    TelaTutorial — Janela Flutuante do Tutorial (z=2, irma do expediente)
    ============================================================ */
 
-QFrame#tela_tutorial {
-    background-color: #ffffff;
-    border: 2px solid #2F9E41;
-    border-radius: 4px;
-}
-
-QFrame#tutorial_sombra {
-    background-color: #888888;
-    border: none;
-}
+/* A moldura da janela do tutorial vem da regra partilhada
+   QFrame[janela_flutuante="true"] (padrao TelaDeExpediente). */
 
 QLabel#tutorial_contador {
     color: #57606A;
