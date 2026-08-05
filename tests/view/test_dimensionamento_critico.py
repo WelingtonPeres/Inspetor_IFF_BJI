@@ -144,7 +144,7 @@ class TestTelaExpedienteDimensionamento:
         assert geo_hd.x() == (1600 - 1280) // 2
         assert geo_hd.y() == (1000 - 800) // 2
 
-        assert expediente._TelaDeExpediente__tamanho_normal == geo_hd
+        assert expediente._JanelaFlutuante__tamanho_normal == geo_hd
 
 
 class TestOverlayNotificacao:
@@ -193,7 +193,7 @@ class TestOverlayNotificacao:
         novo_rect = QRect(0, 0, 1000, 800)
 
         spy = MagicMock()
-        expediente._TelaDeExpediente__reposicionar = spy
+        expediente._reposicionar = spy
 
         # Act
         expediente.redimensionar_com_overlay(novo_rect)
@@ -210,11 +210,11 @@ class TestOverlayNotificacao:
         pai = QWidget()
         pai.setGeometry(0, 0, 1000, 800)
         expediente = TelaDeExpediente(parent=pai)
-        expediente._TelaDeExpediente__maximizado = True
+        expediente._JanelaFlutuante__maximizado = True
         novo_rect = QRect(0, 0, 1200, 900)
 
         # Act
-        expediente._TelaDeExpediente__reposicionar(novo_rect)
+        expediente._reposicionar(novo_rect)
 
         # Assert
         assert expediente.width() == novo_rect.width()

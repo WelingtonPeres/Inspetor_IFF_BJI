@@ -456,6 +456,14 @@
     "proporcao_tela": 0.8,
     "proporcao_sobre_expediente": 0.8,
     "font_familia": "Open Sans",
+    "slide": {
+      "margens": {
+        "top": 8,
+        "right": 0,
+        "bottom": 8,
+        "left": 0
+      }
+    },
     "chrome": {
       "margens": {
         "top": 12,

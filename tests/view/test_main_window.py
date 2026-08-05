@@ -138,29 +138,15 @@ class TestTutorial:
             janela.tutorial_finalizado.emit(MotivoTutorial.NOVO_JOGO)
         assert blocker.args[0] == MotivoTutorial.NOVO_JOGO
 
-    def test_exibir_tutorial_mostra_tela_e_sombra(self, janela):
-        """exibir_tutorial deve mostrar a TelaTutorial e a sombra irma."""
+    def test_exibir_tutorial_mostra_tela(self, janela):
+        """exibir_tutorial deve mostrar a TelaTutorial."""
         from application.interfaces.i_game_view import MotivoTutorial
 
         janela.show()
         janela.exibir_tutorial(MotivoTutorial.NOVO_JOGO)
         tela = janela.findChild(object, "tela_tutorial")
-        sombra = janela.findChild(object, "tutorial_sombra")
         assert tela is not None
         assert tela.isVisible()
-        assert sombra is not None
-        assert sombra.isVisible()
-        janela.hide()
-
-    def test_sombra_acompanha_geometria_da_tela(self, janela):
-        """A sombra deve espelhar a geometria da tela deslocada em (6, 6)."""
-        from application.interfaces.i_game_view import MotivoTutorial
-
-        janela.show()
-        janela.exibir_tutorial(MotivoTutorial.NOVO_JOGO)
-        tela = janela.findChild(object, "tela_tutorial")
-        sombra = janela.findChild(object, "tutorial_sombra")
-        assert sombra.geometry() == tela.geometry().translated(6, 6)
         janela.hide()
 
     def test_pular_emite_tutorial_finalizado(self, janela, qtbot):
@@ -178,16 +164,14 @@ class TestTutorial:
         janela.hide()
 
     def test_exibir_menu_esconde_tutorial(self, janela):
-        """exibir_menu deve esconder o tutorial e a sombra."""
+        """exibir_menu deve esconder o tutorial."""
         from application.interfaces.i_game_view import MotivoTutorial
 
         janela.show()
         janela.exibir_tutorial(MotivoTutorial.NOVO_JOGO)
         janela.exibir_menu()
         tela = janela.findChild(object, "tela_tutorial")
-        sombra = janela.findChild(object, "tutorial_sombra")
         assert not tela.isVisible()
-        assert not sombra.isVisible()
         janela.hide()
 
     def test_consulta_sobre_expediente_usam_rect_do_expediente(self, janela):

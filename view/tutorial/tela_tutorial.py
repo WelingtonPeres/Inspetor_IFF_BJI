@@ -4,7 +4,6 @@ from typing import Callable, List, Optional, Tuple, Type
 from PySide6.QtCore import QRect, Qt, Signal, Slot
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
-    QFrame,
     QHBoxLayout,
     QLabel,
     QPushButton,
@@ -14,8 +13,8 @@ from PySide6.QtWidgets import (
 )
 
 from application.interfaces.i_game_view import MotivoTutorial
-from view.expediente.widgets.window_title_bar import WindowTitleBar
 from view.infrastructure.layout_loader import LayoutLoader
+from view.widgets.janela_flutuante import JanelaFlutuante
 from view.tutorial.paginas.slide_anatomia import SlideAnatomia
 from view.tutorial.paginas.slide_anexos import SlideAnexos
 from view.tutorial.paginas.slide_boas_vindas import SlideBoasVindas
@@ -28,10 +27,8 @@ from view.tutorial.slide_tutorial import SlideTutorial
 
 logger = logging.getLogger(__name__)
 
-LIMIAR_LARGURA_MINIMA = 1280
 
-
-class TelaTutorial(QFrame):
+class TelaTutorial(JanelaFlutuante):
     """Janela flutuante do tutorial, irma da TelaDeExpediente.
 
     Emite ``finalizado_solicitado(MotivoTutorial)`` com o motivo que abriu o
@@ -39,8 +36,6 @@ class TelaTutorial(QFrame):
     """
 
     finalizado_solicitado = Signal(MotivoTutorial)
-    geometria_alterada = Signal()
-    visibilidade_alterada = Signal(bool)
 
     SLIDES: Tuple[Type[SlideTutorial], ...] = (
         SlideBoasVindas,
@@ -57,21 +52,15 @@ class TelaTutorial(QFrame):
     TEXTO_PULAR = "Pular tutorial"
 
     def __init__(self, parent: Optional[QWidget] = None):
-        super().__init__(parent)
+        super().__init__(proporcao_keys=("tutorial", "proporcao_tela"), parent=parent)
         self.setObjectName("tela_tutorial")
         self.setProperty("class", "tela_tutorial")
-        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
-        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
         self.__layout = LayoutLoader.instance()
 
         self.__motivo: MotivoTutorial = MotivoTutorial.NOVO_JOGO
         self.__index_atual: int = 0
-        self.__maximizado: bool = False
-        self.__tamanho_normal: Optional[QRect] = None
-        self.__rect_referencia: Optional[QRect] = None
 
-        self.__title_bar: WindowTitleBar
         self.__label_contador: QLabel
         self.__btn_pular: QPushButton
         self.__label_briefing: QLabel
@@ -84,38 +73,20 @@ class TelaTutorial(QFrame):
         self.__layout.escala_atualizada.connect(self.__reaplicar_dimensoes)
 
     def __setup_ui(self) -> None:
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-
-        self.__title_bar = self.__build_title_bar()
-        layout.addWidget(self.__title_bar)
-
-        body = self.__build_body()
-        layout.addLayout(body, stretch=1)
+        layout = self._montar_chrome(self.TITULO)
+        layout.addLayout(self.__build_body(), stretch=1)
 
         self.__aplicar_dimensoes()
         # Estado inicial do chrome (briefing, setas, dots) sem navegar.
         self.__on_page_changed(0)
 
-    def __build_title_bar(self) -> WindowTitleBar:
-        L = self.__layout
-        title_bar = WindowTitleBar(
-            titulo=self.TITULO,
-            altura=L.scaled("tela_de_expediente", "title_bar", "altura"),
-            altura_keys=("tela_de_expediente", "title_bar", "altura"),
-            mostrar_min_max=True,
-            parent=self,
-        )
-        title_bar.close_requested.connect(self.__on_finalizar)
-        title_bar.minimized_solicitado.connect(self.__on_minimizar)
-        title_bar.maximized_solicitado.connect(self.__on_maximizar_restaurar)
-        return title_bar
-
     def __build_body(self) -> QVBoxLayout:
         L = self.__layout
+        margens_chrome = L.scaled_margins("tutorial", "chrome", "margens")
         body = QVBoxLayout()
-        body.setContentsMargins(*L.scaled_margins("tutorial", "chrome", "margens"))
+        # Recuo completo do chrome aqui (lateral e vertical): o body e o
+        # unico bloco recuado, como no padrao full-bleed da irma.
+        body.setContentsMargins(*margens_chrome)
         body.setSpacing(L.scaled("tutorial", "chrome", "header_spacing"))
 
         body.addLayout(self.__build_cabecalho())
@@ -210,7 +181,6 @@ class TelaTutorial(QFrame):
     ) -> QPushButton:
         btn = QPushButton(texto)
         btn.setObjectName(object_name)
-        btn.setProperty("class", "tutorial_nav_arrow")
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
         btn.clicked.connect(slot)
         return btn
@@ -282,34 +252,12 @@ class TelaTutorial(QFrame):
             self.__stack.setCurrentIndex(indice)
 
     @Slot()
-    def __on_minimizar(self) -> None:
-        self.hide()
-
-    @Slot()
-    def __on_maximizar_restaurar(self) -> None:
-        if self.__maximizado:
-            self.__restaurar_tamanho()
-            self.__maximizado = False
-            self.__title_bar.set_maximizado(False)
-            return
-        self.__maximizar()
-        self.__maximizado = True
-        self.__title_bar.set_maximizado(True)
-
-    def __maximizar(self) -> None:
-        if self.__rect_referencia is not None:
-            self.__tamanho_normal = self.geometry()
-            self.setGeometry(self.__rect_referencia)
-
-    def __restaurar_tamanho(self) -> None:
-        if self.__tamanho_normal is not None:
-            self.setGeometry(self.__tamanho_normal)
+    def _ao_fechar(self) -> None:
+        self.__on_finalizar()
 
     @Slot()
     def __on_finalizar(self) -> None:
-        self.hide()
-        self.__maximizado = False
-        self.__title_bar.set_maximizado(False)
+        self._fechar()
         self.finalizado_solicitado.emit(self.__motivo)
 
     @Slot()
@@ -336,22 +284,6 @@ class TelaTutorial(QFrame):
             L.scaled("tutorial", "chrome", chave),
         )
 
-    def moveEvent(self, event) -> None:
-        super().moveEvent(event)
-        self.geometria_alterada.emit()
-
-    def resizeEvent(self, event) -> None:
-        super().resizeEvent(event)
-        self.geometria_alterada.emit()
-
-    def showEvent(self, event) -> None:
-        super().showEvent(event)
-        self.visibilidade_alterada.emit(True)
-
-    def hideEvent(self, event) -> None:
-        super().hideEvent(event)
-        self.visibilidade_alterada.emit(False)
-
     def exibir_tutorial(self, motivo: MotivoTutorial) -> None:
         """Abre o tutorial com o motivo dado (guard de reentrancia).
 
@@ -371,33 +303,6 @@ class TelaTutorial(QFrame):
             self.__slide_do_indice(indice).definir_motivo(motivo)
 
     def exibir_com_tamanho_inicial(self, parent_rect: QRect) -> None:
-        """Posiciona a janela (80% do rect de referencia) e mostra."""
-        self.__reposicionar(parent_rect)
-        self.show()
+        """Posiciona e mostra acima da irma (regra de sobreposicao local)."""
+        super().exibir_com_tamanho_inicial(parent_rect)
         self.raise_()
-
-    @Slot(QRect)
-    def redimensionar_com_overlay(self, rect: QRect) -> None:
-        """Reaciona ao resize do overlay; so reposiciona se visivel."""
-        if self.isVisible():
-            self.__reposicionar(rect)
-
-    def __reposicionar(self, parent_rect: QRect) -> None:
-        self.__rect_referencia = QRect(parent_rect)
-        self.__tamanho_normal = self.__calcular_rect(parent_rect)
-        if self.__maximizado:
-            self.setGeometry(parent_rect)
-            return
-        self.setGeometry(self.__tamanho_normal)
-
-    def __calcular_rect(self, parent_rect: QRect) -> QRect:
-        L = self.__layout
-        proporcao = L.get("tutorial", "proporcao_tela")
-        w_80 = int(parent_rect.width() * proporcao)
-        if w_80 < LIMIAR_LARGURA_MINIMA:
-            return QRect(0, 0, parent_rect.width(), parent_rect.height())
-        w = w_80
-        h = int(parent_rect.height() * proporcao)
-        x = (parent_rect.width() - w) // 2
-        y = (parent_rect.height() - h) // 2
-        return QRect(x, y, w, h)

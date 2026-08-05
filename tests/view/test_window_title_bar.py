@@ -103,6 +103,32 @@ class TestWindowTitleBar:
         bar = WindowTitleBar(titulo="Teste", altura=48)
         assert bar.height() == 48
 
+    def test_margens_keys_personalizadas(self):
+        """margens_keys deve definir as margens internas do layout."""
+        LayoutLoader._instance = None
+        LayoutLoader.instance().set_screen(1920, 1080)
+        bar = WindowTitleBar(
+            titulo="Teste",
+            altura=32,
+            margens_keys=("janela_sistema", "title_bar", "margens"),
+        )
+        margens = bar.layout().contentsMargins()
+        assert margens.left() == 12
+        assert margens.right() == 12
+        assert margens.top() == 0
+        assert margens.bottom() == 0
+
+    def test_margens_padrao_do_expediente(self):
+        """Sem margens_keys, deve usar as margens do tela_de_expediente."""
+        LayoutLoader._instance = None
+        LayoutLoader.instance().set_screen(1920, 1080)
+        bar = WindowTitleBar(titulo="Teste", altura=32)
+        margens = bar.layout().contentsMargins()
+        assert margens.left() == 12
+        assert margens.right() == 8
+        assert margens.top() == 0
+        assert margens.bottom() == 0
+
     def test_click_close_nao_dispara_minimize(self, title_bar, qtbot):
         """Clicar no close nao deve disparar minimized_solicitado."""
         signals = []

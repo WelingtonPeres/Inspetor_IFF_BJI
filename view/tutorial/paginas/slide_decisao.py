@@ -43,7 +43,7 @@ class SlideDecisao(SlideTutorial):
     def __setup_ui(self) -> None:
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.setContentsMargins(0, 8, 0, 8)
+        layout.setContentsMargins(*self.margens_slide())
         layout.setSpacing(12)
 
         conteudo = QHBoxLayout()

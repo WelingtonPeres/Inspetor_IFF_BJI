@@ -54,6 +54,13 @@ class TestEstrutura:
         bar = expediente.findChild(WindowTitleBar)
         assert bar is not None
 
+    def test_e_uma_janela_flutuante(self, expediente):
+        """A tela herda de JanelaFlutuante e carrega a property do QSS."""
+        from view.widgets.janela_flutuante import JanelaFlutuante
+
+        assert isinstance(expediente, JanelaFlutuante)
+        assert expediente.property("janela_flutuante") is True
+
     def test_stacked_com_cinco_paginas(self, expediente):
         """O QStackedWidget interno deve conter 5 paginas."""
         stack = expediente.findChild(QStackedWidget)
@@ -241,17 +248,17 @@ class TestTamanho:
         parent_rect = QRect(0, 0, 1920, 1080)
         expediente.exibir_com_tamanho_inicial(parent_rect)
         tamanho_normal = expediente.geometry()
-        expediente._TelaDeExpediente__on_maximizar_restaurar()
-        assert expediente._TelaDeExpediente__maximizado
-        expediente._TelaDeExpediente__on_maximizar_restaurar()
-        assert not expediente._TelaDeExpediente__maximizado
+        expediente._alternar_maximizar()
+        assert expediente._maximizado
+        expediente._alternar_maximizar()
+        assert not expediente._maximizado
         assert expediente.geometry() == tamanho_normal
         expediente.hide()
 
     def test_minimizar_esconde(self, expediente):
         """Minimizar deve esconder o widget."""
         expediente.show()
-        expediente._TelaDeExpediente__on_minimizar()
+        expediente._ao_minimizar()
         assert not expediente.isVisible()
 
     def test_minimizar_apos_reexibir_restaura_tamanho_normal(self, expediente):
@@ -260,7 +267,7 @@ class TestTamanho:
         parent_rect = QRect(0, 0, 1920, 1080)
         expediente.exibir_com_tamanho_inicial(parent_rect)
         tamanho = expediente.geometry()
-        expediente._TelaDeExpediente__on_minimizar()
+        expediente._ao_minimizar()
         assert not expediente.isVisible()
         expediente.show()
         assert expediente.geometry() == tamanho
@@ -268,7 +275,7 @@ class TestTamanho:
     def test_fechar_reseta_estado_e_sinaliza_menu(self, expediente):
         """Fechar deve resetar o expediente e emitir voltar_menu_solicitado."""
         stack = expediente.findChild(QStackedWidget)
-        expediente._TelaDeExpediente__maximizado = True
+        expediente._JanelaFlutuante__maximizado = True
         # navega para uma pagina interna qualquer (nao selecao)
         if stack.currentIndex() == 0:
             stack.setCurrentIndex(2)
@@ -280,9 +287,9 @@ class TestTamanho:
             sinal_recebido = True
 
         expediente.voltar_menu_solicitado.connect(_marcar)
-        expediente._TelaDeExpediente__on_fechar()
+        expediente._ao_fechar()
 
-        assert not expediente._TelaDeExpediente__maximizado
+        assert not expediente._maximizado
         assert stack.currentIndex() == 0
         assert sinal_recebido
 
