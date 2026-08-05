@@ -18,6 +18,22 @@ A avaliação ocorre sob pressão temporal, com retroalimentação imediata e um
 
 ---
 
+## 🎨 Galeria Visual
+
+<div align="center">
+
+| Riscos Ocupacionais | Decisões Administrativas | Interface |
+|---|---|---|
+| ![Risco Físico](view/assets/icons/riscos/risco_fisico_color.png) | ![Carimbo Interdição](view/assets/icons/fim_jogo/Fita_interdicao.png) | ![Logo IFF](view/assets/icons/iff_Icons/logo-iff.png) |
+| ![Risco Químico](view/assets/icons/riscos/risco_quimico_color.png) | ![Troféu](view/assets/icons/fim_jogo/trophy.png) | ![Inspetor](view/assets/icons/inspetor_Icons/logo_inspetor.png) |
+| ![Risco Biológico](view/assets/icons/riscos/risco_biologico_color.png) | ![Carimbo Falha](view/assets/icons/fim_jogo/failedCarimbo.png) | ![Ato Inseguro](view/assets/icons/riscos/ato.png) |
+| ![Risco Ergonômico](view/assets/icons/riscos/risco_ergonomico_color.png) | ![Medal](view/assets/icons/fim_jogo/medal-2.png) | ![Condição Insegura](view/assets/icons/riscos/condicao.png) |
+| ![Risco de Acidente](view/assets/icons/riscos/risco_acidente_color.png) | ![Check](view/assets/icons/fim_jogo/square-check.png) | ![Dashboard](view/assets/icons/sidebar/dashboard_green.png) |
+
+</div>
+
+---
+
 ## 📋 Sumário
 
 - [✨ Features](#-features)
