@@ -18,17 +18,19 @@ A avaliação ocorre sob pressão temporal, com retroalimentação imediata e um
 
 ---
 
-## 🎨 Galeria Visual
+## 🎨 Interface e Gameplay
 
+### Tela Inicial — Seleção de Perfil
+![Tela de Seleção de Perfil](docs/img/screenshots/01_selecao_perfil.png)
+
+*Escolha seu perfil de inspetor (persona) para definir o contexto da análise.*
+
+### Elementos Visuais
 <div align="center">
 
-| Riscos Ocupacionais | Decisões Administrativas | Interface |
-|---|---|---|
-| ![Risco Físico](view/assets/icons/riscos/risco_fisico_color.png) | ![Carimbo Interdição](view/assets/icons/fim_jogo/Fita_interdicao.png) | ![Logo IFF](view/assets/icons/iff_Icons/logo-iff.png) |
-| ![Risco Químico](view/assets/icons/riscos/risco_quimico_color.png) | ![Troféu](view/assets/icons/fim_jogo/trophy.png) | ![Inspetor](view/assets/icons/inspetor_Icons/logo_inspetor.png) |
-| ![Risco Biológico](view/assets/icons/riscos/risco_biologico_color.png) | ![Carimbo Falha](view/assets/icons/fim_jogo/failedCarimbo.png) | ![Ato Inseguro](view/assets/icons/riscos/ato.png) |
-| ![Risco Ergonômico](view/assets/icons/riscos/risco_ergonomico_color.png) | ![Medal](view/assets/icons/fim_jogo/medal-2.png) | ![Condição Insegura](view/assets/icons/riscos/condicao.png) |
-| ![Risco de Acidente](view/assets/icons/riscos/risco_acidente_color.png) | ![Check](view/assets/icons/fim_jogo/square-check.png) | ![Dashboard](view/assets/icons/sidebar/dashboard_green.png) |
+| Riscos Ocupacionais | Decisões Administrativas |
+|---|---|
+| ![Risco Físico](view/assets/icons/riscos/risco_fisico_color.png) ![Risco Químico](view/assets/icons/riscos/risco_quimico_color.png) ![Risco Biológico](view/assets/icons/riscos/risco_biologico_color.png) ![Risco Ergonômico](view/assets/icons/riscos/risco_ergonomico_color.png) ![Risco de Acidente](view/assets/icons/riscos/risco_acidente_color.png) | ![Carimbo Interdição](view/assets/icons/fim_jogo/Fita_interdicao.png) ![Troféu](view/assets/icons/fim_jogo/trophy.png) ![Medal](view/assets/icons/fim_jogo/medal-2.png) ![Check](view/assets/icons/fim_jogo/square-check.png) |
 
 </div>
 
