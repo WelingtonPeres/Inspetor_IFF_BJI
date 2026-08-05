@@ -24,3 +24,33 @@ Thumbs.db
 # IDEs (VSCode, PyCharm, etc)
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+
+# Claude e Ferramentas de IA
+.claude/
+.opencode/
+
+# OS e Logs
+*.log
+*.pot
+
+# Builds e Distribuição
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Qt e PySide
+*.qm
+*.qrc.py
+
+# Arquivos temporários do sistema
+.DS_Store
+Thumbs.db
+*.tmp
+
+# Editor temporários
+*.bak
+*~
