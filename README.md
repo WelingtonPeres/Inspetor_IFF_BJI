@@ -4,31 +4,142 @@
 
 # Inspetor IFF-BJI
 
-Simulador de análise de risco ocupacional desenvolvido no IFF, Campus Bom Jesus do Itabapoana, como atividade de Curricularização da Extensão na disciplina de Higiene e Segurança do Trabalho. O jogador recebe relatórios de cenários reais em laboratórios, oficinas e refeitórios, classifica riscos e fatores de insegurança, e escolhe a intervenção cabível sob pressão de tempo. A nota sai de um modelo determinístico que pondera exatidão, completude e decaimento temporal, e o resultado reflete o que um técnico de segurança faria naquele contexto.
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue)](https://www.python.org/downloads/)
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey)](LICENSE)
+[![Status: Active Development](https://img.shields.io/badge/Status-Active%20Development-green)]()
 
-## Sumário
+## Apresentação
 
-- [1. Instalação](#1-instalação)
-- [2. Documentação e Guias](#2-documentação-e-guias)
-- [3. Arquitetura do Projeto](#3-arquitetura-do-projeto)
+**Inspetor IFF-BJI** é um simulador educacional para análise de risco ocupacional, desenvolvido como atividade de Curricularização da Extensão no Instituto Federal Fluminense (IFF), Campus Bom Jesus do Itabapoana, na disciplina de Higiene e Segurança do Trabalho.
 
-## 1. Instalação
+O simulador é um **ambiente de prática imersivo** onde estudantes e profissionais de segurança do trabalho analisam cenários reais em laboratórios, oficinas e refeitórios, identificam riscos ocupacionais segundo a Norma Regulamentadora 26 (NR-26), classificam fatores de insegurança (atos e condições inseguras), e decidem a melhor estratégia administrativa (advertência, interdição ou arquivamento).
 
-### Pré-requisitos
+A avaliação ocorre sob pressão temporal, com retroalimentação imediata e uma pontuação determinística que premia **exatidão** (acertos nas classificações), **completude** (cobertura de todos os riscos) e **eficiência** (penalidade por decorrência de tempo), refletindo as exigências reais da profissão.
 
-| Recurso | Necessário para | Como verificar |
-|---|---|---|
-| **Python 3.11+** | Executar o jogo | `python --version` (Windows/Linux) ou `python3 --version` (macOS) |
-| **Git** | Opção A (clone) | `git --version` |
+---
 
-> O **Git não é obrigatório**: quem prefere não instalar pode usar a **Opção B (ZIP)**.
-> Em qualquer opção, o jogo é instalado numa pasta própria sem alterar o resto do sistema.
+## 🎨 Interface e Gameplay
 
-### Opção A — Instalar com Git (recomendado)
+### 1. Seleção de Perfil — Escolha de Persona
 
-Recomendado porque facilita atualizar o jogo (`git pull`) e acompanhar o desenvolvimento.
+![Tela de Seleção de Perfil](docs/img/screenshots/01_selecao_perfil.png)
 
-**1. Abra o terminal** e clone o repositório:
+Selecione seu personagem inspetor (p.ex., "T. Meio Ambiente"). Cada persona possui contexto e conhecimento específicos que definem como você abordará a análise. A interface mostra cards visuais para cada personagem com seus atributos.
+
+**Elementos visíveis:**
+- Carrossel de personagens com 3-9 opções
+- Visualização clara de cada persona
+- Indicador de progresso (ex: 6/9)
+- Botão "Confirmar" para iniciar
+
+### 2. Tela de Inspeção — Relatório e Decisão
+
+![Tela de Inspeção](docs/img/screenshots/02_tela_inspecao.png)
+Analise o **Relatório Estruturado** com:
+- **Local**: Onde ocorreu o incidente (ex: "Laboratório de Solos - IFFBJI")
+- **Atividade**: O que estava sendo feito (ex: "Preparo para Titulação com HCl")
+- **Envolvidos**: Pessoas presentes
+- **Descrição**: Narrativa do cenário
+
+**Identifique Riscos** (lado direito):
+- 5 categorias com cores (Físico, Químico, Biológico, Ergonômico, Acidente)
+- Clique para marcar os riscos encontrados
+
+**Classifique Fatores de Insegurança**:
+- Ato Inseguro (falha humana)
+- Condição Insegura (falha do ambiente/equipamento)
+
+**Escolha Decisão Administrativa**:
+- ADVERTIR (amarelo) — para riscos menores
+- INTERDITAR (vermelho) — para riscos graves
+- IGNORAR (cinza) — sem risco efetivo
+
+**Botão "Submeter Respostas"** envia sua análise
+
+### 3. Tela de Resultado — Diagnóstico e Pontuação
+
+![Tela de Resultado](docs/img/screenshots/03_tela_resultado.png)
+
+Receba **feedback imediato e detalhado**:
+
+**Pontuação Final** (ex: 7250 pts) com breakdown:
+- Riscos identificados: +3000 pts (corretos)
+- Fatores de insegurança: +750 pts (análise complementar)
+- Decisão administrativa: +2500 pts (escolha apropriada)
+- Bônus temporal: +0 pts (tempo gasto)
+
+**Sidebar esquerdo**:
+- Dashboard com progresso (ex: "Riscos: 2 de 3")
+- Reports, Logs, Settings
+
+**Histórico de progresso** mostrando qual cenário você está.
+
+---
+
+## 📋 Sumário
+
+- [✨ Features](#-features)
+- [🎮 Como Jogar](#-como-jogar)
+- [🚀 Instalação Rápida](#-instalação-rápida)
+- [📚 Documentação](#-documentação)
+- [🏗️ Arquitetura](#-arquitetura)
+- [📄 Licença](#-licença)
+- [👥 Contribuidores](#-contribuidores)
+
+---
+
+## ✨ Características Distintivas
+
+- **Modelo de avaliação determinístico** — Equação de pontuação explícita que premia exatidão (acertos nas classificações), completude (identificação de todos os riscos) e eficiência temporal. Sem aleatoriedade: mesma resposta sempre produz mesma nota.
+
+- **Cenários baseados em casos reais** — Laboratórios, oficinas e refeitórios do IFF com relatórios autênticos, equipamentos e contextos que estudantes reconhecem.
+
+- **Classificação normativa de riscos** — Cinco categorias segundo NR-26: Físico, Químico, Biológico, Ergonômico e Acidente, com cores específicas por fator de risco.
+
+- **Decisões administrativas fundadas** — Três estratégias (Advertência, Interdição, Arquivamento) com consequências que refletem a escolha: erros reverberam na pontuação.
+
+- **Pressão temporal realista** — Decaimento de pontuação conforme o tempo decorre, simulando urgência operacional.
+
+- **Retroalimentação formativa** — Após cada decisão, diagnóstico detalhado: erros identificados, itens faltantes, pontuação por componente, oportunidade de aprender.
+
+- **Guia integrado para primeiro acesso** — 8 slides interativos explicam mecânicas, termos e fluxo, sem exigir leitura externa.
+
+- **Interface responsiva e acessível** — Tema claro/escuro, dimensionamento automático para diferentes resoluções, tipografia legível.
+
+- **Arquitetura académica** — Clean Architecture (camadas Core, Infrastructure, Application, View) com separação rigorosa de responsabilidades, 615+ testes automatizados, código documentado.
+
+---
+
+## 🎮 Fluxo de Operação
+
+O simulador segue um fluxo linear com avaliação ao final:
+
+1. **Escolha de Perfil**: Seleção de persona (p.ex., Inspetor Diurno, Supervisor Noturno) — define contexto e conhecimento prévio.
+
+2. **Apresentação do Caso**: Relatório estruturado com local, atividade, envolvidos, descrição narrativa da situação. Acesso a anexos (fotos, vídeos) se relevantes.
+
+3. **Identificação de Riscos**: Marcação de riscos observados. O sistema lista os riscos possíveis por cores (NR-26: azul=físico, vermelho=acidente, etc.). Objetivo: máxima cobertura com mínimos falsos positivos.
+
+4. **Classificação de Insegurança**: Tipo de risco identificado — **Ato Inseguro** (comportamento inadequado) vs. **Condição Insegura** (ambiente/equipamento inadequado). Exige compreensão normativa.
+
+5. **Decisão Administrativa**: Escolha de ação corretiva única:
+   - **Advertência**: Para riscos menores (reforço comportamental)
+   - **Interdição**: Para riscos graves (suspensão da atividade até correção)
+   - **Arquivamento**: Para situações sem risco efetivo (falso positivo intencional ou erro)
+
+6. **Cálculo e Retroalimentação**: Sistema calcula pontuação segundo equação determinística. Apresenta análise item-por-item, erros cometidos, lacunas, e sugestões de melhoria.
+
+7. **Prática Iterada**: Múltiplos cenários disponíveis, recomenda-se repetição para consolidação de expertise.
+
+**Métrica de Sucesso**: Pontuação máxima = análise completa (todos os riscos), precisa (sem falsos positivos) e eficiente (dentro do tempo limite).
+
+---
+
+## 🚀 Instalação Rápida
+
+**Pré-requisitos:** Python 3.11+
+
+### Opção 1: Via Git (recomendado para desenvolvimento)
 
 ```bash
 git clone https://github.com/WelingtonPeres/Inspetor_IFF_BJI.git
@@ -63,381 +174,137 @@ pip install -r requirements.txt
 python main.py
 ```
 
-**Atualizar o jogo depois** (dentro da pasta, com o `venv` ativado):
+### Opção 2: Download do ZIP (sem Git)
 
-```bash
-git pull
-```
-
-### Opção B — Instalar pelo arquivo ZIP (sem Git)
-
-**1. Baixe o arquivo ZIP:** acesse [github.com/WelingtonPeres/Inspetor_IFF_BJI](https://github.com/WelingtonPeres/Inspetor_IFF_BJI), clique no botão verde **"Code"** e escolha **"Download ZIP"**. O link direto é:
-
-```
-https://github.com/WelingtonPeres/Inspetor_IFF_BJI/archive/refs/heads/main.zip
-```
-
-**2. Extraia o conteúdo** do ZIP para uma pasta de sua preferência (ex.: `C:\Inspetor_IFF_BJI` ou `~/Inspetor_IFF_BJI`). A pasta extraída contém o projeto completo.
-
-**3. Abra o terminal na pasta extraída** (dentro de `Inspetor_IFF_BJI-main`, a pasta que contém o `requirements.txt`):
-
-```bash
-cd caminho/para/Inspetor_IFF_BJI-main
-```
-
-**4. Crie o ambiente virtual:**
+1. Acesse [Releases](https://github.com/WelingtonPeres/Inspetor_IFF_BJI/releases) ou clique no botão **Code** > **Download ZIP**
+2. Extraia o arquivo em uma pasta de sua escolha
+3. Abra o terminal/PowerShell na pasta extraída
+4. Execute:
 
 ```bash
 python -m venv venv
-```
-
-**5. Ative o ambiente virtual:**
-
-| Sistema | Comando |
-|---|---|
-| Windows (PowerShell) | `.\venv\Scripts\Activate.ps1` |
-| Windows (Prompt de Comando) | `.\venv\Scripts\activate.bat` |
-| Linux/macOS | `source venv/bin/activate` |
-
-**6. Instale as dependências:**
-
-```bash
+# Windows (PowerShell): .\venv\Scripts\Activate.ps1
+# Linux/macOS:          source venv/bin/activate
 pip install -r requirements.txt
-```
-
-**7. Inicie o jogo:**
-
-```bash
 python main.py
 ```
 
-> **Nota:** com o ZIP, atualizar o jogo significa baixar o ZIP novamente e repetir os passos 1–6. Para receber atualizações com um único comando, prefira a Opção A.
+**Dúvidas?** Consulte o [Guia de Contribuição](CONTRIBUTING.md) para detalhes de ambiente, dependências e troubleshooting.
 
-### Solução de problemas
+---
 
-| Problema | Causa provável | Solução |
-|---|---|---|
-| `'python' não é reconhecido` | Python fora do `PATH` | Reinstale o Python marcando **"Add Python to PATH"** ou use `py -m venv venv` no Windows |
-| `Não é possível carregar ... porque a execução de scripts está desabilitada` (PowerShell) | Execution Policy do Windows | Rode `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` e tente de novo |
-| `pip` acusa versão antiga | `pip` desatualizado | `python -m pip install --upgrade pip` |
-| Erros de importação ao iniciar | Dependências incompletas | Reexecute `pip install -r requirements.txt` com o `venv` ativado |
+## 📚 Documentação
 
+Toda a documentação técnica vive em [`docs/`](docs/README.md), organizada por tema:
 
-## 2. Documentação do Projeto e Guias
+| Pergunta | Link |
+|----------|------|
+| **Como contribuo?** | [Guia de Contribuição](CONTRIBUTING.md) |
+| **Como o código é organizado?** | [Arquitetura da Camada View](docs/arquitetura/view.md), [Diagrama de Classes](docs/arquitetura/diagrama-classes.md) |
+| **Como o jogo funciona?** | [Modelagem Matemática](docs/game-design/modelagem-matematica.md), [Level Design](docs/game-design/level-design.md) |
+| **Qual é o schema dos dados?** | [Estrutura JSON](docs/dados/estrutura-json.md) |
+| **Qual é o padrão de código?** | [Nomenclatura e PEP-8](docs/processo/nomenclatura-pep8.md) |
+| **Quer revisar PRs?** | [Checklist de Code Review](docs/arquitetura/checklist-revisao.md) |
 
-Para manter este ficheiro principal conciso, toda a documentação técnica, especificações matemáticas e guias de desenvolvimento foram modularizados. Consulte os links abaixo para compreender a fundo os detalhes do projeto:
+**Índice completo**: [docs/README.md](docs/README.md)
 
-* **[Guia de Contribuição (CONTRIBUTING.md)](CONTRIBUTING.md)**: Como configurar o ambiente local, pré-requisitos e regras para submissão de Pull Requests.
-* **[Arquitetura Limpa](docs/CLEAN_ARCHITECTURE.md)**: Mapa de camadas, responsabilidades, regras de dependência e organização do código-fonte.
-* **[Manual de Revisão de Arquitetura](docs/CLEAN_ARCHITECTURE_CHECKLIST.md)**: Guia de code review com as 5 Perguntas Fundamentais antes de qualquer merge.
-* **[Arquitetura da Camada View (MVP)](docs/ARQUITETURA_VIEW.md)**: Padrões de apresentação em PySide6 — widgets, signals/slots e contratos de interface.
-* **[Git Flow (Versionamento)](docs/GITFLOW.md)**: Fluxo de branches eternas e efémeras adotado pela equipa.
-* **[Modelagem Matemática e Algoritmos](docs/game_design/MODELAGEM_MATEMATICA.md)**: Detalhamento das equações de pontuação, cálculo de exatidão e fator de decaimento temporal.
-* **[Estrutura de Dados e Schema JSON](docs/ESTRUTURA_JSON.md)**: Arquitetura e tipagem dos ficheiros de persistência de cenários e relatórios.
-* **[Level Design e Fluxos do Jogo](docs/game_design/Level_Design.md)**: Mapeamento da experiência do utilizador, progressão de dificuldade e mecânicas de feedback.
-* **[Padrões de Nomenclatura e PEP-8](docs/PADROES_NOMENCLATURA_PEP8.md)**: Diretrizes estritas de estilo de código adotadas pela equipa de engenharia.
-* **[Diretrizes de Design Visual](docs/visual/DESIGN.md)**: Tokens de cor, temas claro/escuro e especificações da interface.
-* **[Identidade Institucional](docs/visual/IDENTIDADE.md)**: Regras de uso da marca, cores e tipografia do IFFluminense.
-* **[Atribuição dos Ícones de Risco](view/assets/icons/riscos/ATTRIBUTION.md)**: Origem (Font Awesome) e licença CC BY 4.0 dos ícones utilizados.
+---
 
-## 3. Arquitetura do Projeto (Diagrama de Classes)
+## 🏗️ Arquitetura de Software
 
-O projeto segue os princípios da **Arquitetura Limpa (Clean Architecture)**, dividido em camadas concêntricas:
+O projeto implementa **Arquitetura Limpa** (Clean Architecture, Robert C. Martin), organizando o código em **camadas concêntricas** com dependências unidirecionais (sempre para dentro):
 
-```mermaid
-classDiagram
-    %% ==================== Core Model Layer ====================
-    class Anexo {
-        <<abstract>>
-        -__id_anexo: int
-        -__caminho_arquivo: str
-        +id_anexo() int
-        +caminho_arquivo() str
-        +get_tipo_midia()* str
-        +extrair_dados() dict
-    }
-    class AnexoImagem {
-        +get_tipo_midia() str
-    }
-    class AnexoVideo {
-        +get_tipo_midia() str
-    }
-    class AnexoAudio {
-        +get_tipo_midia() str
-    }
-    class FolhaDeInspecao {
-        <<abstract>>
-        -__riscos: List[str]
-        -__fatores_inseguranca: List[str]
-        +riscos() List[str]
-        +fatores_inseguranca() List[str]
-        +contar_riscos() int
-        +contar_fatores() int
-    }
-    class FolhaDeGabarito {
-        -__decisao_otima: str
-        -__decisao_boa: str
-        +decisao_otima() str
-        +decisao_boa() str
-    }
-    class FolhaDeResposta {
-        -__decisao_tomada: str
-        -__tempo_gasto_segundos: int
-        +decisao_tomada() str
-        +tempo_gasto_segundos() int
-    }
-    class Relatorio {
-        -__id_cenario: int
-        -__titulo: str
-        -__atividade: str
-        -__local: str
-        -__texto_descricao: str
-        -__envolvidos: List[str]
-        -__cursos: List[str]
-        -__dificuldade: int
-        -__anexos: List[Anexo]
-        -__folha_gabarito: FolhaDeGabarito
-        -__folha_resposta: FolhaDeResposta
-        +id_cenario() int
-        +titulo() str
-        +atividade() str
-        +local() str
-        +texto_descricao() str
-        +envolvidos() List[str]
-        +dificuldade() int
-        +cursos() List[str]
-        +folha_gabarito() FolhaDeGabarito
-        +folha_resposta_jogador() FolhaDeResposta
-        +extrair_apresentacao_relatorio() dict
-        +obter_anexos() List[Anexo]
-        +adicionar_anexo(anexo) void
-        +possui_anexos() bool
-        +anexar_resposta_jogador(resposta) void
-    }
-    AnexoImagem --|> Anexo
-    AnexoVideo --|> Anexo
-    AnexoAudio --|> Anexo
-    FolhaDeGabarito --|> FolhaDeInspecao
-    FolhaDeResposta --|> FolhaDeInspecao
-    Relatorio *-- Anexo
-    Relatorio *-- FolhaDeGabarito
-    Relatorio *-- FolhaDeResposta
+| Camada | Diretório | Responsabilidade | Dependências |
+|--------|-----------|------------------|--------------|
+| **Core (Domain)** | `core/model/`, `core/services/`, `core/dtos/` | Entidades, regras de negócio, algoritmos de cálculo (p.ex., equação de pontuação) | ✋ Nenhuma externa |
+| **Infrastructure** | `infrastructure/` | Implementação de repositórios, persistência em JSON, fábrica de cenários | Core apenas |
+| **Application** | `application/controllers/` | Orquestração de casos de uso, sequencialização de eventos, contrato `IGameView` | Core + Infrastructure |
+| **View** | `view/` | Interface com o utilizador (PySide6/Qt), widgets, estilos, sinalização | Application apenas (via contrato) |
+| **Config** | `config/` | Configuração centralizada (logging, caminhos, valores de ambiente) | Acessível a todas |
 
-    %% ==================== Core Services Layer ====================
-    class MotorDePontuacao {
-        +calcular_vmax_relatorio(relatorio) float
-        +calcular_meta_turno(relatorios) float
-        +calcular_pontuacao_relatorio(v_max, dados) float
-        +calcular_pontuacao_detalhada(v_max, dados) ResultadoDiagnosticoDTO
-        +calcular_scores_por_item(v_max, dados) dict
-        +conferir_condicao_vitoria(nota, maxima) bool
-        -__calcular_subtotais(...) _Subtotais
-        -_calcular_pontuacao_riscos(...) float
-        -_calcular_pontuacao_inseguranca(...) float
-        -_calcular_pontuacao_decisao(v_max, status) float
-        -_calcular_fator_tempo(t) float
-    }
-    class DiagnosticoDeResposta {
-        +gerar_diagnostico_pontuacao(gabarito, respostas) DiagnosticoPontuacaoDTO
-        +gerar_feedback(gabarito, respostas) DiagnosticoFeedbackDTO
-        -__extrair_metadados(gabarito, respostas) _MetadadosInspecao
-    }
-    MotorDePontuacao ..> DiagnosticoPontuacaoDTO : depende
-    MotorDePontuacao ..> ResultadoDiagnosticoDTO : produz
-    DiagnosticoDeResposta ..> DiagnosticoPontuacaoDTO : cria
-    DiagnosticoDeResposta --> FolhaDeGabarito : usa
-    DiagnosticoDeResposta --> FolhaDeResposta : usa
+**Propriedades:**
+- **Alta coesão**: Cada camada tem uma única razão para mudar
+- **Baixo acoplamento**: Dependências fluem inward; camadas internas não conhecem externas
+- **Testabilidade**: Core pode ser testado sem Qt, infraestrutura sem UI
+- **Manutenibilidade**: Mudanças na UI não afetam cálculos de negócio
 
-    %% ==================== Core DTOs ====================
-    class DiagnosticoPontuacaoDTO {
-        <<dataclass frozen>>
-        qnt_riscos_marcados: int
-        qnt_riscos_gabarito: int
-        qnt_riscos_corretos_marcados: int
-        qnt_fatores_gabarito: int
-        qnt_fatores_marcados: int
-        estado_ato: bool
-        estado_condicao: bool
-        status_decisao_jogador: str
-        tempo_resposta_segundos: float
-        pontuacao_final: float
-        nota_riscos: float
-        nota_fatores: float
-        nota_decisao: float
-        pontos_bonus_tempo: float
-        decisao_anulada: bool
-    }
-    class DiagnosticoFeedbackDTO {
-        <<dataclass frozen>>
-        riscos_acertados: List[str]
-        riscos_esquecidos: List[str]
-        riscos_inventados: List[str]
-        fatores_acertados: List[str]
-        fatores_esquecidos: List[str]
-        fatores_inventados: List[str]
-        decisao_tomada: str
-        decisao_esperada: str
-        score_por_risco: dict
-        score_por_fator: dict
-    }
-    class ResultadoDiagnosticoDTO {
-        <<dataclass frozen>>
-        pontuacao: DiagnosticoPontuacaoDTO
-        feedback: DiagnosticoFeedbackDTO
-    }
-    class ParecerCIPA {
-        <<dataclass frozen>>
-        numero: str
-        referencia: str
-        texto: str
-    }
-    ResultadoDiagnosticoDTO *-- DiagnosticoPontuacaoDTO
-    ResultadoDiagnosticoDTO *-- DiagnosticoFeedbackDTO
+**Leitura completa**: [Clean Architecture](docs/arquitetura/clean-architecture.md), [Diagrama de Classes](docs/arquitetura/diagrama-classes.md), [Padrões da View](docs/arquitetura/view.md)
 
-    %% ==================== Core Interfaces ====================
-    class IPareceresCIPA {
-        <<interface>>
-        +obter_parecer_para_curso(curso) ParecerCIPA*
-    }
+---
 
-    %% ==================== Infrastructure Layer ====================
-    class RepositorioJSON {
-        -__diretorio_base: Path
-        +curso_selecionado: str
-        +quantidade_gerada: int
-        +extrair_dados() List[DadosCenarioDTO]
-        -__verificar_quantidade_gerada_valida() void
-        -__verificar_curso_valido() void
-        -__verificar_diretorio_existe() void
-        -__validar_esquema_basico(dados) void
-        -__traduzir_erro_validacao(...) void
-    }
-    class FabricaDeRelatorios {
-        +construir_pilha(dados) List[Relatorio]
-        -__instanciar_relatorio_unico(dto) Relatorio
-        -__extrair_instanciar_anexos(dto) List[Anexo]
-    }
-    class RepositorioDePareceresCIPA {
-        -__caminho_ficheiro: Path
-        +obter_parecer_para_curso(curso) ParecerCIPA
-        +cursos_disponiveis() List[str]
-        -__carregar_pareceres() dict
-        -__gerar_numero() str
-    }
-    class DadosCenarioDTO {
-        <<dataclass>>
-        id_cenario: int
-        titulo: str
-        dificuldade: int
-        atividade: str
-        local: str
-        texto_descricao: str
-        envolvidos: List[str]
-        curso: List[str]
-        riscos: List[str]
-        fatores_inseguranca: List[str]
-        decisao_otima: str
-        decisao_boa: str
-        anexos: List[DadosAnexoDTO]
-    }
-    class DadosAnexoDTO {
-        <<dataclass>>
-        id_anexo: int
-        tipo: str
-        caminho_arquivo: str
-    }
-    DadosCenarioDTO *-- DadosAnexoDTO
-    RepositorioJSON ..> DadosCenarioDTO : produz
-    FabricaDeRelatorios ..> DadosCenarioDTO : consome
-    FabricaDeRelatorios ..> Relatorio : produz
-    FabricaDeRelatorios ..> Anexo : instancia
-    RepositorioDePareceresCIPA --|> IPareceresCIPA : implementa
+## 📄 Licença
 
-    %% ==================== Application Layer ====================
-    class GerenciadorDeTurno {
-        -__perfil_atual: str
-        -__pilha_relatorios: List[Relatorio]
-        -__motor_pontuacao: MotorDePontuacao
-        -__diagnostico_resposta: DiagnosticoDeResposta
-        -__pontuacao_acumulada_turno: float
-        -__v_max_turno: float
-        -__turno_iniciado: bool
-        -__relatorio_atual: Relatorio
-        +iniciar_turno() bool
-        +qnt_relatorios() int
-        +obter_relatorio_da_pilha() Relatorio
-        +avaliar_respostas_jogador(riscos, fatores, decisao, tempo) float
-        +verificar_vitoria_do_turno() bool
-        -__processar_submissao_jogador(...) FolhaDeResposta
-    }
-    class GameManager {
-        -__view: IGameView
-        +iniciar_aplicacao() void
-        +encerrar_aplicacao() void
-        +reiniciar_expediente() void
-        +carregar_menu_principal() void
-        +on_iniciar_solicitado() void
-        +iniciar_expediente(perfil) void
-        +processar_submissao(respostas) void
-        +avancar_fila_ou_dia() void
-        -__iniciar_campanha(perfil) void
-        -__encerrar_campanha() void
-        -__iniciar_dia(dia) void
-    }
-    class IGameView {
-        <<interface>>
-        +inicializar() void*
-        +fechar() void*
-        +exibir_menu() void*
-        +exibir_selecao_perfil() void*
-        +trocar_para_tela_inspecao() void*
-        +renderizar_relatorio(dados) void*
-        +exibir_tela_diagnostico(resultado) void*
-        +exibir_resultado(pontuacao, dias, venceu) void*
-        +exibir_popup_erro(mensagem) void*
-    }
-    GerenciadorDeTurno ..> MotorDePontuacao : usa
-    GerenciadorDeTurno ..> DiagnosticoDeResposta : usa
-    GerenciadorDeTurno ..> Relatorio : manipula
-    GerenciadorDeTurno ..> FabricaDeRelatorios : usa
-    GerenciadorDeTurno ..> RepositorioJSON : usa
-    GerenciadorDeTurno ..> ResultadoDiagnosticoDTO : produz
-    GameManager ..> IGameView : coordena
-    GameManager ..> GerenciadorDeTurno : instancia
+Este projeto está licenciado sob a **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License** (CC BY-NC-SA 4.0).
 
-    %% ==================== View Layer ====================
-    class JanelaPrincipal {
-        +iniciar_solicitado: Signal
-        +perfil_confirmado: Signal
-        +submeter_respostas: Signal
-        +continuar_solicitado: Signal
-        +voltar_menu_solicitado: Signal
-        +sair_solicitado: Signal
-        +inicializar() void
-        +fechar() void
-        +exibir_menu() void
-        +exibir_selecao_perfil() void
-        +exibir_tela_diagnostico(resultado) void
-    }
-    class TelaDeExpediente {
-        +exibir_selecao_perfil() void
-        +renderizar_relatorio(dados) void
-        +exibir_tela_diagnostico(resultado) void
-        +exibir_tela_endgame(pontos, dias, venceu) void
-        -__on_page_changed(index) void
-    }
-    JanelaPrincipal --|> IGameView : implementa
-    JanelaPrincipal ..> TelaDeExpediente : compõe
-    TelaDeExpediente "1" *-- "1" pagina_inspecao
-    TelaDeExpediente "1" *-- "1" pagina_diagnostico
-```
+**O que você pode fazer:**
+- ✓ Usar, copiar e redistribuir
+- ✓ Remixar, transformar e melhorar
+- ✓ Usar em contextos educacionais
 
-### Legenda das Camadas
+**Com a condição de:**
+- Atribuir crédito ao IFF e aos autores
+- Não usar para fins comerciais
+- Compartilhar derivados sob a mesma licença
 
-| Camada | Diretório | Responsabilidade |
-|--------|-----------|------------------|
-| **Core (Domain)** | `core/model/`, `core/services/`, `core/dtos/` | Regras de negócio e entidades: **sem dependências externas** |
-| **Infrastructure** | `infrastructure/` | Repositórios, fábrica e DTOs de persistência |
-| **Application** | `application/controllers/`, `application/interfaces/` | Orquestração dos casos de uso e contratos da View |
-| **View** | `view/` | Interface com o utilizador (PySide6, MVP) |
-| **Config** | `config/` | Configuração centralizada (logging, constantes) |
+Para o texto legal completo, veja [LICENSE](LICENSE).
+
+---
+
+## 👥 Contribuidores
+
+Veja [AUTHORS.md](AUTHORS.md) para lista completa de contribuidores, orientadores e instituições envolvidas.
+
+### Como Contribuir
+
+O projeto está em **desenvolvimento ativo** e aceita contribuições! 
+
+1. Leia [CONTRIBUTING.md](CONTRIBUTING.md) para diretrizes
+2. Abra uma [Issue](https://github.com/WelingtonPeres/Inspetor_IFF_BJI/issues) para reportar bugs ou propor features
+3. Envie um [Pull Request](https://github.com/WelingtonPeres/Inspetor_IFF_BJI/pulls) com suas melhorias
+4. Siga os [padrões de código](docs/processo/nomenclatura-pep8.md) do projeto
+
+---
+
+## 📊 Status do Projeto
+
+| Aspecto | Status |
+|---------|--------|
+| **Desenvolvimento** | 🟢 Ativo — novas features e melhorias contínuas |
+| **Estabilidade** | 🟡 Beta — testado mas em refinamento |
+| **Testes** | 🟢 615+ testes automatizados passando |
+| **Documentação** | 🟢 Completa e atualizada |
+| **Licença** | 🟢 CC BY-NC-SA 4.0 |
+
+---
+
+## 🎓 Contexto Institucional e Académico
+
+### Origem
+
+Inspetor IFF-BJI é desenvolvido no **Instituto Federal Fluminense (IFF)**, Campus Bom Jesus do Itabapoana, como **Atividade de Curricularização da Extensão** — iniciativa que integra pesquisa, ensino e extensão conforme diretrizes institucionais.
+
+**Curso:** Engenharia de Computação  
+**Disciplina-sede:** Higiene e Segurança do Trabalho  
+**Objetivo pedagógico:** Criar ambiente prático, seguro e repetível para que aprendizes internalizem critérios de análise de risco ocupacional — competência essencial para profissionais de segurança do trabalho.
+
+### Justificativa Educacional
+
+A análise de risco é uma atividade cognitiva complexa que exige integração de conhecimentos técnicos, normativos (NRs) e de tomada de decisão. O simulador oferece:
+
+- **Prática sem riscos**: Estudantes enfrentam cenários reais sem colocar-se em risco
+- **Feedback imediato**: Aprendem consequências de suas decisões instantaneamente
+- **Escala de dificuldade**: Possibilidade de progredir em complexidade conforme ganham expertise
+- **Acesso democrático**: Ferramenta aberta (CC BY-NC-SA), reutilizável por outros IFs e instituições de ensino profissional
+
+### Referência
+
+> BRASIL. Lei nº 11.788, de 25 de setembro de 2008. Dispõe sobre o estágio de estudantes; altera a redação do art. 428 da Consolidação das Leis do Trabalho (CLT) [...]. Diário Oficial da União, Brasília, 2008.
+
+Legislação sobre prática profissional; este projeto permite prática simulada.
+
+---
+
+**Última atualização:** Agosto de 2026  
+**Instituição:** Instituto Federal Fluminense, Campus Bom Jesus do Itabapoana  
+**Curso:** Engenharia de Computação  
+**Créditos:** Veja [AUTHORS.md](AUTHORS.md)
