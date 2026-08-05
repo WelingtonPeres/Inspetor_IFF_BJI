@@ -2,19 +2,20 @@
 
 ## Desenvolvimento
 
-**Welington Peres Léo**  
-Desenvolvedor principal — Arquitetura, Core, View, Testes
+[A definir]
+
+## Orientação Acadêmica
+
+[Orientador a definir]
 
 ## Instituição
 
 **Instituto Federal Fluminense (IFF)**  
 Campus Bom Jesus do Itabapoana
 
+**Curso:** Engenharia de Computação
+
 Projeto desenvolvido como atividade de Curricularização da Extensão na disciplina de Higiene e Segurança do Trabalho.
-
-## Orientação Acadêmica
-
-Orientadores e contribuidores da disciplina de Higiene e Segurança do Trabalho (IFF).
 
 ## Contribuições Comunitárias
 

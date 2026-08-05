@@ -202,8 +202,9 @@ O projeto está em **desenvolvimento ativo** e aceita contribuições!
 
 Inspetor IFF-BJI é desenvolvido no **Instituto Federal Fluminense (IFF)**, Campus Bom Jesus do Itabapoana, como **Atividade de Curricularização da Extensão** — iniciativa que integra pesquisa, ensino e extensão conforme diretrizes institucionais.
 
-**Disciplina-sede:** Higiene e Segurança do Trabalho (curso técnico em segurança do trabalho)  
-**Objetivo pedagógico:** Criar ambiente prático, seguro e repetível para que aprendizes internalizem critérios de análise de risco ocupacional — competência essencial para a profissão.
+**Curso:** Engenharia de Computação  
+**Disciplina-sede:** Higiene e Segurança do Trabalho  
+**Objetivo pedagógico:** Criar ambiente prático, seguro e repetível para que aprendizes internalizem critérios de análise de risco ocupacional — competência essencial para profissionais de segurança do trabalho.
 
 ### Justificativa Educacional
 
@@ -223,5 +224,6 @@ Legislação sobre prática profissional; este projeto permite prática simulada
 ---
 
 **Última atualização:** Agosto de 2026  
-**Desenvolvido por:** [Welington Peres Léo](https://github.com/WelingtonPeres)  
-**Instituição:** Instituto Federal Fluminense, Campus Bom Jesus do Itabapoana
+**Instituição:** Instituto Federal Fluminense, Campus Bom Jesus do Itabapoana  
+**Curso:** Engenharia de Computação  
+**Créditos:** Veja [AUTHORS.md](AUTHORS.md)
