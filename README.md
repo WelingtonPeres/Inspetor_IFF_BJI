@@ -21,19 +21,50 @@ A avaliação ocorre sob pressão temporal, com retroalimentação imediata e um
 ## 🎨 Interface e Gameplay
 
 ### 1. Seleção de Perfil — Escolha de Persona
-![Tela de Seleção de Perfil](docs/img/screenshots/01_selecao_perfil.png)
+Selecione seu personagem inspetor (p.ex., "T. Meio Ambiente"). Cada persona possui contexto e conhecimento específicos que definem como você abordará a análise. A interface mostra cards visuais para cada personagem com seus atributos.
 
-Escolha seu perfil de inspetor. Cada persona (p.ex., Inspetor Diurno, Supervisor Noturno) define o contexto e conhecimento prévio da análise.
+**Elementos visíveis:**
+- Carrossel de personagens com 3-9 opções
+- Visualização clara de cada persona
+- Indicador de progresso (ex: 6/9)
+- Botão "Confirmar" para iniciar
 
-### 2. Tela de Inspeção — Análise de Riscos
-![Tela de Inspeção](docs/img/screenshots/02_tela_inspecao.png)
+### 2. Tela de Inspeção — Relatório e Decisão
+Analise o **Relatório Estruturado** com:
+- **Local**: Onde ocorreu o incidente (ex: "Laboratório de Solos - IFFBJI")
+- **Atividade**: O que estava sendo feito (ex: "Preparo para Titulação com HCl")
+- **Envolvidos**: Pessoas presentes
+- **Descrição**: Narrativa do cenário
 
-Analise o relatório do cenário, identifique riscos ocupacionais (Físico, Químico, Biológico, Ergonômico, Acidente), classifique os fatores de insegurança (Ato Inseguro vs. Condição Insegura) e escolha a decisão administrativa (Advertir, Interditar ou Arquivar).
+**Identifique Riscos** (lado direito):
+- 5 categorias com cores (Físico, Químico, Biológico, Ergonômico, Acidente)
+- Clique para marcar os riscos encontrados
 
-### 3. Tela de Resultado — Feedback e Pontuação
-![Tela de Resultado](docs/img/screenshots/03_tela_resultado.png)
+**Classifique Fatores de Insegurança**:
+- Ato Inseguro (falha humana)
+- Condição Insegura (falha do ambiente/equipamento)
 
-Receba retroalimentação imediata com análise detalhada: erros identificados, itens faltantes, pontuação por componente e sugestões de melhoria. Apenda com cada decisão.
+**Escolha Decisão Administrativa**:
+- ADVERTIR (amarelo) — para riscos menores
+- INTERDITAR (vermelho) — para riscos graves
+- IGNORAR (cinza) — sem risco efetivo
+
+**Botão "Submeter Respostas"** envia sua análise
+
+### 3. Tela de Resultado — Diagnóstico e Pontuação
+Receba **feedback imediato e detalhado**:
+
+**Pontuação Final** (ex: 7250 pts) com breakdown:
+- Riscos identificados: +3000 pts (corretos)
+- Fatores de insegurança: +750 pts (análise complementar)
+- Decisão administrativa: +2500 pts (escolha apropriada)
+- Bônus temporal: +0 pts (tempo gasto)
+
+**Sidebar esquerdo**:
+- Dashboard com progresso (ex: "Riscos: 2 de 3")
+- Reports, Logs, Settings
+
+**Histórico de progresso** mostrando qual cenário você está.
 
 ---
 
