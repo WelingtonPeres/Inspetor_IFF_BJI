@@ -144,10 +144,33 @@ O simulador segue um fluxo linear com avaliação ao final:
 ```bash
 git clone https://github.com/WelingtonPeres/Inspetor_IFF_BJI.git
 cd Inspetor_IFF_BJI
+```
+
+**2. Crie o ambiente virtual** (isolamento das dependências do sistema):
+
+```bash
 python -m venv venv
-# Windows (PowerShell): .\venv\Scripts\Activate.ps1
-# Linux/macOS:          source venv/bin/activate
+```
+
+**3. Ative o ambiente virtual** — o comando muda conforme o sistema:
+
+| Sistema | Comando |
+|---|---|
+| Windows (PowerShell) | `.\venv\Scripts\Activate.ps1` |
+| Windows (Prompt de Comando) | `.\venv\Scripts\activate.bat` |
+| Linux/macOS | `source venv/bin/activate` |
+
+Depois de ativar, o terminal passa a exibir `(venv)` no início da linha.
+
+**4. Instale as dependências:**
+
+```bash
 pip install -r requirements.txt
+```
+
+**5. Inicie o jogo:**
+
+```bash
 python main.py
 ```
 
