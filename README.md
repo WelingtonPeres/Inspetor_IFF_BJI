@@ -20,19 +20,20 @@ A avaliação ocorre sob pressão temporal, com retroalimentação imediata e um
 
 ## 🎨 Interface e Gameplay
 
-### Tela Inicial — Seleção de Perfil
+### 1. Seleção de Perfil — Escolha de Persona
 ![Tela de Seleção de Perfil](docs/img/screenshots/01_selecao_perfil.png)
 
-*Escolha seu perfil de inspetor (persona) para definir o contexto da análise.*
+Escolha seu perfil de inspetor. Cada persona (p.ex., Inspetor Diurno, Supervisor Noturno) define o contexto e conhecimento prévio da análise.
 
-### Elementos Visuais
-<div align="center">
+### 2. Tela de Inspeção — Análise de Riscos
+![Tela de Inspeção](docs/img/screenshots/02_tela_inspecao.png)
 
-| Riscos Ocupacionais | Decisões Administrativas |
-|---|---|
-| ![Risco Físico](view/assets/icons/riscos/risco_fisico_color.png) ![Risco Químico](view/assets/icons/riscos/risco_quimico_color.png) ![Risco Biológico](view/assets/icons/riscos/risco_biologico_color.png) ![Risco Ergonômico](view/assets/icons/riscos/risco_ergonomico_color.png) ![Risco de Acidente](view/assets/icons/riscos/risco_acidente_color.png) | ![Carimbo Interdição](view/assets/icons/fim_jogo/Fita_interdicao.png) ![Troféu](view/assets/icons/fim_jogo/trophy.png) ![Medal](view/assets/icons/fim_jogo/medal-2.png) ![Check](view/assets/icons/fim_jogo/square-check.png) |
+Analise o relatório do cenário, identifique riscos ocupacionais (Físico, Químico, Biológico, Ergonômico, Acidente), classifique os fatores de insegurança (Ato Inseguro vs. Condição Insegura) e escolha a decisão administrativa (Advertir, Interditar ou Arquivar).
 
-</div>
+### 3. Tela de Resultado — Feedback e Pontuação
+![Tela de Resultado](docs/img/screenshots/03_tela_resultado.png)
+
+Receba retroalimentação imediata com análise detalhada: erros identificados, itens faltantes, pontuação por componente e sugestões de melhoria. Apenda com cada decisão.
 
 ---
 
