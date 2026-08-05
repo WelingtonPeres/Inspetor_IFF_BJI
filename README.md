@@ -8,7 +8,13 @@
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey)](LICENSE)
 [![Status: Active Development](https://img.shields.io/badge/Status-Active%20Development-green)]()
 
-> **Simulador gamificado de análise de risco ocupacional** desenvolvido no IFF (Instituto Federal Fluminense) como atividade de Curricularização da Extensão. O jogador recebe relatórios de cenários reais em laboratórios, oficinas e refeitórios, classifica riscos e fatores de insegurança, e escolhe a intervenção cabível sob pressão de tempo. A nota sai de um modelo determinístico que pondera exatidão, completude e decaimento temporal — refletindo o que um técnico de segurança faria naquele contexto.
+## Apresentação
+
+**Inspetor IFF-BJI** é um simulador educacional para análise de risco ocupacional, desenvolvido como atividade de Curricularização da Extensão no Instituto Federal Fluminense (IFF), Campus Bom Jesus do Itabapoana, na disciplina de Higiene e Segurança do Trabalho.
+
+O simulador é um **ambiente de prática imersivo** onde estudantes e profissionais de segurança do trabalho analisam cenários reais em laboratórios, oficinas e refeitórios, identificam riscos ocupacionais segundo a Norma Regulamentadora 26 (NR-26), classificam fatores de insegurança (atos e condições inseguras), e decidem a melhor estratégia administrativa (advertência, interdição ou arquivamento).
+
+A avaliação ocorre sob pressão temporal, com retroalimentação imediata e uma pontuação determinística que premia **exatidão** (acertos nas classificações), **completude** (cobertura de todos os riscos) e **eficiência** (penalidade por decorrência de tempo), refletindo as exigências reais da profissão.
 
 ---
 
@@ -24,31 +30,50 @@
 
 ---
 
-## ✨ Features
+## ✨ Características Distintivas
 
-- 🎯 **Modelo matemático determinístico** — pontuação precisa baseada em exatidão, completude e fator temporal
-- 🏥 **Cenários educacionais reais** — laboratórios, oficinas e refeitórios do IFF, com relatórios autênticos
-- ⚙️ **Classificação de riscos** — 5 categorias (Físico, Químico, Biológico, Ergonômico, Acidente) com análise profunda
-- 🛡️ **Decisões administrativas** — três opções (Advertir, Interditar, Ignorar) com consequências reais
-- ⏱️ **Pressão temporal** — penalidade por tempo decorrido, simulando realismo operacional
-- 📊 **Feedback detalhado** — diagnóstico pós-decisão, pontuação por item, análise de erros
-- 🎓 **Tutorial integrado** — 8 slides guiando o jogador passo a passo no primeiro acesso
-- 🌙 **Tema claro e escuro** — interface adaptativa com design responsivo
-- 🔧 **Arquitetura limpa** — Clean Architecture com separação rigorosa de camadas (Core, Infrastructure, Application, View)
+- **Modelo de avaliação determinístico** — Equação de pontuação explícita que premia exatidão (acertos nas classificações), completude (identificação de todos os riscos) e eficiência temporal. Sem aleatoriedade: mesma resposta sempre produz mesma nota.
+
+- **Cenários baseados em casos reais** — Laboratórios, oficinas e refeitórios do IFF com relatórios autênticos, equipamentos e contextos que estudantes reconhecem.
+
+- **Classificação normativa de riscos** — Cinco categorias segundo NR-26: Físico, Químico, Biológico, Ergonômico e Acidente, com cores específicas por fator de risco.
+
+- **Decisões administrativas fundadas** — Três estratégias (Advertência, Interdição, Arquivamento) com consequências que refletem a escolha: erros reverberam na pontuação.
+
+- **Pressão temporal realista** — Decaimento de pontuação conforme o tempo decorre, simulando urgência operacional.
+
+- **Retroalimentação formativa** — Após cada decisão, diagnóstico detalhado: erros identificados, itens faltantes, pontuação por componente, oportunidade de aprender.
+
+- **Guia integrado para primeiro acesso** — 8 slides interativos explicam mecânicas, termos e fluxo, sem exigir leitura externa.
+
+- **Interface responsiva e acessível** — Tema claro/escuro, dimensionamento automático para diferentes resoluções, tipografia legível.
+
+- **Arquitetura académica** — Clean Architecture (camadas Core, Infrastructure, Application, View) com separação rigorosa de responsabilidades, 615+ testes automatizados, código documentado.
 
 ---
 
-## 🎮 Como Jogar
+## 🎮 Fluxo de Operação
 
-1. **Seleção de Personagem**: Escolha um dos perfis de inspetor disponíveis (papel define contexto)
-2. **Leitura do Caso**: Analise o relatório da inspeção — local, atividade, envolvidos, descrição
-3. **Classificação de Riscos**: Marque os riscos encontrados — cada um tem uma cor única (NR-26)
-4. **Classificação de Fatores**: Identifique os fatores de insegurança — Ato Inseguro vs. Condição Insegura
-5. **Decisão Administrativa**: Escolha a ação (Advertir/Interditar/Ignorar) baseado na gravidade
-6. **Recebimento de Nota**: O sistema calcula sua performance e fornece feedback completo
-7. **Repetição**: Simule vários casos para melhorar sua expertise em segurança ocupacional
+O simulador segue um fluxo linear com avaliação ao final:
 
-**Objetivo**: Ser o inspetor mais preciso possível — máxima nota = análise correta e rápida.
+1. **Escolha de Perfil**: Seleção de persona (p.ex., Inspetor Diurno, Supervisor Noturno) — define contexto e conhecimento prévio.
+
+2. **Apresentação do Caso**: Relatório estruturado com local, atividade, envolvidos, descrição narrativa da situação. Acesso a anexos (fotos, vídeos) se relevantes.
+
+3. **Identificação de Riscos**: Marcação de riscos observados. O sistema lista os riscos possíveis por cores (NR-26: azul=físico, vermelho=acidente, etc.). Objetivo: máxima cobertura com mínimos falsos positivos.
+
+4. **Classificação de Insegurança**: Tipo de risco identificado — **Ato Inseguro** (comportamento inadequado) vs. **Condição Insegura** (ambiente/equipamento inadequado). Exige compreensão normativa.
+
+5. **Decisão Administrativa**: Escolha de ação corretiva única:
+   - **Advertência**: Para riscos menores (reforço comportamental)
+   - **Interdição**: Para riscos graves (suspensão da atividade até correção)
+   - **Arquivamento**: Para situações sem risco efetivo (falso positivo intencional ou erro)
+
+6. **Cálculo e Retroalimentação**: Sistema calcula pontuação segundo equação determinística. Apresenta análise item-por-item, erros cometidos, lacunas, e sugestões de melhoria.
+
+7. **Prática Iterada**: Múltiplos cenários disponíveis, recomenda-se repetição para consolidação de expertise.
+
+**Métrica de Sucesso**: Pontuação máxima = análise completa (todos os riscos), precisa (sem falsos positivos) e eficiente (dentro do tempo limite).
 
 ---
 
@@ -87,19 +112,25 @@ Toda a documentação técnica vive em [`docs/`](docs/README.md), organizada por
 
 ---
 
-## 🏗️ Arquitetura
+## 🏗️ Arquitetura de Software
 
-O projeto segue **Arquitetura Limpa**, dividido em camadas concêntricas:
+O projeto implementa **Arquitetura Limpa** (Clean Architecture, Robert C. Martin), organizando o código em **camadas concêntricas** com dependências unidirecionais (sempre para dentro):
 
-| Camada | Diretório | Responsabilidade |
-|--------|-----------|------------------|
-| **Core (Domain)** | `core/model/`, `core/services/`, `core/dtos/` | Regras de negócio e entidades — **sem dependências externas** |
-| **Infrastructure** | `infrastructure/` | Repositório, fábrica e DTOs de persistência |
-| **Application** | `application/controllers/` | Orquestração dos casos de uso |
-| **View** | `view/` | Interface com o utilizador (PySide6 + Qt) |
-| **Config** | `config/` | Configuração centralizada (logging, etc.) |
+| Camada | Diretório | Responsabilidade | Dependências |
+|--------|-----------|------------------|--------------|
+| **Core (Domain)** | `core/model/`, `core/services/`, `core/dtos/` | Entidades, regras de negócio, algoritmos de cálculo (p.ex., equação de pontuação) | ✋ Nenhuma externa |
+| **Infrastructure** | `infrastructure/` | Implementação de repositórios, persistência em JSON, fábrica de cenários | Core apenas |
+| **Application** | `application/controllers/` | Orquestração de casos de uso, sequencialização de eventos, contrato `IGameView` | Core + Infrastructure |
+| **View** | `view/` | Interface com o utilizador (PySide6/Qt), widgets, estilos, sinalização | Application apenas (via contrato) |
+| **Config** | `config/` | Configuração centralizada (logging, caminhos, valores de ambiente) | Acessível a todas |
 
-**Leitura recomendada**: [Clean Architecture](docs/arquitetura/clean-architecture.md)
+**Propriedades:**
+- **Alta coesão**: Cada camada tem uma única razão para mudar
+- **Baixo acoplamento**: Dependências fluem inward; camadas internas não conhecem externas
+- **Testabilidade**: Core pode ser testado sem Qt, infraestrutura sem UI
+- **Manutenibilidade**: Mudanças na UI não afetam cálculos de negócio
+
+**Leitura completa**: [Clean Architecture](docs/arquitetura/clean-architecture.md), [Diagrama de Classes](docs/arquitetura/diagrama-classes.md), [Padrões da View](docs/arquitetura/view.md)
 
 ---
 
@@ -148,13 +179,32 @@ O projeto está em **desenvolvimento ativo** e aceita contribuições!
 
 ---
 
-## 🎓 Contexto Académico
+## 🎓 Contexto Institucional e Académico
 
-Projeto desenvolvido como **Atividade de Curricularização da Extensão** na disciplina de Higiene e Segurança do Trabalho do Instituto Federal Fluminense (IFF), Campus Bom Jesus do Itabapoana.
+### Origem
 
-O objetivo é criar uma ferramenta educacional imersiva que permita aos alunos e profissionais de segurança praticar análise de risco em um ambiente controlado e gamificado.
+Inspetor IFF-BJI é desenvolvido no **Instituto Federal Fluminense (IFF)**, Campus Bom Jesus do Itabapoana, como **Atividade de Curricularização da Extensão** — iniciativa que integra pesquisa, ensino e extensão conforme diretrizes institucionais.
+
+**Disciplina-sede:** Higiene e Segurança do Trabalho (curso técnico em segurança do trabalho)  
+**Objetivo pedagógico:** Criar ambiente prático, seguro e repetível para que aprendizes internalizem critérios de análise de risco ocupacional — competência essencial para a profissão.
+
+### Justificativa Educacional
+
+A análise de risco é uma atividade cognitiva complexa que exige integração de conhecimentos técnicos, normativos (NRs) e de tomada de decisão. O simulador oferece:
+
+- **Prática sem riscos**: Estudantes enfrentam cenários reais sem colocar-se em risco
+- **Feedback imediato**: Aprendem consequências de suas decisões instantaneamente
+- **Escala de dificuldade**: Possibilidade de progredir em complexidade conforme ganham expertise
+- **Acesso democrático**: Ferramenta aberta (CC BY-NC-SA), reutilizável por outros IFs e instituições de ensino profissional
+
+### Referência
+
+> BRASIL. Lei nº 11.788, de 25 de setembro de 2008. Dispõe sobre o estágio de estudantes; altera a redação do art. 428 da Consolidação das Leis do Trabalho (CLT) [...]. Diário Oficial da União, Brasília, 2008.
+
+Legislação sobre prática profissional; este projeto permite prática simulada.
 
 ---
 
 **Última atualização:** Agosto de 2026  
-**Mantido por:** [Welington Peres Léo](https://github.com/WelingtonPeres)
+**Desenvolvido por:** [Welington Peres Léo](https://github.com/WelingtonPeres)  
+**Instituição:** Instituto Federal Fluminense, Campus Bom Jesus do Itabapoana
