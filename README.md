@@ -79,11 +79,28 @@ O simulador segue um fluxo linear com avaliação ao final:
 
 ## 🚀 Instalação Rápida
 
-**Pré-requisitos:** Python 3.11+ e Git
+**Pré-requisitos:** Python 3.11+
+
+### Opção 1: Via Git (recomendado para desenvolvimento)
 
 ```bash
 git clone https://github.com/WelingtonPeres/Inspetor_IFF_BJI.git
 cd Inspetor_IFF_BJI
+python -m venv venv
+# Windows (PowerShell): .\venv\Scripts\Activate.ps1
+# Linux/macOS:          source venv/bin/activate
+pip install -r requirements.txt
+python main.py
+```
+
+### Opção 2: Download do ZIP (sem Git)
+
+1. Acesse [Releases](https://github.com/WelingtonPeres/Inspetor_IFF_BJI/releases) ou clique no botão **Code** > **Download ZIP**
+2. Extraia o arquivo em uma pasta de sua escolha
+3. Abra o terminal/PowerShell na pasta extraída
+4. Execute:
+
+```bash
 python -m venv venv
 # Windows (PowerShell): .\venv\Scripts\Activate.ps1
 # Linux/macOS:          source venv/bin/activate
