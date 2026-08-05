@@ -16,12 +16,14 @@ class ItemNumerado(QFrame):
         titulo: str,
         descricao: str,
         parent: Optional[QWidget] = None,
+        cor_badge: Optional[str] = None,
     ):
         super().__init__(parent)
         self.setObjectName("tutorial_item")
         self.setProperty("class", "tutorial_item")
 
         self.__layout = LayoutLoader.instance()
+        self.__cor_badge = cor_badge
         self.__label_titulo: QLabel
         self.__label_descricao: QLabel
         self.__badge: QLabel
@@ -44,6 +46,10 @@ class ItemNumerado(QFrame):
         badge = QLabel(str(numero))
         badge.setObjectName("tutorial_item_num")
         badge.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        if self.__cor_badge is not None:
+            # Variante de cor via QSS (ex: slide da decisao usa a cor
+            # do carimbo correspondente, como no modelo).
+            badge.setProperty("cor_badge", self.__cor_badge)
         self.__badge = badge
         layout.addWidget(badge, alignment=Qt.AlignmentFlag.AlignTop)
 

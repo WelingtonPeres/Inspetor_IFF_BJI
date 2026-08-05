@@ -9,6 +9,7 @@ from view.infrastructure.layout_loader import LayoutLoader
 from view.tutorial.slide_tutorial import SlideTutorial
 from view.tutorial.widgets.assets_helper import RAIZ_ASSETS
 from view.tutorial.widgets.item_numerado import ItemNumerado
+from view.tutorial.widgets.nota_aviso import NotaAviso
 
 RISCO_ORDEM = ("FISICO", "QUIMICO", "BIOLOGICO", "ERGONOMICO", "ACIDENTE")
 RISCO_LABELS = {
@@ -46,12 +47,11 @@ class SlideRiscos(SlideTutorial):
         layout.setContentsMargins(*self.margens_slide())
         layout.setSpacing(12)
 
-        conteudo = QHBoxLayout()
-        conteudo.setSpacing(24)
-        layout.addLayout(conteudo)
-
-        conteudo.addWidget(self.__build_grupo_riscos(), 0, Qt.AlignmentFlag.AlignVCenter)
-        conteudo.addLayout(self.__build_painel_texto(), stretch=1)
+        layout.addLayout(
+            self._montar_conteudo(
+                self.__build_grupo_riscos(), self.__build_painel_texto()
+            )
+        )
 
     def __build_grupo_riscos(self) -> QWidget:
         L = LayoutLoader.instance()
@@ -64,19 +64,26 @@ class SlideRiscos(SlideTutorial):
         coluna.setSpacing(L.scaled("tutorial", "riscos_grupo", "spacing"))
         coluna.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
-        linha_atual = QHBoxLayout()
-        linha_atual.setSpacing(L.scaled("tutorial", "riscos_grupo", "spacing"))
+        linha_atual = self.__nova_linha_centrada(L)
 
         for indice, risco in enumerate(RISCO_ORDEM):
             tile = self.__criar_tile_risco(risco)
-            linha_atual.addWidget(tile)
+            linha_atual.insertWidget(linha_atual.count() - 1, tile)
             if indice == 2:
                 coluna.addLayout(linha_atual)
-                linha_atual = QHBoxLayout()
-                linha_atual.setSpacing(L.scaled("tutorial", "riscos_grupo", "spacing"))
+                linha_atual = self.__nova_linha_centrada(L)
 
         coluna.addLayout(linha_atual)
         return grupo
+
+    @staticmethod
+    def __nova_linha_centrada(L: LayoutLoader) -> QHBoxLayout:
+        """Linha de tiles com stretches nas pontas (modelo centraliza)."""
+        linha = QHBoxLayout()
+        linha.setSpacing(L.scaled("tutorial", "riscos_grupo", "spacing"))
+        linha.addStretch(1)
+        linha.addStretch(1)
+        return linha
 
     def __criar_tile_risco(self, risco: str) -> QToolButton:
         L = LayoutLoader.instance()
@@ -128,7 +135,6 @@ class SlideRiscos(SlideTutorial):
         return caminho if caminho.exists() else None
 
     def __build_painel_texto(self) -> QVBoxLayout:
-        L = LayoutLoader.instance()
         painel = QVBoxLayout()
         painel.setSpacing(10)
         painel.setAlignment(Qt.AlignmentFlag.AlignVCenter)
@@ -142,20 +148,14 @@ class SlideRiscos(SlideTutorial):
         for numero, item_titulo, descricao in ITENS:
             painel.addWidget(ItemNumerado(numero, item_titulo, descricao))
 
-        nota = QLabel(
-            'Marcar um risco que não existe no caso também conta como erro — '
-            'não marque "só por garantia".'
-        )
-        nota.setObjectName("tutorial_aviso")
-        nota.setWordWrap(True)
-        nota.setFont(
-            QFont(
-                L.get("tutorial", "font_familia"),
-                L.scaled("tutorial", "nota", "font_size"),
+        painel.addWidget(
+            NotaAviso(
+                'Marcar um risco que não existe no caso também conta como '
+                'erro — não marque "só por garantia".',
+                icone="⚠",
+                erro=True,
             )
         )
-        nota.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        painel.addWidget(nota)
 
         return painel
 

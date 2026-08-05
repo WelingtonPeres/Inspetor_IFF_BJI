@@ -1,13 +1,14 @@
 from typing import Optional
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QWidget
+from PySide6.QtWidgets import QVBoxLayout, QLabel, QWidget
 
 from view.tutorial.slide_tutorial import SlideTutorial
 from view.tutorial.widgets.credential_iff import CredencialIFF
 
+TITULO = "Sua credencial acaba de ser emitida."
+
 PARAGRAFOS = (
-    "Sua credencial acaba de ser emitida.",
     "Você é o novo Inspetor de Segurança do Trabalho do IFF-BJI. Sua função "
     "é analisar relatórios de ocorrências em laboratórios e ambientes de "
     "curso.",
@@ -37,27 +38,23 @@ class SlideBoasVindas(SlideTutorial):
         layout.setContentsMargins(*self.margens_slide())
         layout.setSpacing(12)
 
-        conteudo = QHBoxLayout()
-        conteudo.setSpacing(24)
-        layout.addLayout(conteudo)
-
-        credencial = CredencialIFF(self)
-        conteudo.addWidget(credencial)
-
-        conteudo.addLayout(self.__build_painel_texto(), stretch=1)
+        layout.addLayout(
+            self._montar_conteudo(CredencialIFF(self), self.__build_painel_texto())
+        )
 
     def __build_painel_texto(self) -> QVBoxLayout:
         painel = QVBoxLayout()
         painel.setSpacing(10)
         painel.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
-        eyebrow = QLabel("Bem-vindo, Inspetor")
+        eyebrow = QLabel("BEM-VINDO, INSPETOR")
         eyebrow.setObjectName("tutorial_eyebrow")
         eyebrow.setAlignment(Qt.AlignmentFlag.AlignLeft)
         painel.addWidget(eyebrow)
 
-        titulo = QLabel("Guia rápido do Inspetor IFF-BJI")
+        titulo = QLabel(TITULO)
         titulo.setObjectName("tutorial_titulo")
+        titulo.setWordWrap(True)
         titulo.setAlignment(Qt.AlignmentFlag.AlignLeft)
         painel.addWidget(titulo)
 

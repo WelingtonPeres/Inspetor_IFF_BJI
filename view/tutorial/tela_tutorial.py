@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, List, Optional, Tuple, Type
+from typing import Callable, Optional, Tuple, Type
 
 from PySide6.QtCore import QRect, Qt, Signal, Slot
 from PySide6.QtGui import QFont
@@ -15,6 +15,11 @@ from PySide6.QtWidgets import (
 from application.interfaces.i_game_view import MotivoTutorial
 from view.infrastructure.layout_loader import LayoutLoader
 from view.widgets.janela_flutuante import JanelaFlutuante
+from view.tutorial.widgets.assets_helper import (
+    carregar_pixmap_escalado,
+    tingir_pixmap,
+)
+from view.tutorial.widgets.dots_navegacao import DotsNavegacao
 from view.tutorial.paginas.slide_anatomia import SlideAnatomia
 from view.tutorial.paginas.slide_anexos import SlideAnexos
 from view.tutorial.paginas.slide_boas_vindas import SlideBoasVindas
@@ -50,24 +55,32 @@ class TelaTutorial(JanelaFlutuante):
 
     TITULO = "Como Jogar"
     TEXTO_PULAR = "Pular tutorial"
+    # Verde IFF: legivel sobre os fundos dos dois temas (QSS nao tinge pixmap).
+    COR_ICONE_BRIEFING = "#2F9E41"
 
-    def __init__(self, parent: Optional[QWidget] = None):
+    def __init__(
+        self,
+        parent: Optional[QWidget] = None,
+        layout_loader: Optional[LayoutLoader] = None,
+    ):
         super().__init__(proporcao_keys=("tutorial", "proporcao_tela"), parent=parent)
         self.setObjectName("tela_tutorial")
         self.setProperty("class", "tela_tutorial")
 
-        self.__layout = LayoutLoader.instance()
+        # Injetavel para teste; o singleton e so o default de producao.
+        self.__layout = layout_loader or LayoutLoader.instance()
 
         self.__motivo: MotivoTutorial = MotivoTutorial.NOVO_JOGO
-        self.__index_atual: int = 0
 
         self.__label_contador: QLabel
         self.__btn_pular: QPushButton
+        self.__briefing_bar: QWidget
+        self.__icone_briefing: QLabel
         self.__label_briefing: QLabel
         self.__stack: QStackedWidget
         self.__btn_prev: QPushButton
         self.__btn_next: QPushButton
-        self.__dots_container: QWidget
+        self.__dots: DotsNavegacao
 
         self.__setup_ui()
         self.__layout.escala_atualizada.connect(self.__reaplicar_dimensoes)
@@ -99,24 +112,59 @@ class TelaTutorial(JanelaFlutuante):
         cabecalho = QVBoxLayout()
         cabecalho.setSpacing(0)
 
-        self.__label_contador = QLabel(self.__texto_contador())
+        # Modelo: contador a esquerda e "Pular tutorial" a direita, na
+        # mesma linha; o briefing centrado logo abaixo.
+        linha_topo = QHBoxLayout()
+        linha_topo.setSpacing(0)
+
+        # Texto preenchido pelo __on_page_changed(0) no fim do setup —
+        # aqui o stack (fonte do indice) ainda nao existe.
+        self.__label_contador = QLabel()
         self.__label_contador.setObjectName("tutorial_contador")
-        self.__label_contador.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        cabecalho.addWidget(self.__label_contador)
+        self.__label_contador.setAlignment(
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+        )
+        linha_topo.addWidget(self.__label_contador)
+        linha_topo.addStretch(1)
 
         self.__btn_pular = QPushButton(self.TEXTO_PULAR)
         self.__btn_pular.setObjectName("tutorial_pular")
         self.__btn_pular.setProperty("class", "tutorial_pular")
         self.__btn_pular.setCursor(Qt.CursorShape.PointingHandCursor)
         self.__btn_pular.clicked.connect(self.__on_finalizar)
-        cabecalho.addWidget(self.__btn_pular, alignment=Qt.AlignmentFlag.AlignCenter)
+        linha_topo.addWidget(self.__btn_pular)
+
+        cabecalho.addLayout(linha_topo)
+        cabecalho.addWidget(self.__build_briefing_bar())
+
+        return cabecalho
+
+    def __build_briefing_bar(self) -> QWidget:
+        """Barra do briefing: icone do chefe + frase, centrados (modelo)."""
+        L = self.__layout
+        barra = QWidget()
+        barra.setObjectName("tutorial_briefing_bar")
+
+        linha = QHBoxLayout(barra)
+        linha.setContentsMargins(0, 0, 0, 0)
+        linha.setSpacing(L.scaled("tutorial", "chrome", "briefing_spacing"))
+
+        linha.addStretch(1)
+
+        self.__icone_briefing = QLabel()
+        self.__icone_briefing.setObjectName("tutorial_briefing_icone")
+        self.__icone_briefing.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        linha.addWidget(self.__icone_briefing, 0, Qt.AlignmentFlag.AlignVCenter)
 
         self.__label_briefing = QLabel()
         self.__label_briefing.setObjectName("tutorial_briefing")
         self.__label_briefing.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        cabecalho.addWidget(self.__label_briefing)
+        linha.addWidget(self.__label_briefing, 0, Qt.AlignmentFlag.AlignVCenter)
 
-        return cabecalho
+        linha.addStretch(1)
+
+        self.__briefing_bar = barra
+        return barra
 
     def __build_stack(self) -> QStackedWidget:
         stack = QStackedWidget()
@@ -124,9 +172,15 @@ class TelaTutorial(JanelaFlutuante):
             self.__validar_slide(slide_cls)
             slide = slide_cls(self)
             stack.addWidget(slide)
-            slide.cta_clicked.connect(self.__on_finalizar)
+            self.__conectar_cta(slide)
         stack.currentChanged.connect(self.__on_page_changed)
         return stack
+
+    def __conectar_cta(self, slide: SlideTutorial) -> None:
+        """Liga o CTA por deteccao — o sinal e opcional e nao vive na base."""
+        sinal_cta = getattr(slide, "cta_clicked", None)
+        if sinal_cta is not None:
+            sinal_cta.connect(self.__on_finalizar)
 
     @staticmethod
     def __validar_slide(slide_cls: Type[SlideTutorial]) -> None:
@@ -153,26 +207,31 @@ class TelaTutorial(JanelaFlutuante):
     def __build_footer(self) -> QHBoxLayout:
         L = self.__layout
         footer = QHBoxLayout()
-        footer.setSpacing(L.scaled("tutorial", "dot", "gap"))
+        # Modelo: grupo "\u2039 dots \u203a" centrado, nao setas nas extremidades.
+        footer.setSpacing(L.scaled("tutorial", "chrome", "footer_gap"))
+
+        footer.addStretch(1)
 
         self.__btn_prev = self.__criar_botao_seta(
             "\u2039", "tutorial_nav_prev", self.__ir_para_slide_anterior
         )
         footer.addWidget(self.__btn_prev, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        self.__dots_container = QWidget()
-        self.__dots_container.setObjectName("tutorial_dots")
-        self.__dots_layout = QHBoxLayout(self.__dots_container)
-        self.__dots_layout.setContentsMargins(0, 0, 0, 0)
-        self.__dots_layout.setSpacing(L.scaled("tutorial", "dot", "gap"))
-        self.__dots_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.__build_dots()
-        footer.addWidget(self.__dots_container, stretch=1)
+        self.__dots = DotsNavegacao(len(self.SLIDES), self.__layout)
+        self.__dots.slide_solicitado.connect(self.__ir_para_slide)
+        footer.addWidget(self.__dots, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.__btn_next = self.__criar_botao_seta(
             "\u203a", "tutorial_nav_next", self.__ir_para_slide_seguinte
         )
+        # No ultimo slide a seta some mas mantem o lugar, para o grupo
+        # nao se deslocar (modelo usa um spacer da mesma largura).
+        politica = self.__btn_next.sizePolicy()
+        politica.setRetainSizeWhenHidden(True)
+        self.__btn_next.setSizePolicy(politica)
         footer.addWidget(self.__btn_next, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        footer.addStretch(1)
 
         return footer
 
@@ -185,48 +244,17 @@ class TelaTutorial(JanelaFlutuante):
         btn.clicked.connect(slot)
         return btn
 
-    def __build_dots(self) -> None:
-        self.__dots: List[QPushButton] = []
-        for indice in range(len(self.SLIDES)):
-            dot = QPushButton()
-            dot.setObjectName("tutorial_dot")
-            dot.setProperty("class", "tutorial_dot")
-            dot.setCheckable(False)
-            dot.setCursor(Qt.CursorShape.PointingHandCursor)
-            dot.clicked.connect(lambda _checked, i=indice: self.__ir_para_slide(i))
-            self.__dots_layout.addWidget(dot)
-            self.__dots.append(dot)
-
-    def __texto_contador(self) -> str:
-        return "Como jogar · %d de %d" % (self.__index_atual + 1, len(self.SLIDES))
-
-    def __atualizar_dots(self) -> None:
-        L = self.__layout
-        largura_inativo = L.scaled("tutorial", "dot", "largura")
-        largura_ativo = L.scaled("tutorial", "dot", "largura_ativo")
-        altura = L.scaled("tutorial", "dot", "altura")
-        for indice, dot in enumerate(self.__dots):
-            ativo = indice == self.__index_atual
-            dot.setProperty("active", "true" if ativo else "false")
-            dot.setFixedSize(largura_ativo if ativo else largura_inativo, altura)
-            self.__repolish(dot)
-
-    @staticmethod
-    def __repolish(widget: QWidget) -> None:
-        estilo = widget.style()
-        estilo.unpolish(widget)
-        estilo.polish(widget)
+    def __texto_contador(self, indice: int) -> str:
+        return "Como jogar · %d de %d" % (indice + 1, len(self.SLIDES))
 
     def __on_page_changed(self, index: int) -> None:
-        self.__index_atual = index
-        self.__label_contador.setText(self.__texto_contador())
-        self.__atualizar_dots()
+        self.__label_contador.setText(self.__texto_contador(index))
+        self.__dots.atualizar(index)
         slide = self.__slide_do_indice(index)
-        self.__label_briefing.setText(slide.texto_briefing())
+        self.__label_briefing.setText('"%s"' % slide.texto_briefing())
         ultimo = index == self.__stack.count() - 1
         self.__btn_prev.setEnabled(index > 0)
         self.__btn_next.setVisible(not ultimo)
-        self.__dots_container.setVisible(not ultimo)
 
     def __slide_do_indice(self, indice: int) -> SlideTutorial:
         slide = self.__stack.widget(indice)
@@ -238,13 +266,12 @@ class TelaTutorial(JanelaFlutuante):
 
     @Slot()
     def __ir_para_slide_anterior(self) -> None:
-        if self.__index_atual > 0:
-            self.__stack.setCurrentIndex(self.__index_atual - 1)
+        # O stack e a unica fonte do indice atual (sem copia local).
+        self.__ir_para_slide(self.__stack.currentIndex() - 1)
 
     @Slot()
     def __ir_para_slide_seguinte(self) -> None:
-        if self.__index_atual < self.__stack.count() - 1:
-            self.__stack.setCurrentIndex(self.__index_atual + 1)
+        self.__ir_para_slide(self.__stack.currentIndex() + 1)
 
     @Slot(int)
     def __ir_para_slide(self, indice: int) -> None:
@@ -268,14 +295,21 @@ class TelaTutorial(JanelaFlutuante):
         L = self.__layout
         self.__label_contador.setFont(self.__font_do_chrome("contador_font_size"))
         self.__btn_pular.setFont(self.__font_do_chrome("pular_font_size"))
-        self.__label_briefing.setFixedHeight(
+        self.__briefing_bar.setFixedHeight(
             L.scaled("tutorial", "chrome", "briefing_altura")
+        )
+        lado_icone = L.scaled("tutorial", "chrome", "briefing_icone_tamanho")
+        self.__icone_briefing.setFixedSize(lado_icone, lado_icone)
+        self.__icone_briefing.setPixmap(
+            tingir_pixmap(
+                carregar_pixmap_escalado(lado_icone, lado_icone, "tutorial", "boss.png"),
+                self.COR_ICONE_BRIEFING,
+            )
         )
         tamanho_seta = L.scaled("tutorial", "nav_arrow", "tamanho")
         self.__btn_prev.setFixedSize(tamanho_seta, tamanho_seta)
         self.__btn_next.setFixedSize(tamanho_seta, tamanho_seta)
-        self.__dots_layout.setSpacing(L.scaled("tutorial", "dot", "gap"))
-        self.__atualizar_dots()
+        self.__dots.reaplicar_dimensoes()
 
     def __font_do_chrome(self, chave: str) -> QFont:
         L = self.__layout

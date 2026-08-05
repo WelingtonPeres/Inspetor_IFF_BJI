@@ -1168,40 +1168,44 @@ QPushButton#tutorial_pular:hover {
     color: #1a1c1c;
 }
 
+/* Frase do chefe: verde, italico e sem faixa de fundo (modelo HTML). */
 QLabel#tutorial_briefing {
-    background-color: #f2f2f2;
-    border-top: 1px solid #2F9E41;
-    border-bottom: 1px solid #d0d7de;
-    color: #57606A;
+    background-color: transparent;
+    border: none;
+    color: #006b21;
+    font-size: 17px;
+    font-style: italic;
+    font-weight: bold;
     font-family: "Open Sans";
 }
 
 QPushButton#tutorial_nav_prev,
 QPushButton#tutorial_nav_next {
-    background-color: #eaeaea;
+    background-color: transparent;
     color: #1a1c1c;
-    border: 1px solid #d0d7de;
-    border-radius: 50%;
+    border: none;
+    /* Qt nao suporta border-radius em %; 17px = metade dos 34px base. */
+    border-radius: 17px;
     font-size: 20px;
     font-family: "Open Sans";
 }
 
 QPushButton#tutorial_nav_prev:hover,
 QPushButton#tutorial_nav_next:hover {
-    border-color: #2F9E41;
+    background-color: #eaeaea;
 }
 
 QPushButton#tutorial_nav_prev:disabled,
 QPushButton#tutorial_nav_next:disabled {
     background-color: transparent;
     color: #c0c0c0;
-    border-color: #eaeaea;
 }
 
 QPushButton#tutorial_dot {
     background-color: #d0d7de;
     border: none;
-    border-radius: 50%;
+    /* 3px = metade dos 7px base (Qt nao aceita 50%). */
+    border-radius: 3px;
 }
 
 QPushButton#tutorial_dot[active="true"] {
@@ -1212,7 +1216,7 @@ QPushButton#tutorial_cta {
     background-color: #2F9E41;
     color: #FFFFFF;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     font-weight: bold;
     font-family: "Open Sans";
     padding: 13px 26px;
@@ -1234,28 +1238,46 @@ QPushButton#tutorial_cta:focus {
 
 QLabel#tutorial_eyebrow {
     color: #006b21;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: bold;
     font-family: "Open Sans";
 }
 
 QLabel#tutorial_titulo {
     color: #1a1c1c;
-    font-size: 22px;
+    font-size: 28px;
     font-weight: bold;
     font-family: "Open Sans";
 }
 
 QLabel#tutorial_paragrafo {
     color: #57606A;
-    font-size: 14px;
+    font-size: 15px;
     font-family: "Open Sans";
 }
 
-QLabel#tutorial_aviso {
+/* Caixa de aviso/nota dos slides (modelo: fundo, borda e icone). */
+QFrame#tutorial_aviso {
+    background-color: #f6f6f6;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+}
+
+QLabel#tutorial_aviso_icone {
+    color: #006b21;
+    background-color: transparent;
+    border: none;
+    font-family: "Open Sans";
+}
+
+QLabel#tutorial_aviso_icone[cor="erro"] {
+    color: #bb0213;
+}
+
+QLabel#tutorial_aviso_texto {
     color: #57606A;
-    font-size: 13px;
-    font-style: italic;
+    background-color: transparent;
+    border: none;
     font-family: "Open Sans";
 }
 
@@ -1264,53 +1286,79 @@ QWidget#tutorial_riscos_grupo QToolButton[riscoTile="true"] {
     min-height: 90px;
 }
 
+/* Credencial (modelo: cartao claro, selo verde, cargo em chip). */
 QFrame#tutorial_credential {
     background-color: #eeeae2;
     border: 1px solid #B9B4A8;
-    border-radius: 8px;
+    border-radius: 10px;
 }
 
 QFrame#credential_selo {
-    background-color: #ffffff;
-    border: 2px solid #B9B4A8;
-    border-radius: 50%;
+    background-color: #37a547;
+    border: none;
+    /* 50px = metade do selo de 100px base (Qt nao aceita 50%). */
+    border-radius: 50px;
 }
 
 QLabel#credential_selo_icone {
-    background-image: url(icons/tutorial/pessoa.png);
-    background-repeat: no-repeat;
-    background-position: center;
-    border-radius: 50%;
+    background-color: transparent;
+    border: none;
+}
+
+QLabel#credential_label {
+    color: #5f5e5a;
+    font-weight: bold;
+    font-family: "Open Sans";
+    background-color: transparent;
 }
 
 QLabel#credential_nome {
     color: #1a1c1c;
     font-weight: bold;
     font-family: "Open Sans";
+    background-color: transparent;
 }
 
 QLabel#credential_cargo {
-    color: #6b6b66;
+    color: #1a1c1c;
+    font-weight: bold;
     font-family: "Open Sans";
+    background-color: #d8d3c6;
+    border-radius: 4px;
 }
 
 QLabel#credential_logo {
-    background-image: url(icons/iff_Icons/logo-iff.png);
-    background-repeat: no-repeat;
-    background-position: center;
+    background-color: transparent;
 }
 
 QFrame#credential_separador {
-    background-color: #B9B4A8;
+    background-color: #1a1c1c;
     border: none;
 }
 
+/* Badge numerado circular ciano (modelo: --tertiary). */
 QLabel#tutorial_item_num {
-    background-color: #006b21;
-    color: #FFFFFF;
-    border-radius: 50%;
+    background-color: #8dd2d8;
+    color: #00363a;
+    /* 14px = metade do badge de 28px base (Qt nao aceita 50%). */
+    border-radius: 14px;
     font-weight: bold;
     font-family: "Open Sans";
+}
+
+QLabel#tutorial_item_num[cor_badge="advertir"] {
+    background-color: #E6A800;
+    color: #FFFFFF;
+}
+
+QLabel#tutorial_item_num[cor_badge="interditar"] {
+    background-color: #CD191E;
+    color: #FFFFFF;
+}
+
+QLabel#tutorial_item_num[cor_badge="ignorar"] {
+    background-color: #889484;
+    color: #FFFFFF;
 }
 
 QLabel#tutorial_item_titulo {
@@ -1324,110 +1372,211 @@ QLabel#tutorial_item_descricao {
     font-family: "Open Sans";
 }
 
+/* Mini-relatorio (modelo: painel com blocos e labels verdes). */
 QFrame#tutorial_mini_relatorio {
-    background-color: #eeeae2;
-    border: 1px solid #B9B4A8;
+    background-color: #f9f9f9;
+    border: 1px solid #d0d7de;
     border-radius: 8px;
 }
 
 QLabel#tutorial_relatorio_titulo {
-    color: #1a1c1c;
+    color: #57606A;
     font-weight: bold;
     font-family: "Open Sans";
+    background-color: transparent;
+    border: none;
+}
+
+QFrame#tutorial_relatorio_bloco {
+    background-color: #eeeeee;
+    border: none;
+    border-radius: 6px;
 }
 
 QLabel#tutorial_relatorio_campo {
-    color: #8a8475;
+    color: #006b21;
     font-weight: bold;
     font-family: "Open Sans";
+    background-color: transparent;
+    border: none;
 }
 
 QLabel#tutorial_relatorio_valor {
     color: #1a1c1c;
     font-family: "Open Sans";
+    background-color: transparent;
+    border: none;
 }
 
-QFrame[class="tutorial_fator_tile"] {
-    background-color: #f9f9f9;
-    border: 1px solid #d0d7de;
+QLabel#tutorial_relatorio_badge {
+    background-color: #8dd2d8;
+    color: #00363a;
+    /* 11px = metade do badge de 22px base. */
+    border-radius: 11px;
+    font-weight: bold;
+    font-family: "Open Sans";
+}
+
+/* Fatores (modelo: marcado preenchido ciano, desmarcado so contorno). */
+QFrame#tutorial_fator_tile_ATO_INSEGURO {
+    background-color: #8dd2d8;
+    border: none;
     border-radius: 8px;
+}
+
+QFrame#tutorial_fator_tile_ATO_INSEGURO QLabel#tutorial_fator_titulo,
+QFrame#tutorial_fator_tile_ATO_INSEGURO QLabel#tutorial_fator_subtitulo {
+    color: #00363a;
+}
+
+QFrame#tutorial_fator_tile_CONDICAO_INSEGURA {
+    background-color: transparent;
+    border: 2px solid #3b8f96;
+    border-radius: 8px;
+}
+
+QLabel#tutorial_fator_icone {
+    background-color: transparent;
+    border: none;
 }
 
 QLabel#tutorial_fator_titulo {
     color: #1a1c1c;
     font-weight: bold;
     font-family: "Open Sans";
+    background-color: transparent;
+    border: none;
 }
 
 QLabel#tutorial_fator_subtitulo {
     color: #57606A;
     font-family: "Open Sans";
+    background-color: transparent;
+    border: none;
 }
 
 QFrame#tutorial_exemplo {
-    background-color: #eeeeee;
+    background-color: #f6f6f6;
     border: 1px solid #d0d7de;
-    border-radius: 8px;
+    border-radius: 6px;
 }
 
 QLabel#tutorial_exemplo_titulo {
-    color: #006b21;
+    color: #0e7c86;
     font-weight: bold;
     font-family: "Open Sans";
+    background-color: transparent;
+    border: none;
 }
 
 QLabel#tutorial_exemplo_linha {
     color: #57606A;
     font-family: "Open Sans";
+    background-color: transparent;
+    border: none;
 }
 
-QFrame#tutorial_carimbo {
-    border-radius: 50%;
-}
-
-QFrame#tutorial_carimbo[estado="marcado"] {
-    background-color: #006b21;
-    border: 2px solid #37a547;
-}
-
-QFrame#tutorial_carimbo[estado="vazio"] {
+/* Painel generico dos visuais (modelo: .painel dos slides 4 e 6). */
+QFrame#tutorial_painel {
     background-color: #f9f9f9;
-    border: 2px dashed #B9B4A8;
-}
-
-QFrame#tutorial_carimbo[estado="marcado"] QLabel#tutorial_carimbo_nome {
-    color: #FFFFFF;
-    font-family: "Open Sans";
-}
-
-QFrame#tutorial_carimbo[estado="vazio"] QLabel#tutorial_carimbo_nome {
-    color: #57606A;
-    font-family: "Open Sans";
-}
-
-QLabel#tutorial_decisao_legenda {
-    color: #57606A;
-    font-style: italic;
-    font-family: "Open Sans";
-}
-
-QFrame#tutorial_mini_tela {
+    border: 1px solid #d0d7de;
     border-radius: 8px;
 }
 
+QLabel#tutorial_painel_titulo {
+    color: #57606A;
+    font-weight: bold;
+    font-family: "Open Sans";
+    background-color: transparent;
+    border: none;
+}
+
+/* Carimbos da decisao (modelo: retangulos com cor propria). */
+QFrame#tutorial_carimbo {
+    border-radius: 3px;
+    background-color: transparent;
+}
+
+QFrame#tutorial_carimbo[tipo="advertir"] {
+    border: 3px solid #E6A800;
+}
+
+QFrame#tutorial_carimbo[tipo="interditar"] {
+    border: 3px solid #CD191E;
+    background-color: #CD191E;
+}
+
+QFrame#tutorial_carimbo[tipo="ignorar"] {
+    border: 3px solid #889484;
+}
+
+QLabel#tutorial_carimbo_nome {
+    font-weight: bold;
+    font-family: "Open Sans";
+    background-color: transparent;
+    border: none;
+}
+
+QFrame#tutorial_carimbo[tipo="advertir"] QLabel#tutorial_carimbo_nome {
+    color: #b58300;
+}
+
+QFrame#tutorial_carimbo[tipo="interditar"] QLabel#tutorial_carimbo_nome {
+    color: #FFFFFF;
+}
+
+QFrame#tutorial_carimbo[tipo="ignorar"] QLabel#tutorial_carimbo_nome {
+    color: #6d776a;
+}
+
+QLabel#tutorial_decisao_legenda {
+    color: #006b21;
+    font-family: "Open Sans";
+    background-color: transparent;
+    border: none;
+}
+
+/* Mini-telas de vitoria/derrota (modelo: lado a lado). */
+QFrame#tutorial_mini_tela {
+    border-radius: 8px;
+    background-color: #ffffff;
+}
+
 QFrame#tutorial_mini_tela[estado="win"] {
-    background-color: #e8f5e9;
     border: 1px solid #37a547;
 }
 
 QFrame#tutorial_mini_tela[estado="over"] {
-    background-color: #fde8e8;
     border: 1px solid #bb0213;
+}
+
+QFrame#tutorial_mini_tela_selo {
+    border: none;
+    /* 22px = metade do circulo de 44px base. */
+    border-radius: 22px;
+}
+
+QFrame#tutorial_mini_tela_selo[estado="win"] {
+    background-color: #37a547;
+}
+
+QFrame#tutorial_mini_tela_selo[estado="over"] {
+    background-color: #bb0213;
+}
+
+QLabel#tutorial_mini_tela_icone {
+    color: #FFFFFF;
+    background-color: transparent;
+    border: none;
+    font-weight: bold;
+    font-family: "Open Sans";
 }
 
 QLabel#tutorial_mini_tela_titulo {
     font-weight: bold;
     font-family: "Open Sans";
+    background-color: transparent;
+    border: none;
 }
 
 QFrame#tutorial_mini_tela[estado="win"] QLabel#tutorial_mini_tela_titulo {
@@ -1441,4 +1590,6 @@ QFrame#tutorial_mini_tela[estado="over"] QLabel#tutorial_mini_tela_titulo {
 QLabel#tutorial_mini_tela_subtitulo {
     color: #57606A;
     font-family: "Open Sans";
+    background-color: transparent;
+    border: none;
 }

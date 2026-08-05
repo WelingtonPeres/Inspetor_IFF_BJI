@@ -1,13 +1,13 @@
 from typing import Optional
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
 from view.infrastructure.layout_loader import LayoutLoader
 from view.tutorial.slide_tutorial import SlideTutorial
 from view.tutorial.widgets.assets_helper import carregar_pixmap_escalado
 from view.tutorial.widgets.item_numerado import ItemNumerado
+from view.tutorial.widgets.nota_aviso import NotaAviso
 
 ITENS = (
     (
@@ -40,12 +40,9 @@ class SlideAnexos(SlideTutorial):
         layout.setContentsMargins(*self.margens_slide())
         layout.setSpacing(12)
 
-        conteudo = QHBoxLayout()
-        conteudo.setSpacing(24)
-        layout.addLayout(conteudo)
-
-        conteudo.addWidget(self.__build_visual(), 0, Qt.AlignmentFlag.AlignVCenter)
-        conteudo.addLayout(self.__build_painel_texto(), stretch=1)
+        layout.addLayout(
+            self._montar_conteudo(self.__build_visual(), self.__build_painel_texto())
+        )
 
     def __build_visual(self) -> QWidget:
         L = LayoutLoader.instance()
@@ -55,7 +52,23 @@ class SlideAnexos(SlideTutorial):
 
         coluna = QVBoxLayout(visual)
         coluna.setContentsMargins(0, 0, 0, 0)
+        coluna.setSpacing(L.scaled("tutorial", "anexos_visual", "spacing"))
         coluna.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Modelo: duas capturas empilhadas — o botao "Ver Anexos" e a
+        # galeria de evidencias.
+        botao = QLabel()
+        botao.setObjectName("tutorial_anexos_botao")
+        botao.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        botao.setPixmap(
+            carregar_pixmap_escalado(
+                L.scaled("tutorial", "anexos_visual", "botao_largura"),
+                L.scaled("tutorial", "anexos_visual", "botao_altura"),
+                "tutorial",
+                "anexo_botao.png",
+            )
+        )
+        coluna.addWidget(botao, alignment=Qt.AlignmentFlag.AlignCenter)
 
         imagem = QLabel()
         imagem.setObjectName("tutorial_anexos_imagem")
@@ -72,7 +85,6 @@ class SlideAnexos(SlideTutorial):
         return visual
 
     def __build_painel_texto(self) -> QVBoxLayout:
-        L = LayoutLoader.instance()
         painel = QVBoxLayout()
         painel.setSpacing(10)
         painel.setAlignment(Qt.AlignmentFlag.AlignVCenter)
@@ -86,17 +98,9 @@ class SlideAnexos(SlideTutorial):
         for numero, item_titulo, descricao in ITENS:
             painel.addWidget(ItemNumerado(numero, item_titulo, descricao))
 
-        nota = QLabel("Navegar pelos anexos não pausa o tempo da inspeção.")
-        nota.setObjectName("tutorial_aviso")
-        nota.setWordWrap(True)
-        nota.setFont(
-            QFont(
-                L.get("tutorial", "font_familia"),
-                L.scaled("tutorial", "nota", "font_size"),
-            )
+        painel.addWidget(
+            NotaAviso("Navegar pelos anexos não pausa o tempo da inspeção.")
         )
-        nota.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        painel.addWidget(nota)
 
         return painel
 

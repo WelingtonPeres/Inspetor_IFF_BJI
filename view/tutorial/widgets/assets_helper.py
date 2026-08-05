@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QPixmap
+from PySide6.QtGui import QColor, QPainter, QPixmap
 
 logger = logging.getLogger(__name__)
 
@@ -35,3 +35,21 @@ def carregar_pixmap_escalado(
         Qt.AspectRatioMode.KeepAspectRatio,
         Qt.TransformationMode.SmoothTransformation,
     )
+
+
+def tingir_pixmap(pixmap: QPixmap, cor: str) -> QPixmap:
+    """Recolore um pixmap usando o seu alfa como mascara (padrao mask-image).
+
+    Permite reusar os icones escuros em fundos coloridos, como o modelo
+    faz com ``mask-image`` + ``background-color``.
+    """
+    if pixmap.isNull():
+        return pixmap
+    tingido = QPixmap(pixmap.size())
+    tingido.fill(Qt.GlobalColor.transparent)
+    painter = QPainter(tingido)
+    painter.drawPixmap(0, 0, pixmap)
+    painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceIn)
+    painter.fillRect(tingido.rect(), QColor(cor))
+    painter.end()
+    return tingido

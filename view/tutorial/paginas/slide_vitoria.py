@@ -6,8 +6,12 @@ from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QVBoxLayout, QWidget
 
 from view.infrastructure.layout_loader import LayoutLoader
 from view.tutorial.slide_tutorial import SlideTutorial
-from view.tutorial.widgets.assets_helper import carregar_pixmap_escalado
+from view.tutorial.widgets.assets_helper import (
+    carregar_pixmap_escalado,
+    tingir_pixmap,
+)
 from view.tutorial.widgets.item_numerado import ItemNumerado
+from view.tutorial.widgets.nota_aviso import NotaAviso
 
 ITENS = (
     (
@@ -40,12 +44,9 @@ class SlideVitoria(SlideTutorial):
         layout.setContentsMargins(*self.margens_slide())
         layout.setSpacing(12)
 
-        conteudo = QHBoxLayout()
-        conteudo.setSpacing(24)
-        layout.addLayout(conteudo)
-
-        conteudo.addWidget(self.__build_visual(), 0, Qt.AlignmentFlag.AlignVCenter)
-        conteudo.addLayout(self.__build_painel_texto(), stretch=1)
+        layout.addLayout(
+            self._montar_conteudo(self.__build_visual(), self.__build_painel_texto())
+        )
 
     def __build_visual(self) -> QWidget:
         L = LayoutLoader.instance()
@@ -53,24 +54,21 @@ class SlideVitoria(SlideTutorial):
         visual.setObjectName("tutorial_vitoria_visual")
         visual.setFixedWidth(L.scaled("tutorial", "vitoria_visual", "largura"))
 
-        coluna = QVBoxLayout(visual)
-        coluna.setContentsMargins(0, 0, 0, 0)
-        coluna.setSpacing(L.scaled("tutorial", "vitoria_visual", "spacing"))
-        coluna.setAlignment(Qt.AlignmentFlag.AlignVCenter)
+        # Modelo: as duas mini-telas lado a lado, com a mesma largura.
+        linha = QHBoxLayout(visual)
+        linha.setContentsMargins(0, 0, 0, 0)
+        linha.setSpacing(L.scaled("tutorial", "vitoria_visual", "spacing"))
+        linha.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
-        coluna.addWidget(
+        linha.addWidget(
             self.__build_mini_tela(
                 "win", "CASO ENCERRADO", "credencial mantida", "fim_jogo", "trophy.png"
-            )
+            ),
+            stretch=1,
         )
-        coluna.addWidget(
-            self.__build_mini_tela(
-                "over",
-                "GAME OVER",
-                "credencial revogada",
-                "fim_jogo",
-                "failedCarimbo.png",
-            )
+        linha.addWidget(
+            self.__build_mini_tela("over", "GAME OVER", "credencial revogada"),
+            stretch=1,
         )
 
         return visual
@@ -89,24 +87,13 @@ class SlideVitoria(SlideTutorial):
 
         coluna = QVBoxLayout(tela)
         coluna.setContentsMargins(*L.scaled_margins("tutorial", "mini_tela", "margens"))
-        coluna.setSpacing(6)
+        coluna.setSpacing(8)
         coluna.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        icone_label = QLabel()
-        icone_label.setObjectName("tutorial_mini_tela_icone")
-        icone_label.setFixedSize(
-            L.scaled("tutorial", "mini_tela", "icone_tamanho"),
-            L.scaled("tutorial", "mini_tela", "icone_tamanho"),
+        coluna.addWidget(
+            self.__build_selo_icone(estado, *icone),
+            alignment=Qt.AlignmentFlag.AlignCenter,
         )
-        icone_label.setPixmap(
-            carregar_pixmap_escalado(
-                L.scaled("tutorial", "mini_tela", "icone_tamanho"),
-                L.scaled("tutorial", "mini_tela", "icone_tamanho"),
-                *icone,
-            )
-        )
-        icone_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        coluna.addWidget(icone_label, alignment=Qt.AlignmentFlag.AlignCenter)
 
         titulo_label = QLabel(titulo)
         titulo_label.setObjectName("tutorial_mini_tela_titulo")
@@ -132,8 +119,44 @@ class SlideVitoria(SlideTutorial):
 
         return tela
 
-    def __build_painel_texto(self) -> QVBoxLayout:
+    def __build_selo_icone(self, estado: str, *icone: str) -> QFrame:
+        """Circulo colorido com o icone branco (modelo: .mini-icone)."""
         L = LayoutLoader.instance()
+        selo = QFrame()
+        selo.setObjectName("tutorial_mini_tela_selo")
+        selo.setProperty("estado", estado)
+        lado = L.scaled("tutorial", "mini_tela", "icone_tamanho")
+        selo.setFixedSize(lado, lado)
+
+        layout = QVBoxLayout(selo)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        icone_label = QLabel()
+        icone_label.setObjectName("tutorial_mini_tela_icone")
+        icone_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        if icone:
+            interno = lado - 16
+            icone_label.setPixmap(
+                tingir_pixmap(
+                    carregar_pixmap_escalado(interno, interno, *icone),
+                    "#FFFFFF",
+                )
+            )
+        else:
+            icone_label.setText("✕")
+            icone_label.setFont(
+                QFont(
+                    L.get("tutorial", "font_familia"),
+                    L.scaled("tutorial", "mini_tela", "titulo_font_size"),
+                    QFont.Weight.Bold,
+                )
+            )
+        layout.addWidget(icone_label)
+
+        return selo
+
+    def __build_painel_texto(self) -> QVBoxLayout:
         painel = QVBoxLayout()
         painel.setSpacing(10)
         painel.setAlignment(Qt.AlignmentFlag.AlignVCenter)
@@ -147,20 +170,13 @@ class SlideVitoria(SlideTutorial):
         for numero, item_titulo, descricao in ITENS:
             painel.addWidget(ItemNumerado(numero, item_titulo, descricao))
 
-        nota = QLabel(
-            "Errar tem peso aqui, mas também faz parte do aprendizado — você "
-            "pode tentar de novo quantas vezes quiser."
-        )
-        nota.setObjectName("tutorial_aviso")
-        nota.setWordWrap(True)
-        nota.setFont(
-            QFont(
-                L.get("tutorial", "font_familia"),
-                L.scaled("tutorial", "nota", "font_size"),
+        painel.addWidget(
+            NotaAviso(
+                "Errar tem peso aqui, mas também faz parte do aprendizado — "
+                "você pode tentar de novo quantas vezes quiser.",
+                icone="⟳",
             )
         )
-        nota.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        painel.addWidget(nota)
 
         return painel
 
