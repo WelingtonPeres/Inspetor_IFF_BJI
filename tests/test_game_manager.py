@@ -5,7 +5,7 @@ Suite completa de testes para o GameManager.
 import pytest
 from unittest.mock import MagicMock, create_autospec, patch
 
-from application.interfaces.i_game_view import IGameView
+from application.interfaces.i_game_view import IGameView, MotivoTutorial
 from infrastructure.repository.repositorio_json import RepositorioJSON
 
 
@@ -191,29 +191,104 @@ class TestOnIniciarSolicitado:
     """
     Testes do Método on_iniciar_solicitado
 
-    Validar que o método instrui a View a exibir a seleção de perfil
-    apenas quando o estado atual é ESTADO_MENU.
+    Validar que o método instrui a View a exibir o tutorial em modo novo
+    jogo, apenas quando o estado atual é ESTADO_MENU.
     """
 
-    def test_view_exibir_selecao_perfil_chamado(self, gm, view_mock):
+    def test_view_exibir_tutorial_novo_jogo_chamado(self, gm, view_mock):
         """
-        View.exibir_selecao_perfil é Chamado
+        View.exibir_tutorial(NOVO_JOGO) é Chamado
 
-        on_iniciar_solicitado deve chamar exibir_selecao_perfil da View
-        quando o estado actual for ESTADO_MENU.
+        on_iniciar_solicitado deve chamar exibir_tutorial da View com
+        o motivo NOVO_JOGO quando o estado actual for ESTADO_MENU.
         """
+        from application.interfaces.i_game_view import MotivoTutorial
+
         gm.on_iniciar_solicitado()
-        view_mock.exibir_selecao_perfil.assert_called_once_with()
+        view_mock.exibir_tutorial.assert_called_once_with(MotivoTutorial.NOVO_JOGO)
 
     def test_ignorado_fora_do_menu(self, gm, view_mock):
         """
         Deve ser Ignorado Fora do Menu
 
-        on_iniciar_solicitado não deve chamar exibir_selecao_perfil
+        on_iniciar_solicitado não deve chamar exibir_tutorial
         se o estado actual não for ESTADO_MENU.
         """
         gm._GameManager__estado_atual = gm.ESTADO_EXPEDIENTE
         gm.on_iniciar_solicitado()
+        view_mock.exibir_tutorial.assert_not_called()
+
+
+class TestOnHelpSolicitado:
+    """
+    Testes do Método on_help_solicitado
+
+    O Help abre o tutorial em modo consulta a partir de qualquer estado,
+    sem guard de ESTADO_MENU.
+    """
+
+    def test_view_exibir_tutorial_consulta_no_menu(self, gm, view_mock):
+        """
+        View.exibir_tutorial(CONSULTA) no Menu
+
+        on_help_solicitado no estado menu deve abrir o tutorial
+        em modo consulta.
+        """
+        from application.interfaces.i_game_view import MotivoTutorial
+
+        gm.on_help_solicitado()
+        view_mock.exibir_tutorial.assert_called_once_with(MotivoTutorial.CONSULTA)
+
+    def test_view_exibir_tutorial_consulta_no_expediente(self, gm, view_mock):
+        """
+        View.exibir_tutorial(CONSULTA) no Expediente
+
+        on_help_solicitado durante o expediente deve abrir o tutorial
+        em modo consulta, mesmo fora do ESTADO_MENU.
+        """
+        from application.interfaces.i_game_view import MotivoTutorial
+
+        gm._GameManager__estado_atual = gm.ESTADO_EXPEDIENTE
+        gm.on_help_solicitado()
+        view_mock.exibir_tutorial.assert_called_once_with(MotivoTutorial.CONSULTA)
+
+
+class TestOnTutorialFinalizado:
+    """
+    Testes do Método on_tutorial_finalizado
+
+    Só o motivo novo_jogo avança para a seleção de perfil;
+    consulta não faz nada e motivos desconhecidos são ignorados.
+    """
+
+    def test_novo_jogo_avanca_para_selecao_perfil(self, gm, view_mock):
+        """
+        Novo Jogo Avança para Seleção de Perfil
+
+        on_tutorial_finalizado(NOVO_JOGO) deve chamar
+        exibir_selecao_perfil da View.
+        """
+        gm.on_tutorial_finalizado(MotivoTutorial.NOVO_JOGO)
+        view_mock.exibir_selecao_perfil.assert_called_once_with()
+
+    def test_consulta_nao_faz_nada(self, gm, view_mock):
+        """
+        Consulta Não Faz Nada
+
+        on_tutorial_finalizado(CONSULTA) não deve chamar
+        exibir_selecao_perfil.
+        """
+        gm.on_tutorial_finalizado(MotivoTutorial.CONSULTA)
+        view_mock.exibir_selecao_perfil.assert_not_called()
+
+    def test_motivo_desconhecido_ignorado(self, gm, view_mock):
+        """
+        Motivo Desconhecido é Ignorado
+
+        on_tutorial_finalizado com motivo fora do Enum não deve
+        chamar exibir_selecao_perfil.
+        """
+        gm.on_tutorial_finalizado("motivo_invalido")
         view_mock.exibir_selecao_perfil.assert_not_called()
 
 

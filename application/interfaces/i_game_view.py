@@ -1,7 +1,15 @@
 from abc import ABC, abstractmethod
+from enum import Enum
 from typing import Any
 
 from core.dtos.resultado_diagnostico import ResultadoDiagnosticoDTO
+
+
+class MotivoTutorial(Enum):
+    """Motivo que originou a abertura da tela de tutorial."""
+
+    NOVO_JOGO = "novo_jogo"
+    CONSULTA = "consulta"
 
 
 class IGameView(ABC):
@@ -19,6 +27,10 @@ class IGameView(ABC):
 
     @abstractmethod
     def exibir_selecao_perfil(self) -> None:
+        pass
+
+    @abstractmethod
+    def exibir_tutorial(self, motivo: "MotivoTutorial") -> None:
         pass
 
     @abstractmethod

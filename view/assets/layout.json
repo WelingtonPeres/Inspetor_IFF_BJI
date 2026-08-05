@@ -452,6 +452,184 @@
       "spacing_entre_elementos": 12
     }
   },
+  "tutorial": {
+    "proporcao_tela": 0.8,
+    "proporcao_sobre_expediente": 0.8,
+    "font_familia": "Open Sans",
+    "slide": {
+      "margens": {
+        "top": 8,
+        "right": 0,
+        "bottom": 8,
+        "left": 0
+      },
+      "colunas_spacing": 24,
+      "texto_max_largura": 640
+    },
+    "chrome": {
+      "margens": {
+        "top": 12,
+        "right": 16,
+        "bottom": 12,
+        "left": 16
+      },
+      "header_spacing": 10,
+      "contador_font_size": 12,
+      "pular_font_size": 12,
+      "briefing_altura": 44,
+      "briefing_font_size": 14,
+      "briefing_icone_tamanho": 26,
+      "briefing_spacing": 12,
+      "footer_gap": 20
+    },
+    "dot": {
+      "largura": 7,
+      "largura_ativo": 20,
+      "altura": 7,
+      "gap": 7
+    },
+    "nav_arrow": {
+      "tamanho": 34
+    },
+    "cta_btn": {
+      "altura": 52,
+      "font_size": 14,
+      "padding": {
+        "left": 26,
+        "top": 13,
+        "right": 26,
+        "bottom": 13
+      }
+    },
+    "credential": {
+      "largura": 280,
+      "altura": 380,
+      "selo": 100,
+      "selo_icone": 50,
+      "logo": 26,
+      "nome": 18,
+      "cargo": 12,
+      "label": 10,
+      "padding": {
+        "left": 24,
+        "top": 26,
+        "right": 24,
+        "bottom": 22
+      }
+    },
+    "item_numerado": {
+      "badge_tamanho": 28,
+      "badge_font_size": 14,
+      "titulo_font_size": 14,
+      "descricao_font_size": 13,
+      "spacing": 10
+    },
+    "mini_relatorio": {
+      "largura": 430,
+      "titulo_font_size": 11,
+      "campo_font_size": 10,
+      "valor_font_size": 11,
+      "campo_spacing": 10,
+      "badge_tamanho": 22,
+      "badge_font_size": 11,
+      "bloco_padding": {
+        "left": 14,
+        "top": 10,
+        "right": 14,
+        "bottom": 10
+      },
+      "padding": {
+        "left": 20,
+        "top": 18,
+        "right": 20,
+        "bottom": 18
+      }
+    },
+    "anexos_visual": {
+      "largura": 560,
+      "spacing": 14,
+      "imagem_largura": 540,
+      "imagem_altura": 300,
+      "botao_largura": 540,
+      "botao_altura": 90
+    },
+    "riscos_grupo": {
+      "largura": 380,
+      "spacing": 10
+    },
+    "risco_tile": {
+      "tamanho_minimo": 110,
+      "icone_tamanho": 44,
+      "font_size": 11
+    },
+    "fatores_visual": {
+      "largura": 420,
+      "spacing": 14
+    },
+    "fator_tile": {
+      "icone_tamanho": 40,
+      "titulo_font_size": 13,
+      "subtitulo_font_size": 10,
+      "spacing": 14,
+      "margens": {
+        "left": 20,
+        "top": 16,
+        "right": 20,
+        "bottom": 16
+      }
+    },
+    "exemplo": {
+      "titulo_font_size": 13,
+      "linha_font_size": 12,
+      "margens": {
+        "left": 14,
+        "top": 10,
+        "right": 14,
+        "bottom": 10
+      }
+    },
+    "decisao_visual": {
+      "largura": 500,
+      "spacing": 18,
+      "legenda_font_size": 11,
+      "padding": {
+        "left": 24,
+        "top": 26,
+        "right": 24,
+        "bottom": 26
+      }
+    },
+    "carimbo": {
+      "altura": 52,
+      "font_size": 11
+    },
+    "vitoria_visual": {
+      "largura": 480,
+      "spacing": 16
+    },
+    "mini_tela": {
+      "icone_tamanho": 44,
+      "titulo_font_size": 13,
+      "subtitulo_font_size": 10,
+      "margens": {
+        "left": 14,
+        "top": 22,
+        "right": 14,
+        "bottom": 22
+      }
+    },
+    "aviso": {
+      "texto_font_size": 12,
+      "icone_font_size": 15,
+      "spacing": 10,
+      "margens": {
+        "left": 14,
+        "top": 10,
+        "right": 14,
+        "bottom": 10
+      }
+    }
+  },
   "janela_sistema": {
     "largura": 480,
     "altura": 340,

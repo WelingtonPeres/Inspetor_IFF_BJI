@@ -1,19 +1,13 @@
 import logging
 from typing import Any, Dict
-from PySide6.QtCore import Qt, QRect, Signal, Slot
-from PySide6.QtWidgets import (
-    QFrame,
-    QHBoxLayout,
-    QStackedWidget,
-    QVBoxLayout,
-)
+from PySide6.QtCore import QRect, Signal, Slot
+from PySide6.QtWidgets import QHBoxLayout, QStackedWidget
 
 from core.dtos.resultado_diagnostico import ResultadoDiagnosticoDTO
 from infrastructure.repository.repositorio_pareceres_cipa import RepositorioDePareceresCIPA
 from infrastructure.repository.repositorio_pareceres_cipavitoria import RepositorioDePareceresCIPAVitoria
 from view.expediente.widgets.sidebar import Sidebar
-from view.expediente.widgets.window_title_bar import WindowTitleBar
-from view.infrastructure.layout_loader import LayoutLoader
+from view.widgets.janela_flutuante import JanelaFlutuante
 from view.expediente.overlays.anexo_gallery import AnexoGallery
 from view.expediente.overlays.media_viewer import MediaViewer
 from view.expediente.paginas.diagnostico import PaginaDiagnostico
@@ -25,7 +19,7 @@ from view.expediente.paginas.selecao_perfil import PaginaSelecaoPerfil
 logger = logging.getLogger(__name__)
 
 
-class TelaDeExpediente(QFrame):
+class TelaDeExpediente(JanelaFlutuante):
     perfil_confirmado = Signal(str)
     submeter_respostas = Signal(dict)
     continuar_solicitado = Signal()
@@ -41,14 +35,12 @@ class TelaDeExpediente(QFrame):
     IDX_GAME_OVER = 4
 
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__(
+            proporcao_keys=("tela_de_expediente", "proporcao_tela"), parent=parent
+        )
         self.setObjectName("tela_de_expediente")
         self.setProperty("class", "tela_expediente")
-        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
-        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
-        self.__maximizado: bool = False
-        self.__tamanho_normal: Any = None
         self.__perfil_selecionado: str = ""
 
         self.__repositorio_pareceres: RepositorioDePareceresCIPA = RepositorioDePareceresCIPA()
@@ -68,33 +60,9 @@ class TelaDeExpediente(QFrame):
         self.__setup_ui()
 
     def __setup_ui(self):
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-
-        self.__title_bar = self.__build_title_bar()
-        layout.addWidget(self.__title_bar)
-
-        body = self.__build_body()
-        layout.addLayout(body, stretch=1)
-
+        layout = self._montar_chrome("Expediente")
+        layout.addLayout(self.__build_body(), stretch=1)
         self.__build_overlays()
-
-    def __build_title_bar(self) -> WindowTitleBar:
-        L = LayoutLoader.instance()
-        altura_bar = L.scaled("tela_de_expediente", "title_bar", "altura")
-        title_bar = WindowTitleBar(
-            titulo="Expediente",
-            altura=altura_bar,
-            altura_keys=("tela_de_expediente", "title_bar", "altura"),
-            parent=self,
-        )
-        title_bar.close_requested.connect(self.__on_fechar)
-        title_bar.minimized_solicitado.connect(self.__on_minimizar)
-        title_bar.maximized_solicitado.connect(self.__on_maximizar_restaurar)
-        # Reage a mudancas de escala global (resize da janela pai).
-        L.escala_atualizada.connect(self.__reaplicar_dimensoes)
-        return title_bar
 
     def __build_body(self) -> QHBoxLayout:
         body = QHBoxLayout()
@@ -166,68 +134,43 @@ class TelaDeExpediente(QFrame):
 
     @Slot(int)
     def __on_page_changed(self, index: int) -> None:
-        self.__sidebar.setVisible(index in [self.IDX_INSPECAO, self.IDX_DIAGNOSTICO])
+        # Guard defensivo: durante o teardown (destruicao do widget) o Qt pode
+        # emitir currentChanged(-1) com o wrapper Python ja em finalizacao.
+        sidebar = getattr(self, "_TelaDeExpediente__sidebar", None)
+        if sidebar is not None:
+            sidebar.setVisible(index in [self.IDX_INSPECAO, self.IDX_DIAGNOSTICO])
 
     @Slot()
-    def __on_minimizar(self) -> None:
-        self.hide()
+    def _ao_minimizar(self) -> None:
+        super()._ao_minimizar()
         self.minimized_solicitado.emit()
 
     @Slot()
-    def __on_maximizar_restaurar(self) -> None:
-        if self.__maximizado:
-            self.__restaurar_tamanho()
-            self.__maximizado = False
-            self.__title_bar.set_maximizado(False)
-            return
-        self.__maximizar()
-        self.__maximizado = True
-        self.__title_bar.set_maximizado(True)
-
-    def __maximizar(self) -> None:
-        parent = self.parentWidget()
-        if parent:
-            self.__tamanho_normal = self.geometry()
-            self.setGeometry(parent.rect())
-
-    def __restaurar_tamanho(self) -> None:
-        if self.__tamanho_normal:
-            self.setGeometry(self.__tamanho_normal)
-
-    @Slot()
-    def __on_fechar(self) -> None:
+    def _ao_fechar(self) -> None:
         self.reiniciar()
         self.voltar_menu_solicitado.emit()
-        self.hide()
-        self.__maximizado = False
-        self.__title_bar.set_maximizado(False)
-
-    @Slot()
-    def __reaplicar_dimensoes(self) -> None:
-        """Re-aplica dims dependentes de escala (title bar) apos resize."""
-        L = LayoutLoader.instance()
-        self.__title_bar.reaplicar_dimensoes(L.scaled("tela_de_expediente", "title_bar", "altura"))
+        self._fechar()
 
     def exibir_selecao_perfil(self) -> None:
-        self.__title_bar.definir_titulo("Seleção de Perfil")
+        self._title_bar.definir_titulo("Seleção de Perfil")
         self.__stack.setCurrentIndex(self.IDX_SELECAO_PERFIL)
 
     def renderizar_relatorio(self, dados_relatorio: Dict[str, Any]) -> None:
         logger.info("Renderizando relatorio: %s", dados_relatorio.get("titulo", ""))
         titulo = dados_relatorio.get("titulo", "Relatório")
-        self.__title_bar.definir_titulo(f"Relatório: {titulo}")
+        self._title_bar.definir_titulo(f"Relatório: {titulo}")
         self.__pagina_inspecao.renderizar_relatorio(dados_relatorio)
         self.__stack.setCurrentIndex(self.IDX_INSPECAO)
 
     def exibir_tela_diagnostico(self, resultado: ResultadoDiagnosticoDTO) -> None:
         logger.info("Exibindo diagnostico: %s", resultado)
-        self.__title_bar.definir_titulo("Resultado da Inspecao")
+        self._title_bar.definir_titulo("Resultado da Inspecao")
         self.__pagina_diagnostico.exibir_diagnostico(resultado)
         self.__stack.setCurrentIndex(self.IDX_DIAGNOSTICO)
 
     def exibir_tela_endgame(self, pontuacao_global: float, dias_concluidos: int, venceu: bool) -> None:
         logger.info("Exibindo endgame: %.1f pts, venceu=%s", pontuacao_global, venceu)
-        self.__title_bar.definir_titulo("Fim do Expediente")
+        self._title_bar.definir_titulo("Fim do Expediente")
         if venceu:
             self.__pagina_game_win.exibir_resultado(
                 pontuacao_global, self.__perfil_selecionado
@@ -239,49 +182,14 @@ class TelaDeExpediente(QFrame):
         )
         self.__stack.setCurrentIndex(self.IDX_GAME_OVER)
 
-    def exibir_com_tamanho_inicial(self, parent_rect: Any) -> None:
-        # Recalcula a cada chamada: reabrir apos fechar+redimensionar nao pode
-        # manter geometria velha congelada (B4).
-        self.__reposicionar(parent_rect)
-        self.show()
-
-    @Slot(QRect)
-    def redimensionar_com_overlay(self, rect: QRect) -> None:
-        """Hook acionado pelo _OverlayArea ao crescer (B5).
-
-        So reposiciona se o expediente ja esta visivel; nunca o exibe.
-        """
-        if self.isVisible():
-            self.__reposicionar(rect)
-
-    def __reposicionar(self, parent_rect: Any) -> None:
-        L = LayoutLoader.instance()
-        proporcao = L.get("tela_de_expediente", "proporcao_tela")
-        w_80 = int(parent_rect.width() * proporcao)
-        if w_80 < 1280:
-            w = parent_rect.width()
-            h = parent_rect.height()
-            x = 0
-            y = 0
-        else:
-            w = w_80
-            h = int(parent_rect.height() * proporcao)
-            x = (parent_rect.width() - w) // 2
-            y = (parent_rect.height() - h) // 2
-        self.__tamanho_normal = QRect(x, y, w, h)
-        if self.__maximizado:
-            self.setGeometry(parent_rect)
-            return
-        self.setGeometry(x, y, w, h)
-
     def reiniciar(self) -> None:
         self.__pagina_inspecao.limpar_formulario()
         self.__stack.setCurrentIndex(self.IDX_SELECAO_PERFIL)
-        self.__title_bar.definir_titulo("Expediente")
+        self._title_bar.definir_titulo("Expediente")
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        if self.__maximizado and self.parentWidget():
+        if self._maximizado and self.parentWidget():
             self.setGeometry(self.parentWidget().rect())
         # Overlays de midia ancoram no _OverlayArea (acima da taskbar), nao no
         # rect do expediente nem da janela inteira (B7).

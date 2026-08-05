@@ -62,6 +62,15 @@ class TestJanelaPrincipal:
         """exibir_menu deve esconder o expediente."""
         janela.exibir_menu()
 
+    def test_exibir_tutorial_executa_sem_erro(self, janela):
+        """exibir_tutorial deve aceitar qualquer motivo sem erro (stub Etapa 1)."""
+        from application.interfaces.i_game_view import MotivoTutorial
+
+        janela.show()
+        janela.exibir_tutorial(MotivoTutorial.NOVO_JOGO)
+        janela.exibir_tutorial(MotivoTutorial.CONSULTA)
+        janela.hide()
+
     def test_exibir_selecao_perfil_mostra_expediente(self, janela):
         """exibir_selecao_perfil deve mostrar a TelaDeExpediente."""
         janela.show()
@@ -103,3 +112,79 @@ class TestJanelaPrincipal:
         """O signal iniciar_solicitado deve ser emitivel."""
         with qtbot.waitSignal(janela.iniciar_solicitado, timeout=1000):
             janela.iniciar_solicitado.emit()
+
+    def test_help_solicitado_signal(self, janela, qtbot):
+        """O signal help_solicitado deve ser emitivel."""
+        with qtbot.waitSignal(janela.help_solicitado, timeout=1000):
+            janela.help_solicitado.emit()
+
+    def test_on_help_solicitado_emite_help_solicitado(self, janela, qtbot):
+        """O slot privado de Help deve propagar o signal publico (regressao R6)."""
+        with qtbot.waitSignal(janela.help_solicitado, timeout=1000):
+            janela._JanelaPrincipal__on_help_solicitado()
+
+
+class TestTutorial:
+    """
+    Testes da fiacao do tutorial na JanelaPrincipal.
+    """
+
+    def test_tutorial_finalizado_signal_existe(self, janela, qtbot):
+        """tutorial_finalizado deve ser emitivel com um MotivoTutorial."""
+        from application.interfaces.i_game_view import MotivoTutorial
+
+        assert hasattr(janela, "tutorial_finalizado")
+        with qtbot.waitSignal(janela.tutorial_finalizado, timeout=1000) as blocker:
+            janela.tutorial_finalizado.emit(MotivoTutorial.NOVO_JOGO)
+        assert blocker.args[0] == MotivoTutorial.NOVO_JOGO
+
+    def test_exibir_tutorial_mostra_tela(self, janela):
+        """exibir_tutorial deve mostrar a TelaTutorial."""
+        from application.interfaces.i_game_view import MotivoTutorial
+
+        janela.show()
+        janela.exibir_tutorial(MotivoTutorial.NOVO_JOGO)
+        tela = janela.findChild(object, "tela_tutorial")
+        assert tela is not None
+        assert tela.isVisible()
+        janela.hide()
+
+    def test_pular_emite_tutorial_finalizado(self, janela, qtbot):
+        """Clicar em Pular deve propagar tutorial_finalizado com o motivo."""
+        from application.interfaces.i_game_view import MotivoTutorial
+        from PySide6.QtWidgets import QPushButton
+
+        janela.show()
+        janela.exibir_tutorial(MotivoTutorial.NOVO_JOGO)
+        tela = janela.findChild(object, "tela_tutorial")
+        btn = tela.findChild(QPushButton, "tutorial_pular")
+        with qtbot.waitSignal(janela.tutorial_finalizado, timeout=1000) as blocker:
+            qtbot.mouseClick(btn, Qt.MouseButton.LeftButton)
+        assert blocker.args[0] == MotivoTutorial.NOVO_JOGO
+        janela.hide()
+
+    def test_exibir_menu_esconde_tutorial(self, janela):
+        """exibir_menu deve esconder o tutorial."""
+        from application.interfaces.i_game_view import MotivoTutorial
+
+        janela.show()
+        janela.exibir_tutorial(MotivoTutorial.NOVO_JOGO)
+        janela.exibir_menu()
+        tela = janela.findChild(object, "tela_tutorial")
+        assert not tela.isVisible()
+        janela.hide()
+
+    def test_consulta_sobre_expediente_usam_rect_do_expediente(self, janela):
+        """Em consulta com expediente visivel, o tutorial nao pode ser maior
+        que o rect actual do expediente."""
+        from application.interfaces.i_game_view import MotivoTutorial
+
+        janela.show()
+        janela.exibir_selecao_perfil()
+        expediente = janela.findChild(object, "tela_de_expediente")
+        assert expediente.isVisible()
+        janela.exibir_tutorial(MotivoTutorial.CONSULTA)
+        tela = janela.findChild(object, "tela_tutorial")
+        assert tela.width() <= expediente.width()
+        assert tela.height() <= expediente.height()
+        janela.hide()
