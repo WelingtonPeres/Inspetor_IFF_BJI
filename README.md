@@ -21,6 +21,9 @@ A avaliação ocorre sob pressão temporal, com retroalimentação imediata e um
 ## 🎨 Interface e Gameplay
 
 ### 1. Seleção de Perfil — Escolha de Persona
+
+![Tela de Seleção de Perfil](docs/img/screenshots/01_selecao_perfil.png)
+
 Selecione seu personagem inspetor (p.ex., "T. Meio Ambiente"). Cada persona possui contexto e conhecimento específicos que definem como você abordará a análise. A interface mostra cards visuais para cada personagem com seus atributos.
 
 **Elementos visíveis:**
@@ -30,6 +33,8 @@ Selecione seu personagem inspetor (p.ex., "T. Meio Ambiente"). Cada persona poss
 - Botão "Confirmar" para iniciar
 
 ### 2. Tela de Inspeção — Relatório e Decisão
+
+![Tela de Inspeção](docs/img/screenshots/02_tela_inspecao.png)
 Analise o **Relatório Estruturado** com:
 - **Local**: Onde ocorreu o incidente (ex: "Laboratório de Solos - IFFBJI")
 - **Atividade**: O que estava sendo feito (ex: "Preparo para Titulação com HCl")
@@ -52,6 +57,9 @@ Analise o **Relatório Estruturado** com:
 **Botão "Submeter Respostas"** envia sua análise
 
 ### 3. Tela de Resultado — Diagnóstico e Pontuação
+
+![Tela de Resultado](docs/img/screenshots/03_tela_resultado.png)
+
 Receba **feedback imediato e detalhado**:
 
 **Pontuação Final** (ex: 7250 pts) com breakdown:
