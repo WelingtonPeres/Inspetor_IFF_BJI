@@ -20,6 +20,15 @@ class Relatorio:
                  dificuldade: int, 
                  gabarito: FolhaDeGabarito):
         
+        if id_cenario < 1:
+            raise ValueError(f"[Erro] id_cenario deve ser positivo: {id_cenario}")
+        if not titulo:
+            raise ValueError("[Erro] titulo não pode ser vazio")
+        if not envolvidos:
+            raise ValueError("[Erro] envolvidos não pode ser vazio")
+        if not cursos:
+            raise ValueError("[Erro] cursos não pode ser vazio")
+
         self.__id_cenario = id_cenario
         self.__titulo = titulo
         self.__atividade = atividade
@@ -115,7 +124,6 @@ class Relatorio:
             "anexos": lista_anexos_apresentacao,
         }
     
-    # Métodos relacionados aos Anexos 
     def obter_anexos(self) -> List[Anexo]:
         """ Devolve a lista de anexos do relatório """
         return self.__anexos
@@ -128,7 +136,6 @@ class Relatorio:
         """ Verifica se o relatório tem anexos atribuídos """
         return len(self.__anexos) > 0
     
-    # Métodos relacionados à resposta do jogador
     def anexar_resposta_jogador(self, resposta: FolhaDeResposta):
         """Recebe a parte do Relatório que o jogador preencheu e guarda internamente"""
         self.__folha_resposta = resposta

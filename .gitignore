@@ -24,3 +24,8 @@ Thumbs.db
 # IDEs (VSCode, PyCharm, etc)
 .vscode/
 .idea/
+.opencode/
+.claude/
+temp/
+logs/
+docs/.local/
