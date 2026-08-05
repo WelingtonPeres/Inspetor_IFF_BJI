@@ -4,17 +4,57 @@
 
 # Inspetor IFF-BJI
 
-> Simulador de análise de risco ocupacional desenvolvido no IFF, Campus Bom Jesus do Itabapoana, como atividade de Curricularização da Extensão na disciplina de Higiene e Segurança do Trabalho. O jogador recebe relatórios de cenários reais em laboratórios, oficinas e refeitórios, classifica riscos e fatores de insegurança, e escolhe a intervenção cabível sob pressão de tempo. A nota sai de um modelo determinístico que pondera exatidão, completude e decaimento temporal, e o resultado reflete o que um técnico de segurança faria naquele contexto.
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue)](https://www.python.org/downloads/)
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey)](LICENSE)
+[![Status: Active Development](https://img.shields.io/badge/Status-Active%20Development-green)]()
 
-## Sumário
+> **Simulador gamificado de análise de risco ocupacional** desenvolvido no IFF (Instituto Federal Fluminense) como atividade de Curricularização da Extensão. O jogador recebe relatórios de cenários reais em laboratórios, oficinas e refeitórios, classifica riscos e fatores de insegurança, e escolhe a intervenção cabível sob pressão de tempo. A nota sai de um modelo determinístico que pondera exatidão, completude e decaimento temporal — refletindo o que um técnico de segurança faria naquele contexto.
 
-- [1. Instalação Rápida](#1-instalação-rápida)
-- [2. Documentação do Projeto e Guias](#2-documentação-do-projeto-e-guias)
-- [3. Arquitetura do Projeto](#3-arquitetura-do-projeto)
+---
 
-## 1. Instalação Rápida
+## 📋 Sumário
 
-Pré-requisitos: **Python 3.11+** e **Git**.
+- [✨ Features](#-features)
+- [🎮 Como Jogar](#-como-jogar)
+- [🚀 Instalação Rápida](#-instalação-rápida)
+- [📚 Documentação](#-documentação)
+- [🏗️ Arquitetura](#-arquitetura)
+- [📄 Licença](#-licença)
+- [👥 Contribuidores](#-contribuidores)
+
+---
+
+## ✨ Features
+
+- 🎯 **Modelo matemático determinístico** — pontuação precisa baseada em exatidão, completude e fator temporal
+- 🏥 **Cenários educacionais reais** — laboratórios, oficinas e refeitórios do IFF, com relatórios autênticos
+- ⚙️ **Classificação de riscos** — 5 categorias (Físico, Químico, Biológico, Ergonômico, Acidente) com análise profunda
+- 🛡️ **Decisões administrativas** — três opções (Advertir, Interditar, Ignorar) com consequências reais
+- ⏱️ **Pressão temporal** — penalidade por tempo decorrido, simulando realismo operacional
+- 📊 **Feedback detalhado** — diagnóstico pós-decisão, pontuação por item, análise de erros
+- 🎓 **Tutorial integrado** — 8 slides guiando o jogador passo a passo no primeiro acesso
+- 🌙 **Tema claro e escuro** — interface adaptativa com design responsivo
+- 🔧 **Arquitetura limpa** — Clean Architecture com separação rigorosa de camadas (Core, Infrastructure, Application, View)
+
+---
+
+## 🎮 Como Jogar
+
+1. **Seleção de Personagem**: Escolha um dos perfis de inspetor disponíveis (papel define contexto)
+2. **Leitura do Caso**: Analise o relatório da inspeção — local, atividade, envolvidos, descrição
+3. **Classificação de Riscos**: Marque os riscos encontrados — cada um tem uma cor única (NR-26)
+4. **Classificação de Fatores**: Identifique os fatores de insegurança — Ato Inseguro vs. Condição Insegura
+5. **Decisão Administrativa**: Escolha a ação (Advertir/Interditar/Ignorar) baseado na gravidade
+6. **Recebimento de Nota**: O sistema calcula sua performance e fornece feedback completo
+7. **Repetição**: Simule vários casos para melhorar sua expertise em segurança ocupacional
+
+**Objetivo**: Ser o inspetor mais preciso possível — máxima nota = análise correta e rápida.
+
+---
+
+## 🚀 Instalação Rápida
+
+**Pré-requisitos:** Python 3.11+ e Git
 
 ```bash
 git clone https://github.com/WelingtonPeres/Inspetor_IFF_BJI.git
@@ -26,30 +66,95 @@ pip install -r requirements.txt
 python main.py
 ```
 
-Dúvidas de ambiente (Python, `venv`, dependências) estão cobertas no [Guia de Contribuição](CONTRIBUTING.md); se algo ainda travar, abra uma issue.
+**Dúvidas?** Consulte o [Guia de Contribuição](CONTRIBUTING.md) para detalhes de ambiente, dependências e troubleshooting.
 
+---
 
-## 2. Documentação do Projeto e Guias
+## 📚 Documentação
 
-Toda a documentação técnica vive em [`docs/`](docs/README.md), organizada por tema — o índice completo está em **[docs/README.md](docs/README.md)**. Atalhos mais usados:
+Toda a documentação técnica vive em [`docs/`](docs/README.md), organizada por tema:
 
-* **[Guia de Contribuição](CONTRIBUTING.md)**: como configurar o ambiente local e submeter Pull Requests.
-* **[Clean Architecture](docs/arquitetura/clean-architecture.md)**: as camadas do projeto e as regras de dependência entre elas.
-* **[Modelagem Matemática](docs/game-design/modelagem-matematica.md)**: equações de pontuação, exatidão e decaimento temporal.
-* **[Estrutura JSON](docs/dados/estrutura-json.md)**: o schema dos cenários e relatórios.
-* **[Nomenclatura e PEP-8](docs/processo/nomenclatura-pep8.md)**: diretrizes de estilo de código.
+| Pergunta | Link |
+|----------|------|
+| **Como contribuo?** | [Guia de Contribuição](CONTRIBUTING.md) |
+| **Como o código é organizado?** | [Arquitetura da Camada View](docs/arquitetura/view.md), [Diagrama de Classes](docs/arquitetura/diagrama-classes.md) |
+| **Como o jogo funciona?** | [Modelagem Matemática](docs/game-design/modelagem-matematica.md), [Level Design](docs/game-design/level-design.md) |
+| **Qual é o schema dos dados?** | [Estrutura JSON](docs/dados/estrutura-json.md) |
+| **Qual é o padrão de código?** | [Nomenclatura e PEP-8](docs/processo/nomenclatura-pep8.md) |
+| **Quer revisar PRs?** | [Checklist de Code Review](docs/arquitetura/checklist-revisao.md) |
 
-## 3. Arquitetura do Projeto
+**Índice completo**: [docs/README.md](docs/README.md)
 
-O projeto segue os princípios da **Arquitetura Limpa (Clean Architecture)**, dividido em camadas concêntricas:
+---
 
+## 🏗️ Arquitetura
+
+O projeto segue **Arquitetura Limpa**, dividido em camadas concêntricas:
 
 | Camada | Diretório | Responsabilidade |
 |--------|-----------|------------------|
-| **Core (Domain)** | `core/model/`, `core/services/`, `core/dtos/` | Regras de negócio e entidades: **sem dependências externas** |
+| **Core (Domain)** | `core/model/`, `core/services/`, `core/dtos/` | Regras de negócio e entidades — **sem dependências externas** |
 | **Infrastructure** | `infrastructure/` | Repositório, fábrica e DTOs de persistência |
 | **Application** | `application/controllers/` | Orquestração dos casos de uso |
-| **View** | `view/` | Interface com o utilizador (PySide6) |
+| **View** | `view/` | Interface com o utilizador (PySide6 + Qt) |
 | **Config** | `config/` | Configuração centralizada (logging, etc.) |
 
-O diagrama de classes completo das camadas internas está em [docs/arquitetura/diagrama-classes.md](docs/arquitetura/diagrama-classes.md); os padrões da camada view em [docs/arquitetura/view.md](docs/arquitetura/view.md).
+**Leitura recomendada**: [Clean Architecture](docs/arquitetura/clean-architecture.md)
+
+---
+
+## 📄 Licença
+
+Este projeto está licenciado sob a **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License** (CC BY-NC-SA 4.0).
+
+**O que você pode fazer:**
+- ✓ Usar, copiar e redistribuir
+- ✓ Remixar, transformar e melhorar
+- ✓ Usar em contextos educacionais
+
+**Com a condição de:**
+- Atribuir crédito ao IFF e aos autores
+- Não usar para fins comerciais
+- Compartilhar derivados sob a mesma licença
+
+Para o texto legal completo, veja [LICENSE](LICENSE).
+
+---
+
+## 👥 Contribuidores
+
+Veja [AUTHORS.md](AUTHORS.md) para lista completa de contribuidores, orientadores e instituições envolvidas.
+
+### Como Contribuir
+
+O projeto está em **desenvolvimento ativo** e aceita contribuições! 
+
+1. Leia [CONTRIBUTING.md](CONTRIBUTING.md) para diretrizes
+2. Abra uma [Issue](https://github.com/WelingtonPeres/Inspetor_IFF_BJI/issues) para reportar bugs ou propor features
+3. Envie um [Pull Request](https://github.com/WelingtonPeres/Inspetor_IFF_BJI/pulls) com suas melhorias
+4. Siga os [padrões de código](docs/processo/nomenclatura-pep8.md) do projeto
+
+---
+
+## 📊 Status do Projeto
+
+| Aspecto | Status |
+|---------|--------|
+| **Desenvolvimento** | 🟢 Ativo — novas features e melhorias contínuas |
+| **Estabilidade** | 🟡 Beta — testado mas em refinamento |
+| **Testes** | 🟢 615+ testes automatizados passando |
+| **Documentação** | 🟢 Completa e atualizada |
+| **Licença** | 🟢 CC BY-NC-SA 4.0 |
+
+---
+
+## 🎓 Contexto Académico
+
+Projeto desenvolvido como **Atividade de Curricularização da Extensão** na disciplina de Higiene e Segurança do Trabalho do Instituto Federal Fluminense (IFF), Campus Bom Jesus do Itabapoana.
+
+O objetivo é criar uma ferramenta educacional imersiva que permita aos alunos e profissionais de segurança praticar análise de risco em um ambiente controlado e gamificado.
+
+---
+
+**Última atualização:** Agosto de 2026  
+**Mantido por:** [Welington Peres Léo](https://github.com/WelingtonPeres)
