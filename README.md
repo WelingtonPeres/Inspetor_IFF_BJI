@@ -6,132 +6,128 @@
 
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue)](https://www.python.org/downloads/)
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey)](LICENSE)
-[![Status: Active Development](https://img.shields.io/badge/Status-Active%20Development-green)]()
+[![Versão 1.0](https://img.shields.io/badge/Vers%C3%A3o-1.0-green)](https://github.com/WelingtonPeres/Inspetor_IFF_BJI/releases)
 
 ## Apresentação
 
 **Inspetor IFF-BJI** é um simulador educacional para análise de risco ocupacional, desenvolvido como atividade de Curricularização da Extensão no Instituto Federal Fluminense (IFF), Campus Bom Jesus do Itabapoana, na disciplina de Higiene e Segurança do Trabalho.
 
-O simulador é um **ambiente de prática imersivo** onde estudantes e profissionais de segurança do trabalho analisam cenários reais em laboratórios, oficinas e refeitórios, identificam riscos ocupacionais segundo a Norma Regulamentadora 26 (NR-26), classificam fatores de insegurança (atos e condições inseguras), e decidem a melhor estratégia administrativa (advertência, interdição ou arquivamento).
+O simulador é um **ambiente de prática** em que o jogador assume o papel de inspetor: analisa relatórios de ocorrências registradas em vídeo no Laboratório de Solos do campus, identifica os riscos ocupacionais (NR-26), classifica os fatores de insegurança (ato inseguro e condição insegura) e escolhe a decisão administrativa adequada (advertir, interditar ou ignorar).
 
-A avaliação ocorre sob pressão temporal, com retroalimentação imediata e uma pontuação determinística que premia **exatidão** (acertos nas classificações), **completude** (cobertura de todos os riscos) e **eficiência** (penalidade por decorrência de tempo), refletindo as exigências reais da profissão.
+A avaliação ocorre sob pressão de tempo, com retorno imediato e uma pontuação determinística que premia **exatidão** (acertos nas classificações), **completude** (cobertura de todos os riscos) e **eficiência** (a nota decai quando o tempo ideal é ultrapassado).
 
 ---
 
 ## 🎨 Interface e Gameplay
 
-### 1. Seleção de Perfil — Escolha de Persona
+A interface simula o desktop de um sistema operacional ("IFF-OS"): área de trabalho com atalhos, barra de tarefas e janelas que podem ser maximizadas, minimizadas e fechadas. Ao iniciar um novo jogo, um tutorial de 8 slides apresenta as mecânicas.
+
+### 1. Seleção de Perfil
 
 ![Tela de Seleção de Perfil](docs/img/screenshots/01_selecao_perfil.png)
 
-Selecione seu personagem inspetor (p.ex., "T. Meio Ambiente"). Cada persona possui contexto e conhecimento específicos que definem como você abordará a análise. A interface mostra cards visuais para cada personagem com seus atributos.
+Escolha o perfil do inspetor em um carrossel com **9 opções**: um perfil padrão e um para cada curso do campus (por exemplo, "T. Meio Ambiente").
 
 **Elementos visíveis:**
-- Carrossel de personagens com 3-9 opções
-- Visualização clara de cada persona
-- Indicador de progresso (ex: 6/9)
-- Botão "Confirmar" para iniciar
+- Carrossel com o cartão ilustrado de cada perfil
+- Indicador de posição (ex.: 6/9)
+- Botão "Confirmar" para iniciar o expediente
 
 ### 2. Tela de Inspeção — Relatório e Decisão
 
 ![Tela de Inspeção](docs/img/screenshots/02_tela_inspecao.png)
-Analise o **Relatório Estruturado** com:
-- **Local**: Onde ocorreu o incidente (ex: "Laboratório de Solos - IFFBJI")
-- **Atividade**: O que estava sendo feito (ex: "Preparo para Titulação com HCl")
-- **Envolvidos**: Pessoas presentes
-- **Descrição**: Narrativa do cenário
 
-**Identifique Riscos** (lado direito):
-- 5 categorias com cores (Físico, Químico, Biológico, Ergonômico, Acidente)
+Analise o **relatório**:
+- **Local**: onde ocorreu o fato (ex.: "Laboratório de Solos - IFFBJI")
+- **Atividade**: o que estava sendo feito (ex.: "Preparo para Titulação com HCl")
+- **Envolvidos**: pessoas presentes
+- **Descrição**: narrativa do cenário
+- **Anexos**: vídeo da ocorrência, que pode ser ampliado
+
+**Identifique os riscos:**
+- 5 categorias, cada uma com sua cor: Físico (verde), Químico (vermelho), Biológico (marrom), Ergonômico (amarelo) e Acidente (azul)
 - Clique para marcar os riscos encontrados
 
-**Classifique Fatores de Insegurança**:
+**Classifique os fatores de insegurança:**
 - Ato Inseguro (falha humana)
-- Condição Insegura (falha do ambiente/equipamento)
+- Condição Insegura (falha do ambiente ou do equipamento)
 
-**Escolha Decisão Administrativa**:
-- ADVERTIR (amarelo) — para riscos menores
-- INTERDITAR (vermelho) — para riscos graves
-- IGNORAR (cinza) — sem risco efetivo
+**Escolha a decisão administrativa:**
+- ADVERTIR — para riscos que pedem orientação e correção
+- INTERDITAR — para riscos graves, que exigem parar a atividade
+- IGNORAR — quando não há risco que justifique ação
 
-**Botão "Submeter Respostas"** envia sua análise
+O botão **"Submeter Respostas"** envia a análise.
 
 ### 3. Tela de Resultado — Diagnóstico e Pontuação
 
 ![Tela de Resultado](docs/img/screenshots/03_tela_resultado.png)
 
-Receba **feedback imediato e detalhado**:
+Receba **retorno imediato e detalhado**. No exemplo acima, a pontuação final de 7250 pts se decompõe em:
+- **Riscos** (2 de 3): +4000 pts — dois acertos de +3000 pts e um risco marcado indevidamente, de −2000 pts
+- **Fatores de insegurança**: +750 pts
+- **Decisão administrativa**: +2500 pts (decisão ótima)
+- **Bônus de tempo**: +0 pts (resposta em 25 s, dentro do tempo ideal)
 
-**Pontuação Final** (ex: 7250 pts) com breakdown:
-- Riscos identificados: +3000 pts (corretos)
-- Fatores de insegurança: +750 pts (análise complementar)
-- Decisão administrativa: +2500 pts (escolha apropriada)
-- Bônus temporal: +0 pts (tempo gasto)
-
-**Sidebar esquerdo**:
-- Dashboard com progresso (ex: "Riscos: 2 de 3")
-- Reports, Logs, Settings
-
-**Histórico de progresso** mostrando qual cenário você está.
+Cada risco e cada fator aparece com a sua contribuição individual, e a decisão correta é destacada quando o jogador escolhe outra. Ao fim do expediente, a tela de vitória ou de derrota traz um parecer da CIPA sobre o desempenho.
 
 ---
 
 ## 📋 Sumário
 
-- [✨ Features](#-features)
-- [🎮 Como Jogar](#-como-jogar)
+- [✨ Características Distintivas](#-características-distintivas)
+- [🎮 Fluxo de Operação](#-fluxo-de-operação)
 - [🚀 Instalação Rápida](#-instalação-rápida)
 - [📚 Documentação](#-documentação)
-- [🏗️ Arquitetura](#-arquitetura)
+- [🏗️ Arquitetura de Software](#️-arquitetura-de-software)
 - [📄 Licença](#-licença)
 - [👥 Contribuidores](#-contribuidores)
+- [📊 Status do Projeto](#-status-do-projeto)
+- [🎓 Contexto Institucional e Académico](#-contexto-institucional-e-académico)
 
 ---
 
 ## ✨ Características Distintivas
 
-- **Modelo de avaliação determinístico** — Equação de pontuação explícita que premia exatidão (acertos nas classificações), completude (identificação de todos os riscos) e eficiência temporal. Sem aleatoriedade: mesma resposta sempre produz mesma nota.
+- **Modelo de avaliação determinístico** — Equação de pontuação explícita que premia exatidão, completude e eficiência temporal. A mesma resposta, no mesmo tempo, produz sempre a mesma nota.
 
-- **Cenários baseados em casos reais** — Laboratórios, oficinas e refeitórios do IFF com relatórios autênticos, equipamentos e contextos que estudantes reconhecem.
+- **Cenários do próprio campus** — 12 ocorrências gravadas em vídeo no Laboratório de Solos do IFF-BJI, com relatórios, equipamentos e contextos que os estudantes reconhecem.
 
-- **Classificação normativa de riscos** — Cinco categorias segundo NR-26: Físico, Químico, Biológico, Ergonômico e Acidente, com cores específicas por fator de risco.
+- **Classificação normativa de riscos** — Cinco categorias segundo a NR-26: Físico, Químico, Biológico, Ergonômico e Acidente, cada uma com sua cor.
 
-- **Decisões administrativas fundadas** — Três estratégias (Advertência, Interdição, Arquivamento) com consequências que refletem a escolha: erros reverberam na pontuação.
+- **Decisões administrativas com peso** — Três ações (Advertir, Interditar, Ignorar): a decisão ótima vale 25% da nota do cenário, a alternativa aceitável vale 12,5% e a incorreta não pontua.
 
-- **Pressão temporal realista** — Decaimento de pontuação conforme o tempo decorre, simulando urgência operacional.
+- **Pressão de tempo** — Até 45 segundos, a nota é integral; depois disso decai linearmente, até o piso de 50%.
 
-- **Retroalimentação formativa** — Após cada decisão, diagnóstico detalhado: erros identificados, itens faltantes, pontuação por componente, oportunidade de aprender.
+- **Retorno formativo** — Após cada relatório, diagnóstico item a item: riscos e fatores acertados, esquecidos e marcados indevidamente, com a pontuação de cada um.
 
-- **Guia integrado para primeiro acesso** — 8 slides interativos explicam mecânicas, termos e fluxo, sem exigir leitura externa.
+- **Tutorial integrado** — 8 slides interativos explicam mecânicas, termos e fluxo; podem ser consultados a qualquer momento pelo atalho "Help".
 
-- **Interface responsiva e acessível** — Tema claro/escuro, dimensionamento automático para diferentes resoluções, tipografia legível.
+- **Interface responsiva** — Dimensionamento automático para diferentes resoluções (a partir de 1280×720) e temas escuro e claro.
 
-- **Arquitetura académica** — Clean Architecture (camadas Core, Infrastructure, Application, View) com separação rigorosa de responsabilidades, 615+ testes automatizados, código documentado.
+- **Arquitetura em camadas** — Clean Architecture (Core, Infrastructure, Application, View) com separação de responsabilidades e 615 testes automatizados.
 
 ---
 
 ## 🎮 Fluxo de Operação
 
-O simulador segue um fluxo linear com avaliação ao final:
+1. **Tutorial**: ao clicar em iniciar, o tutorial de 8 slides é exibido.
 
-1. **Escolha de Perfil**: Seleção de persona (p.ex., Inspetor Diurno, Supervisor Noturno) — define contexto e conhecimento prévio.
+2. **Escolha de Perfil**: seleção de um dos 9 perfis. Nesta versão, todos os perfis recebem o mesmo conjunto de cenários; a separação de cenários por curso já é suportada pelo formato de dados e será usada quando houver cenários específicos.
 
-2. **Apresentação do Caso**: Relatório estruturado com local, atividade, envolvidos, descrição narrativa da situação. Acesso a anexos (fotos, vídeos) se relevantes.
+3. **Apresentação do Caso**: relatório com local, atividade, envolvidos e descrição, acompanhado do vídeo da ocorrência.
 
-3. **Identificação de Riscos**: Marcação de riscos observados. O sistema lista os riscos possíveis por cores (NR-26: azul=físico, vermelho=acidente, etc.). Objetivo: máxima cobertura com mínimos falsos positivos.
+4. **Identificação de Riscos**: marcação dos riscos observados entre as cinco categorias. O objetivo é cobrir todos os riscos presentes sem marcar riscos inexistentes.
 
-4. **Classificação de Insegurança**: Tipo de risco identificado — **Ato Inseguro** (comportamento inadequado) vs. **Condição Insegura** (ambiente/equipamento inadequado). Exige compreensão normativa.
+5. **Classificação de Insegurança**: **Ato Inseguro** (comportamento inadequado) e/ou **Condição Insegura** (ambiente ou equipamento inadequado).
 
-5. **Decisão Administrativa**: Escolha de ação corretiva única:
-   - **Advertência**: Para riscos menores (reforço comportamental)
-   - **Interdição**: Para riscos graves (suspensão da atividade até correção)
-   - **Arquivamento**: Para situações sem risco efetivo (falso positivo intencional ou erro)
+6. **Decisão Administrativa**: escolha de uma única ação — **Advertir**, **Interditar** ou **Ignorar**.
 
-6. **Cálculo e Retroalimentação**: Sistema calcula pontuação segundo equação determinística. Apresenta análise item-por-item, erros cometidos, lacunas, e sugestões de melhoria.
+7. **Cálculo e Diagnóstico**: o sistema calcula a pontuação e apresenta a análise item a item.
 
-7. **Prática Iterada**: Múltiplos cenários disponíveis, recomenda-se repetição para consolidação de expertise.
+8. **Fim do Expediente**: o expediente é aprovado quando a pontuação atinge **60% do máximo possível**. Nesta versão, cada expediente sorteia um dos 12 cenários; "Jogar novamente" inicia outro expediente com novo sorteio.
 
-**Métrica de Sucesso**: Pontuação máxima = análise completa (todos os riscos), precisa (sem falsos positivos) e eficiente (dentro do tempo limite).
+As fórmulas completas estão em [Modelagem Matemática](docs/game-design/modelagem-matematica.md).
 
 ---
 
@@ -140,6 +136,8 @@ O simulador segue um fluxo linear com avaliação ao final:
 **Pré-requisitos:** Python 3.11+
 
 ### Opção 1: Via Git (recomendado para desenvolvimento)
+
+**1. Clone o repositório:**
 
 ```bash
 git clone https://github.com/WelingtonPeres/Inspetor_IFF_BJI.git
@@ -176,7 +174,7 @@ python main.py
 
 ### Opção 2: Download do ZIP (sem Git)
 
-1. Acesse [Releases](https://github.com/WelingtonPeres/Inspetor_IFF_BJI/releases) ou clique no botão **Code** > **Download ZIP**
+1. Baixe o código-fonte da versão mais recente em [Releases](https://github.com/WelingtonPeres/Inspetor_IFF_BJI/releases), ou clique no botão **Code** > **Download ZIP**
 2. Extraia o arquivo em uma pasta de sua escolha
 3. Abra o terminal/PowerShell na pasta extraída
 4. Execute:
@@ -189,7 +187,24 @@ pip install -r requirements.txt
 python main.py
 ```
 
-**Dúvidas?** Consulte o [Guia de Contribuição](CONTRIBUTING.md) para detalhes de ambiente, dependências e troubleshooting.
+### Tema claro
+
+O jogo abre no tema escuro. Para usar o tema claro, defina a variável de ambiente `APP_THEME` antes de iniciar:
+
+```bash
+# Linux/macOS
+APP_THEME=light python main.py
+# Windows (PowerShell)
+$env:APP_THEME="light"; python main.py
+```
+
+### Executando os testes
+
+```bash
+pytest
+```
+
+**Dúvidas?** Consulte o [Guia de Contribuição](CONTRIBUTING.md) para detalhes de ambiente e de fluxo de trabalho.
 
 ---
 
@@ -200,7 +215,7 @@ Toda a documentação técnica vive em [`docs/`](docs/README.md), organizada por
 | Pergunta | Link |
 |----------|------|
 | **Como contribuo?** | [Guia de Contribuição](CONTRIBUTING.md) |
-| **Como o código é organizado?** | [Arquitetura da Camada View](docs/arquitetura/view.md), [Diagrama de Classes](docs/arquitetura/diagrama-classes.md) |
+| **Como o código é organizado?** | [Clean Architecture](docs/arquitetura/clean-architecture.md), [Arquitetura da Camada View](docs/arquitetura/view.md), [Diagrama de Classes](docs/arquitetura/diagrama-classes.md) |
 | **Como o jogo funciona?** | [Modelagem Matemática](docs/game-design/modelagem-matematica.md), [Level Design](docs/game-design/level-design.md) |
 | **Qual é o schema dos dados?** | [Estrutura JSON](docs/dados/estrutura-json.md) |
 | **Qual é o padrão de código?** | [Nomenclatura e PEP-8](docs/processo/nomenclatura-pep8.md) |
@@ -216,16 +231,16 @@ O projeto implementa **Arquitetura Limpa** (Clean Architecture, Robert C. Martin
 
 | Camada | Diretório | Responsabilidade | Dependências |
 |--------|-----------|------------------|--------------|
-| **Core (Domain)** | `core/model/`, `core/services/`, `core/dtos/` | Entidades, regras de negócio, algoritmos de cálculo (p.ex., equação de pontuação) | ✋ Nenhuma externa |
-| **Infrastructure** | `infrastructure/` | Implementação de repositórios, persistência em JSON, fábrica de cenários | Core apenas |
-| **Application** | `application/controllers/` | Orquestração de casos de uso, sequencialização de eventos, contrato `IGameView` | Core + Infrastructure |
-| **View** | `view/` | Interface com o utilizador (PySide6/Qt), widgets, estilos, sinalização | Application apenas (via contrato) |
-| **Config** | `config/` | Configuração centralizada (logging, caminhos, valores de ambiente) | Acessível a todas |
+| **Core (Domain)** | `core/model/`, `core/services/`, `core/dtos/`, `core/interfaces/` | Entidades, regras de negócio, algoritmos de cálculo (p.ex., equação de pontuação) | Nenhuma outra camada |
+| **Infrastructure** | `infrastructure/` | Repositórios de leitura de JSON e fábrica de relatórios | Core apenas |
+| **Application** | `application/controllers/`, `application/interfaces/` | Orquestração de casos de uso (`GameManager`, `GerenciadorDeTurno`) e contrato `IGameView` | Core + Infrastructure |
+| **View** | `view/` | Interface com o usuário (PySide6/Qt), widgets, estilos e sinais | Contrato da Application e DTOs do Core |
+| **Config** | `config/` | Constantes (caminho dos dados, cursos, tema padrão) e logging | Nenhuma |
 
 **Propriedades:**
 - **Alta coesão**: Cada camada tem uma única razão para mudar
-- **Baixo acoplamento**: Dependências fluem inward; camadas internas não conhecem externas
-- **Testabilidade**: Core pode ser testado sem Qt, infraestrutura sem UI
+- **Baixo acoplamento**: Dependências apontam para dentro; camadas internas não conhecem as externas
+- **Testabilidade**: Core e Application são testados sem Qt; a view é substituída por um mock do contrato
 - **Manutenibilidade**: Mudanças na UI não afetam cálculos de negócio
 
 **Leitura completa**: [Clean Architecture](docs/arquitetura/clean-architecture.md), [Diagrama de Classes](docs/arquitetura/diagrama-classes.md), [Padrões da View](docs/arquitetura/view.md)
@@ -280,10 +295,11 @@ O projeto está em **desenvolvimento ativo** e aceita contribuições!
 
 | Aspecto | Status |
 |---------|--------|
+| **Versão** | 🟢 1.0 |
 | **Desenvolvimento** | 🟢 Ativo — novas features e melhorias contínuas |
-| **Estabilidade** | 🟡 Beta — testado mas em refinamento |
-| **Testes** | 🟢 615+ testes automatizados passando |
-| **Documentação** | 🟢 Completa e atualizada |
+| **Conteúdo** | 🟡 12 cenários (Laboratório de Solos); cenários por curso em elaboração |
+| **Testes** | 🟢 615 testes automatizados (pytest e pytest-qt) |
+| **Documentação** | 🟢 Revisada na versão 1.0 |
 | **Licença** | 🟢 CC BY-NC-SA 4.0 |
 
 ---
@@ -305,7 +321,7 @@ A análise de risco é uma atividade cognitiva complexa que exige integração d
 
 - **Prática sem riscos**: Estudantes enfrentam cenários reais sem colocar-se em risco
 - **Feedback imediato**: Aprendem consequências de suas decisões instantaneamente
-- **Escala de dificuldade**: Possibilidade de progredir em complexidade conforme ganham expertise
+- **Escala de dificuldade**: Cenários classificados em cinco níveis, do introdutório ao especialista
 - **Acesso democrático**: Ferramenta aberta (CC BY-NC-SA), reutilizável por outros IFs e instituições de ensino profissional
 
 ### Referência

@@ -37,7 +37,7 @@ Agradecimentos especiais a:
 
 - **PySide6** — Interface gráfica (Qt for Python)
 - **Python 3.11+** — Linguagem de programação
-- **pytest** — Framework de testes
+- **pytest** e **pytest-qt** — Testes automatizados
 - **jsonschema** — Validação de dados
 
 ## Licença
