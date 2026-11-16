@@ -12,11 +12,13 @@ Se a resposta para **qualquer** uma destas 5 perguntas for negativa ou violar a 
 
 > O fluxo de dependência aponta *apenas* para dentro?
 
-**Avaliação:** Verifique os `imports`. A camada `core/` (model, services, dtos) **jamais** pode importar arquivos de `infrastructure/` (repository, factory, dtos), `application/` (controllers) ou `view/` (interface). As camadas externas podem enxergar o núcleo, mas o núcleo é cego para o mundo externo.
+**Avaliação:** Verifique os `imports`. A camada `core/` (model, services, dtos, interfaces) **jamais** pode importar arquivos de `infrastructure/` (repository, factory, dtos), `application/` (controllers, interfaces) ou `view/` (interface). As camadas externas podem enxergar o núcleo, mas o núcleo é cego para o mundo externo.
 
 **Referência no projeto:**
 - ✅ Correto: `infrastructure/factory/fabrica_de_relatorios.py` importa `core.model.relatorio`
+- ✅ Correto: `application/controllers/game_manager.py` depende do contrato `IGameView`, nunca de `view/`
 - ❌ Incorreto: `core/model/folha_de_inspecao.py` importa `unidecode` (biblioteca externa, violação tolerada mas não incentivada)
+- ❌ Incorreto: `view/expediente/tela.py` importa as classes concretas de `infrastructure/repository/` (violação tolerada; o correto é receber um `IPareceresCIPA` injetado)
 
 ### 2. Isolamento de I/O e Frameworks
 
@@ -36,6 +38,7 @@ Se a resposta para **qualquer** uma destas 5 perguntas for negativa ou violar a 
 
 **Referência no projeto:**
 - ✅ Correto: `Relatorio.extrair_apresentacao_relatorio()` retorna um `dict` seguro (sem gabarito) para a UI
+- ✅ Correto: o resultado da avaliação chega à View como `ResultadoDiagnosticoDTO` (congelado)
 - ✅ Correto: `RepositorioJSON` produz `DadosCenarioDTO` (infrastructure DTO), que é convertido por `FabricaDeRelatorios` em entidades de domínio
 - ❌ Incorreto: Passar `FolhaDeGabarito` diretamente para a View
 
@@ -46,8 +49,9 @@ Se a resposta para **qualquer** uma destas 5 perguntas for negativa ou violar a 
 **Avaliação:** Controladores e Serviços não devem instanciar diretamente classes de Banco de Dados ou IO no meio de seus métodos de negócio. Prefira receber essas instâncias prontas (Mocks em teste, Repositórios reais em produção) através dos construtores. Isso viabiliza testes unitários isolados.
 
 **Referência no projeto:**
-- ⚠️ `GerenciadorDeTurno.__init__()` instancia `MotorDePontuacao()` e `DiagnosticoDeResposta()` internamente, para testes, use `unittest.mock.patch`
-- ✅ Ideal futuro: Receber `MotorDePontuacao` e `RepositorioJSON` como parâmetros do construtor
+- ✅ Correto: `GameManager.__init__(view: IGameView)` recebe a view por injeção; nos testes, a view é um mock
+- ✅ Correto: `GameWin` e `GameOver` recebem um `IPareceresCIPA` no construtor
+- ⚠️ `GerenciadorDeTurno` instancia `MotorDePontuacao`, `DiagnosticoDeResposta` e `RepositorioJSON` internamente; nos testes, use `unittest.mock.patch`. O recomendado para código novo é receber essas dependências pelo construtor
 
 ### 5. Responsabilidade Única (SRP)
 
@@ -79,8 +83,8 @@ Estas perguntas avaliam o quão limpa e segura é a implementação interna do c
 > A classe faz validação de entrada e levanta erros específicos com tags no lugar de prints ou crashes silenciosos?
 
 **Referência:**
-- ✅ Correto: `raise ValueError("[Erro - Turno] Nenhum relatório foi obtido da pilha")`
-- ✅ Correto: `raise FileNotFoundError(f"[Erro - Caminho Json] O diretório {path} não foi encontrado.")`
+- ✅ Correto: `raise RuntimeError("[Erro - Turno] Nenhum relatório foi obtido da pilha")`
+- ✅ Correto: `raise ValueError("[Erro] envolvidos não pode ser vazio")` (entidades usam a tag simples `[Erro]`)
 - ❌ Incorreto: `print("Deu erro")` ou `raise Exception("erro")` sem contexto
 
 ### Testabilidade
@@ -141,7 +145,7 @@ Estas perguntas avaliam o quão limpa e segura é a implementação interna do c
 [ ] 4. Injeção: Dependências pesadas são injetadas, não instanciadas?
 [ ] 5. SRP: Cada classe tem um único motivo para mudar?
 [ ] 6. Encapsulamento: Atributos privados com __ e @property?
-[ ] 7. Exceções: Erros com tags [Erro - NomeDaClasse]?
+[ ] 7. Exceções: Mensagens de erro com tag ([Erro] ou [Erro - Contexto])?
 [ ] 8. Testabilidade: Testável sem JSON/UI reais?
 [ ] 9. Ubiquidade: Nomes seguem o vocabulário do domínio?
 [ ] 10. Documentação: Type Hints + Docstrings em todo método público?
@@ -153,17 +157,18 @@ Estas perguntas avaliam o quão limpa e segura é a implementação interna do c
 
 ```
 view/  ──>  application/  ──>  core/  <──  infrastructure/
-                │                              │
-                └───────── config/ ────────────┘
+                │                              ▲
+                └──────────────────────────────┘
+        config/ é consumida por application/ e por main.py
 ```
 
 | Camada | Diretório | Pode importar |
 |--------|-----------|---------------|
-| **Domain** | `core/model/`, `core/services/`, `core/dtos/` | Apenas stdlib |
+| **Domain** | `core/model/`, `core/services/`, `core/dtos/`, `core/interfaces/` | Apenas stdlib |
 | **Infrastructure** | `infrastructure/` | `core/`, stdlib, libs externas |
-| **Application** | `application/controllers/` | `core/`, `infrastructure/`, `config/` |
+| **Application** | `application/controllers/`, `application/interfaces/` | `core/`, `infrastructure/`, `config/` |
 | **Config** | `config/` | Apenas stdlib |
-| **View** | `view/` | `application/` |
+| **View** | `view/` | `application/interfaces/`, DTOs e portas de `core/` |
 
 ---
 **Documento mantido pela equipe de engenharia do Inspetor IFF-BJI.**

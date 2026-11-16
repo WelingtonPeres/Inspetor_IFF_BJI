@@ -2,7 +2,7 @@
 
 ## 1. Visão Geral
 
-O projeto **Inspetor IFF-BJI** adota os princípios da **Arquitetura Limpa (Clean Architecture)** para garantir separação rigorosa de responsabilidades, testabilidade e manutenibilidade do código. Este documento descreve a organização real das camadas, suas responsabilidades e as regras de dependência entre elas, conforme implementadas no código-fonte.
+O projeto **Inspetor IFF-BJI** adota os princípios da **Arquitetura Limpa (Clean Architecture)** para garantir separação de responsabilidades, testabilidade e manutenibilidade do código. Este documento descreve a organização das camadas, suas responsabilidades e as regras de dependência entre elas, conforme implementadas no código-fonte.
 
 ---
 
@@ -10,11 +10,12 @@ O projeto **Inspetor IFF-BJI** adota os princípios da **Arquitetura Limpa (Clea
 
 | Camada | Diretório | Responsabilidade | Pode importar |
 |--------|-----------|------------------|---------------|
-| **Domain (Core)** | `core/model/`, `core/services/`, `core/dtos/` | Regras de negócio e entidades | Apenas stdlib e a si mesma |
-| **Infrastructure** | `infrastructure/` | Persistência, leitura de arquivos, DTOs de transporte | `core/`, stdlib, bibliotecas externas |
-| **Application** | `application/controllers/` | Orquestração dos casos de uso | `core/`, `infrastructure/`, `config/` |
-| **Config** | `config/` | Configuração centralizada | Apenas stdlib |
-| **View** | `view/` | Interface com o usuário (PySide6, planejada) | `application/` |
+| **Domain (Core)** | `core/model/`, `core/services/`, `core/dtos/`, `core/interfaces/` | Entidades, regras de negócio, cálculo de pontuação e portas do domínio | stdlib e a si mesma |
+| **Infrastructure** | `infrastructure/` | Leitura de arquivos JSON, DTOs de transporte, fábrica de entidades | `core/`, stdlib, bibliotecas externas |
+| **Application** | `application/controllers/`, `application/interfaces/` | Orquestração dos casos de uso e contrato da interface (`IGameView`) | `core/`, `infrastructure/`, `config/` |
+| **View** | `view/` | Interface com o usuário (PySide6) | `application/interfaces/`, DTOs e portas de `core/` |
+| **Config** | `config/` | Constantes e configuração de logging | stdlib |
+| **Composição** | `main.py` | Cria a view e o `GameManager`, conecta os sinais e inicia o Qt | Todas |
 
 ### Regra de Dependência (Direção Única)
 
@@ -22,11 +23,12 @@ As dependências apontam **sempre para dentro**:
 
 ```
 view/  ──>  application/  ──>  core/  <──  infrastructure/
-                │                              │
-                └───────── config/ ────────────┘
+                │                              ▲
+                └──────────────────────────────┘
+        config/ é consumida por application/ e por main.py
 ```
 
-Nenhuma camada interna (`core/`) pode conhecer ou importar uma camada externa (`infrastructure/`, `application/`, `view/`).
+Nenhum módulo de `core/` importa `infrastructure/`, `application/` ou `view/`. Os pontos em que o código se afasta desta regra estão registrados na [seção 10](#10-desvios-conhecidos).
 
 ---
 
@@ -34,7 +36,7 @@ Nenhuma camada interna (`core/`) pode conhecer ou importar uma camada externa (`
 
 ### 3.1. Entidades (`core/model/`)
 
-Contém as classes que representam os conceitos centrais do negócio, sem qualquer dependência externa ou de infraestrutura.
+Classes que representam os conceitos centrais do jogo.
 
 | Arquivo | Classe | Tipo |
 |---------|--------|------|
@@ -58,202 +60,182 @@ FolhaDeInspecao (ABC)
  └── FolhaDeResposta
 ```
 
+**Invariantes validadas nos construtores:**
+
+| Entidade | Regras |
+|----------|--------|
+| `Anexo` | `id_anexo` não negativo; `caminho_arquivo` não vazio |
+| `FolhaDeInspecao` | Normaliza riscos e fatores (sem acentos, maiúsculas) e rejeita valores fora de `LISTA_RISCOS_VALIDOS` e `FATORES_INSEGURANCA_VALIDOS` |
+| `FolhaDeGabarito` | Decisões dentro de `INTERDITAR`, `ADVERTIR`, `IGNORAR`; `decisao_otima` diferente de `decisao_boa` |
+| `FolhaDeResposta` | Decisão válida; `tempo_gasto_segundos` não negativo |
+| `Relatorio` | `id_cenario` ≥ 1; `titulo`, `envolvidos` e `cursos` não vazios; `dificuldade` entre 1 e 5 |
+
 ### 3.1.1. Tratamento de Exceções nas Entidades
 
-As entidades de domínio são agnósticas não sabem se o dado veio de um clique do mouse na UI ou de um arquivo no disco. O papel delas **não é** tratar erros de sistema (arquivo não encontrado, conexão perdida), mas sim **garantir Invariantes de Negócio**. O tratamento de exceções nas entidades segue quatro princípios fundamentais:
+As entidades de domínio são agnósticas: não sabem se o dado veio de um clique na interface ou de um arquivo no disco. O papel delas **não é** tratar erros de sistema (arquivo não encontrado, JSON inválido), mas **garantir invariantes de negócio**. Quatro princípios orientam esse tratamento.
 
 #### Princípio 1: Estado Sempre Válido (Fail Fast)
 
-Uma entidade nunca deve existir em um estado inválido na memória. O construtor (`__init__`) atua como o guardião implacável, se tentarem instanciar um `Relatorio` com `dificuldade = 6`, a classe deve levantar um erro **instantaneamente** no construtor.
-
-
+Uma entidade nunca existe em estado inválido na memória. O construtor (`__init__`) é o guardião: instanciar um `Relatorio` com `dificuldade = 6` levanta erro imediatamente.
 
 #### Princípio 2: Validação de Regra de Negócio vs. Validação de Formato
 
-A entidade valida **Semântica (Negócio)**, não **Sintaxe (Formato)**.
+A entidade valida **semântica (negócio)**, não **sintaxe (formato)**.
 
-**O que a entidade DEVE validar:**
-- "A dificuldade deve ser entre 1 e 5": regra do jogo.
-- "A decisão tomada deve ser `INTERDITAR`, `ADVERTIR` ou `IGNORAR`": regra do jogo.
-- "Riscos inválidos não podem ser registrados": regra do jogo.
+**O que a entidade valida:**
+- "A dificuldade deve ser entre 1 e 5".
+- "A decisão deve ser `INTERDITAR`, `ADVERTIR` ou `IGNORAR`".
+- "Riscos fora da lista válida não podem ser registrados".
 
-**O que a entidade NÃO deve validar:**
-- Não deve fazer *cast* de tipos (`int(dificuldade)`). tipo correto.
-- Não deve verificar formato de data, expressões regulares ou parsing de strings. 
-
-
+**O que a entidade não valida:**
+- Conversão de tipos (`int(dificuldade)`): o dado já chega no tipo correto.
+- Formato de data, expressões regulares ou parsing de strings.
 
 #### Princípio 3: Exceções Agnósticas e Puras
 
-Uma entidade jamais deve lançar `JsonDecodeError`, `FileNotFoundError`, `Http404NotFound` ou qualquer exceção específica de infraestrutura ou interface.
+Uma entidade nunca lança `JSONDecodeError`, `FileNotFoundError` ou qualquer exceção específica de infraestrutura ou interface. Usa-se `ValueError` para valores de negócio inválidos.
 
-**Use exceções nativas do Python puras:**
-- `ValueError`: para valores de negócio inválidos (a escolha primária do projeto).
-- `TypeError`: para tipos inaceitáveis (raro, já que Type Hints previnem a maioria).
-
-**Padrão do projeto (Tags):** Como estabelecido nas convenções do projeto, use **tags** nas mensagens para rastreamento:
+**Padrão do projeto (tags):** toda mensagem de erro começa com uma tag entre colchetes. As entidades usam a tag simples `[Erro]`; serviços, controladores e repositórios acrescentam o contexto (`[Erro - Turno]`, `[Erro - GameManager]`, `[Erro - Json]`, `[Erro - ParecerCIPA]`).
 
 ```python
-raise ValueError("[Erro - Relatorio] A lista de envolvidos não pode estar vazia.")
-raise ValueError("[Erro - Anexo] id_anexo não pode ser negativo: -3")
+raise ValueError("[Erro] envolvidos não pode ser vazio")                       # core/model/relatorio.py
+raise ValueError(f"[Erro] id_anexo não pode ser negativo: {id_anexo}")         # core/model/anexo.py
+raise RuntimeError("[Erro - Turno] Relatório anterior ainda não foi avaliado")  # application/
 ```
 
-A tag `[Erro - NomeDaClasse]` permite identificar rapidamente em qual entidade o erro ocorreu, sem precisar de exceções personalizadas ou hierarquias complexas.
+#### Princípio 4: Proteção contra Mutabilidade
 
-#### Princípio 4: Proteção contra Mutabilidade (Setters Fechados)
-
-Se o construtor blindou a criação, você não pode deixar que as propriedades sejam alteradas depois de forma descontrolada.
+Os atributos das entidades são privados (`__atributo`) e expostos apenas por `@property` de leitura. As únicas mutações permitidas passam por métodos explícitos: `Relatorio.adicionar_anexo()` e `Relatorio.anexar_resposta_jogador()`.
 
 ### 3.2. Serviços de Domínio (`core/services/`)
 
-Serviços stateless que operam sobre as entidades de domínio.
-
 | Arquivo | Classe | Função |
 |---------|--------|--------|
-| `core/services/motor_de_pontuacao.py` | `MotorDePontuacao` | Motor matemático de pontuação (Vmax, riscos, fatores, decisão, tempo) |
-| `core/services/diagnostico_de_resposta.py` | `DiagnosticoDeResposta` | Confronta gabarito × resposta do jogador |
-| `core/services/diagnostico_feedback.py` | `DiagnosticoFeedback` | *Stub*, feedback textual futuro (código comentado) |
+| `core/services/motor_de_pontuacao.py` | `MotorDePontuacao` | Motor matemático: Vmax, notas de riscos, fatores e decisão, fator tempo, scores por item e condição de vitória |
+| `core/services/diagnostico_de_resposta.py` | `DiagnosticoDeResposta` | Confronta gabarito × resposta do jogador e produz os DTOs de pontuação e de feedback |
 
-### 3.2.1. Serviços de Domínio
+As fórmulas implementadas estão em [Modelagem matemática](../game-design/modelagem-matematica.md).
 
-Os serviços de domínio são o **cálculo puro, apátrida e determinístico**. Eles implementam a lógica que não pertence a nenhuma entidade isoladamente. 
+### 3.2.1. Filosofia dos Serviços de Domínio
 
-#### Princípio 1: Cálculo Apátrida (Stateless)
+Os serviços de domínio são **cálculo puro, sem estado e determinístico**. Implementam a lógica que não pertence a nenhuma entidade isoladamente.
 
-Um serviço de domínio **não guarda estado** entre chamadas. Métodos recebem dados, processam e devolvem um resultado, sem efeitos colaterais nem atributos mutáveis.
+#### Princípio 1: Cálculo sem Estado (Stateless)
 
-**Referência:** `MotorDePontuacao.calcular_pontuacao_relatorio(v_max, dados_pontuacao)` recebe os operandos e retorna `float`. Quem persiste a pontuação acumulada é o `GerenciadorDeTurno` (camada de aplicação), não o motor.
+Um serviço de domínio não guarda estado entre chamadas. `MotorDePontuacao.calcular_pontuacao_relatorio(v_max, dados_pontuacao)` recebe os operandos e retorna `float`. Quem acumula a pontuação do turno é o `GerenciadorDeTurno` (camada de aplicação), não o motor.
 
+#### Princípio 2: Determinismo
 
-#### Princípio 2: Determinismo Absoluto
+Dado o mesmo input, o serviço **sempre** devolve o mesmo output.
 
-Dado o mesmo input A, o serviço **sempre** devolve o mesmo output B. O simulador rejeita aleatoriedade, os serviços são funções puras.
+- `random` não é usado em `core/services/`.
+- Leitura de relógio (`datetime.now()`) não é usada: o tempo gasto pelo jogador chega como argumento (`tempo_resposta_segundos`).
+- Componentes não determinísticos (sorteio de cenários, sorteio de pareceres) vivem na camada de infraestrutura.
 
-- `random()` é proibido dentro de `core/services/`.
-- Leitura de relógio (`datetime.now()`) é proibida, o tempo gasto pelo jogador é recebido como argumento (`tempo_segundos: float`) para o cálculo do fator tempo.
-- Qualquer componente não-determinístico deve viver na camada de Infraestrutura.
+#### Princípio 3: Orquestração entre Entidades
 
-#### Princípio 3: Orquestração entre Entidades 
+O serviço é o local das lógicas que fariam uma entidade violar a responsabilidade única. `FolhaDeGabarito` sabe as respostas certas; `FolhaDeResposta` sabe o que o jogador marcou; nenhuma tem um método `comparar_com()`. O `DiagnosticoDeResposta` recebe ambas e produz o diagnóstico.
 
-O serviço é o local correto para lógicas que fariam uma entidade violar sua Responsabilidade Única.
+#### Princípio 4: Cegueira de Infraestrutura
 
-**Exemplo:** `FolhaDeGabarito` sabe as respostas certas. `FolhaDeResposta` sabe o que o jogador marcou. Nenhuma das duas deve ter um método `comparar_com()`. O `DiagnosticoDeResposta` é o serviço que recebe ambas, confronta os dados e produz o diagnóstico, mantendo as entidades limpas e cada uma com seu propósito único.
-
-#### Princípio 4: Cegueira Total de Infraestrutura
-
-Assim como as entidades, os serviços em `core/services/` não podem:
-- Ler ou escrever arquivos (JSON, TXT, etc.)
-- Fazer requisições web
-- Usar `print()` para depuração (o `logging` é a única ponte permitida)
-- Importar qualquer coisa de `infrastructure/` ou `view/`
+Os serviços em `core/services/` não leem nem escrevem arquivos, não fazem requisições, não usam `print()` (o `logging` é a única ponte permitida) e não importam nada de `infrastructure/` ou `view/`.
 
 #### Princípio 5: Comunicação via DTOs Congelados
 
-Serviços geram relatórios complexos de seus cálculos. Em vez de dicionários soltos (sujeitos a chaves digitadas errado), devem retornar DTOs congelados (`frozen=True` dataclasses).
+Em vez de dicionários soltos, os serviços retornam DTOs congelados:
 
-**Referência:** `DiagnosticoDeResposta.gerar_diagnostico_pontuacao()` retorna `DiagnosticoPontuacaoDTO`, congelado, com type hints precisos, impossível de ser adulterado após a criação. O controlador recebe os dados já mastigados e seguros.
+- `DiagnosticoDeResposta.gerar_diagnostico_pontuacao()` → `DiagnosticoPontuacaoDTO` (operandos).
+- `DiagnosticoDeResposta.gerar_feedback()` → `DiagnosticoFeedbackDTO` (itens acertados, esquecidos e inventados).
+- `MotorDePontuacao.calcular_pontuacao_detalhada()` → `DiagnosticoPontuacaoDTO` completo, com subtotais e nota final.
 
 ### 3.3. DTOs de Domínio (`core/dtos/`)
 
-Dataclasses congeladas (`frozen=True`) para transporte de operandos matemáticos entre serviços.
+Dataclasses congeladas (`frozen=True`).
 
-| Arquivo | DTO | Campos |
-|---------|-----|--------|
-| `core/dtos/diagnostico_pontuacao.py` | `DiagnosticoPontuacaoDTO` | `qnt_riscos_marcados`, `qnt_riscos_gabarito`, `qnt_riscos_corretos_marcados`, `estado_ato`, `estado_condicao`, `status_decisao_jogador`, `tempo_resposta_segundos` |
+| Arquivo | DTO | Conteúdo |
+|---------|-----|----------|
+| `core/dtos/diagnostico_pontuacao.py` | `DiagnosticoPontuacaoDTO` | Operandos: `qnt_riscos_marcados`, `qnt_riscos_gabarito`, `qnt_riscos_corretos_marcados`, `estado_ato`, `estado_condicao`, `status_decisao_jogador`, `tempo_resposta_segundos`, `qnt_fatores_gabarito`, `qnt_fatores_marcados`. Resultados: `pontuacao_final`, `nota_riscos`, `nota_fatores`, `nota_decisao`, `pontos_bonus_tempo`, `decisao_anulada` |
+| `core/dtos/diagnostico_feedback.py` | `DiagnosticoFeedbackDTO` | `riscos_acertados`, `riscos_esquecidos`, `riscos_inventados`, `fatores_acertados`, `fatores_esquecidos`, `fatores_inventados`, `decisao_tomada`, `decisao_esperada`, `score_por_risco`, `score_por_fator` |
+| `core/dtos/resultado_diagnostico.py` | `ResultadoDiagnosticoDTO` | Agrupa `pontuacao` (`DiagnosticoPontuacaoDTO`) e `feedback` (`DiagnosticoFeedbackDTO`); é o objeto entregue à view |
+| `core/dtos/parecer_cipa.py` | `ParecerCIPA` | `numero` (formato `NNN/AAAA`), `referencia`, `texto` |
 
-### 3.3.1. DTOs de Domínio
-
-Os DTOs de domínio são os **mensageiros blindados**. Sua filosofia resume-se a: Imutabilidade, Tipagem Forte e Zero Comportamento.
+### 3.3.1. Filosofia dos DTOs de Domínio
 
 #### Princípio 1: Imutabilidade
 
-Um DTO de domínio nunca deve ser alterado depois de criado. Em Python, implementa-se com `@dataclass(frozen=True)`.
+Um DTO de domínio não é alterado depois de criado (`@dataclass(frozen=True)`). Tentar `dto.qnt_riscos_marcados = 0` levanta `FrozenInstanceError`. Quando um DTO precisa ser enriquecido, cria-se uma nova instância: é o que o `GerenciadorDeTurno` faz ao preencher `score_por_risco` e `score_por_fator` no feedback.
 
-**Referência:** `DiagnosticoPontuacaoDTO` em `core/dtos/diagnostico_pontuacao.py` é `frozen=True`. Se um programador tentar `dto.qnt_riscos_marcados = 0` dentro do `MotorDePontuacao`, o Python levanta `FrozenInstanceError` imediatamente, protegendo a integridade dos dados originais gerados pelo `DiagnosticoDeResposta`.
+#### Princípio 2: Sem Lógica de Negócio
 
-#### Princípio 2: Zero Lógica de Negócio 
+Um DTO contém apenas atributos. A exceção é o `ParecerCIPA`, um *value object* que valida o próprio formato em `__post_init__` (texto e referência não vazios, número no padrão `NNN/AAAA`).
 
-Para entidades, um "Modelo Anémico" é um anti-padrão. Para DTOs, a anemia é o objetivo.
+#### Princípio 3: Contrato entre Serviços
 
-Um DTO de domínio contém **apenas atributos**. Nenhum método como `calcular_media()`, `validar_regra()` ou `salvar_no_banco()`. A única exceção são utilitários simples como `__str__` ou `to_dict()` para depuração.
+DTOs evitam métodos com muitos parâmetros avulsos ou dependentes de `dict` genéricos. Sempre que um serviço passa dados complexos a outro ou devolve resultados ao controlador, usa-se um DTO.
 
-#### Princípio 3: O Contrato Inquebrável entre Serviços
+#### Princípio 4: Cegueira do Mundo Externo
 
-DTOs existem para evitar que métodos recebam 15 parâmetros avulsos ou dependam de `dict` genéricos. Sempre que um serviço precisar passar dados complexos para outro ou devolver resultados mastigados ao controlador, usa-se um DTO.
+DTOs de domínio são Python puro: sem anotações de serialização nem mapeamento de banco de dados. Dados brutos de arquivo trafegam em `infrastructure/dtos/`.
 
-#### Princípio 4: Cegueira Total do Mundo Externo
+### 3.4. Portas do Domínio (`core/interfaces/`)
 
-Assim como tudo em `core/`, os DTOs de domínio não conhecem o mundo real:
-- Nunca conter anotações de serialização web (Pydantic, Marshmallow).
-- Nunca conter mapeamento de banco de dados (SQLAlchemy).
-- Devem ser Python puro.
+| Arquivo | Interface | Função |
+|---------|-----------|--------|
+| `core/interfaces/i_pareceres_cipa.py` | `IPareceresCIPA` | Contrato `obter_parecer_para_curso(curso) -> ParecerCIPA`, implementado na infraestrutura e consumido pelas telas de fim de jogo |
 
-Se for preciso transportar dados de/para a infraestrutura, usa-se `infrastructure/dtos/`.
-
-### 3.4. Violação Conhecida
-
-**`core/model/folha_de_inspecao.py`** importa a biblioteca externa `unidecode` para normalização de acentos. Segundo a Arquitetura Limpa pura, a camada `core/` não deveria ter dependências externas. Esta violação é tolerada no projeto atual por se tratar de uma biblioteca de utilidade genérica (transformação de strings), sem acoplamento, banco de dados ou interface. Caso a regra seja aplicada rigidamente no futuro, a normalização deverá ser movida para a camada de infraestrutura ou implementada com stdlib.
+A porta aplica a Inversão de Dependência: o domínio define o contrato e a infraestrutura fornece a implementação.
 
 ---
 
 ## 4. Camada de Infraestrutura (`infrastructure/`)
 
-Responsável por lidar com o mundo externo: Sistema de arquivos, serialização JSON e construção de objetos de domínio a partir de dados persistidos.
+Lida com o mundo externo: sistema de arquivos, serialização JSON e construção de objetos de domínio a partir de dados persistidos.
 
 ### 4.1. DTOs de Infraestrutura (`infrastructure/dtos/`)
 
-Dataclasses mutáveis que transportam dados brutos do arquivo JSON para a fábrica.
+Dataclasses mutáveis que transportam os dados brutos do JSON até a fábrica.
 
 | Arquivo | DTO | Campos |
 |---------|-----|--------|
 | `infrastructure/dtos/dados_cenario.py` | `DadosAnexoDTO` | `id_anexo`, `tipo`, `caminho_arquivo` |
 | `infrastructure/dtos/dados_cenario.py` | `DadosCenarioDTO` | `id_cenario`, `titulo`, `dificuldade`, `atividade`, `local`, `texto_descricao`, `envolvidos`, `curso`, `riscos`, `fatores_inseguranca`, `decisao_otima`, `decisao_boa`, `anexos` |
 
-### 4.2. Repositório (`infrastructure/repository/`)
+### 4.2. Repositórios (`infrastructure/repository/`)
 
 | Arquivo | Classe | Função |
 |---------|--------|--------|
-| `infrastructure/repository/repositorio_json.py` | `RepositorioJSON` | Lê, valida (schema JSON) e filtra arquivos `.json` do diretório base, retornando DTOs |
+| `repositorio_json.py` | `RepositorioJSON` | Lê os arquivos `.json` de `resources/data/`, valida contra `JSON_SCHEMA`, filtra por curso, sorteia e devolve `DadosCenarioDTO` |
+| `repositorio_pareceres_cipa.py` | `RepositorioDePareceresCIPA` | Implementa `IPareceresCIPA`: carrega `view/assets/textos/pareceres_gameover.json` e devolve um parecer aleatório por curso, com fallback para `DEFAULT` |
+| `repositorio_pareceres_cipavitoria.py` | `RepositorioDePareceresCIPAVitoria` | Subclasse do anterior que carrega `pareceres_gamewin.json` |
 
-Dependência externa: `jsonschema` (validação de schemas).
+Dependência externa: `jsonschema` (validação de schemas). O formato dos cenários está em [Estrutura JSON](../dados/estrutura-json.md).
 
 ### 4.2.1. Filosofia do Repositório
 
-É a fronteira entre o mundo dos dados adormecidos no arquivo e o mundo das regras vivas da aplicação. 
+#### Princípio 1: Fronteira dos Dados Persistidos
 
-#### Princípio 1: A Fronteira Exclusiva de Dados Persistidos 
+O repositório não sabe que existe um jogador. Ele valida **a estrutura do arquivo externo** com `jsonschema`: se a chave `"titulo"` existe, se `"dificuldade"` é um inteiro entre 1 e 5, se os valores enumerados são válidos. A entidade barra regras de negócio; o repositório barra arquivos malformados.
 
-O repositório não sabe que existe um jogador. Seu único trabalho é garantir que os dados "adormecidos" no disco acordem no formato correto para a aplicação usar.
+#### Princípio 2: Tratamento de I/O
 
-Ele valida **exclusivamente a estrutura do arquivo externo** (usando `jsonschema`): verifica se a chave `"titulo"` existe no JSON, se `"dificuldade"` veio preenchida como número em vez de texto.
+Erros físicos e de formato são tratados exclusivamente aqui, de duas formas:
 
-**A diferença crucial:** A entidade barra o jogador de tentar inventar uma `dificuldade = 6` na hora de jogar. O repositório barra o arquivo JSON de tentar injetar uma string `"difícil"` onde deveria estar um número.
+- **`RepositorioJSON` falha rápido.** Diretório inexistente ou sem arquivos `.json` levanta `FileNotFoundError`/`NotADirectoryError` no construtor. Um arquivo com sintaxe inválida, vazio ou fora do schema interrompe `extrair_dados()` com `ValueError`, `KeyError` ou `TypeError`, conforme o tipo de violação. O `GameManager` captura a falha, exibe o erro e volta ao menu.
+- **`RepositorioDePareceresCIPA` é tolerante.** Arquivo ausente ou inválido gera um aviso no log e um repositório vazio; a falta de parecer só aparece como `ParecerCIPAIndisponivelError` quando nem o curso nem o `DEFAULT` têm textos.
 
+#### Princípio 3: Sem Regras de Negócio
 
+O repositório sabe extrair a informação, mas não calcula notas nem avalia respostas. A lógica permitida é de consulta: filtrar cenários por curso, embaralhar a lista (`random.shuffle`) e limitar a quantidade a `QUANTIDADE_GERACAO`.
 
-#### Princípio 2: Tratamento Resiliente de I/O Físico
+**Regra de filtro por curso:** um cenário é incluído quando o curso selecionado está na lista `curso` do cenário, ou quando o curso selecionado é `DEFAULT` (que recebe todos os cenários).
 
-O repositório lida com erros **físicos e lógicos da máquina**: Arquivo não encontrado, JSON mal formatado, perda de conexão. Blocos `try/except` para `FileNotFoundError`, `json.JSONDecodeError` e `ValidationError` vivem exclusivamente aqui.
+#### Princípio 4: Conversão para DTOs de Infraestrutura
 
-**Como falhar:** Se `cenario_10.json` estiver corrompido, o repositório isola a falha, registra no log (`logger.error(...)`) e continua carregando os dados saudáveis. Um arquivo quebrado nunca deve fazer o jogo inteiro fechar.
-
-#### Princípio 3: Anemia de Regras de Negócio 
-
-O repositório sabe como extrair a informação, mas é cego para as regras do jogo. Nunca deve calcular a nota de um relatório, nem verificar se a resposta de um JSON faz sentido no contexto do jogo.
-
-**A única lógica permitida:** Lógica de Consulta (Query). Filtrar todos os arquivos cujo campo `curso` seja igual a `T_MEIO_AMBIENTE` é o máximo de inteligência que esta classe deve ter.
-
-#### Princípio 4: A Conversão para DTOs de Infraestrutura (O Molde)
-
-O repositório não deve deixar vazar dicionários puros do Python (`dict` do `json.load`) para o resto do sistema, pois a aplicação não tem como adivinhar o que está dentro deles.
-
-Ele pega o JSON validado e preenche um **DTO mutável de Infraestrutura**, como o `DadosCenarioDTO`. Esse DTO serve como um molde padronizado, a partir do momento em que o dado sai do repositório em formato de DTO, a próxima camada (a Fábrica) sabe exatamente com quais atributos pode trabalhar, beneficiando do auto-complete da IDE e dos type hints.
+O repositório não deixa vazar `dict` do `json.load` para o resto do sistema. Ele preenche `DadosCenarioDTO`, e a partir daí a fábrica trabalha com atributos tipados.
 
 #### Princípio 5: Isolamento de Tecnologia
 
-Para a camada de Aplicação (`GerenciadorDeTurno`), o repositório é uma ilusão. O controlador chama `extrair_dados()` e recebe DTOs prontos. Toda a complexidade de importar `json`, usar `pathlib` para achar pastas e abrir arquivos fica trancada na Infraestrutura.
-
-Se amanhã você decidir trocar os JSONs por um banco SQLite ou dados na nuvem, você altera apenas o repositório. O resto do jogo continua funcionando sem notar a diferença.
+Para a camada de aplicação, o repositório é uma caixa-preta: o `GerenciadorDeTurno` chama `extrair_dados()` e recebe DTOs prontos. Trocar JSON por SQLite ou por uma API exigiria alterar apenas o repositório.
 
 ### 4.3. Fábrica (`infrastructure/factory/`)
 
@@ -263,156 +245,146 @@ Se amanhã você decidir trocar os JSONs por um banco SQLite ou dados na nuvem, 
 
 ### 4.3.1. Filosofia da Fábrica
 
-A fábrica é a **linha de montagem e camada anticorrupção** (Anti-Corruption Layer). É o único lugar do sistema autorizado a conhecer os dois mundos em simultâneo, a Infraestrutura (DTOs) e o Domínio .
+A fábrica é a **camada anticorrupção**: o único lugar autorizado a conhecer ao mesmo tempo os DTOs de infraestrutura e as entidades de domínio.
 
-#### Princípio 1: A Ponte entre Dois Mundos 
+#### Princípio 1: Ponte entre Dois Mundos
 
-A fábrica é a fronteira oficial onde a infraestrutura morre e o domínio nasce. Recebe `DadosCenarioDTO` (do repositório) e devolve entidades `Relatorio` (do `core/model/`).
+Recebe `DadosCenarioDTO` e devolve `Relatorio`. Isso impede que o `GerenciadorDeTurno` precise saber como desempacotar um DTO.
 
-Isto impede que o `GerenciadorDeTurno` (aplicação) precise saber como desempacotar um DTO. 
+#### Princípio 2: Encapsulamento da Instanciação
 
-#### Princípio 2: Encapsulamento da Complexidade de Instanciação
+Para criar um `Relatorio`, a fábrica instancia a `FolhaDeGabarito`, depois o `Relatorio`, depois cada anexo conforme o tipo (`AnexoImagem`, `AnexoVideo` ou `AnexoAudio`) e os adiciona ao relatório.
 
-Criar um objeto rico do domínio raramente é um simples `Objeto()`. A fábrica assume o trabalho pesado, para criar um `Relatorio`, ela primeiro instancia a `FolhaDeGabarito`, depois verifica o tipo de cada anexo no DTO (`AnexoImagem`, `AnexoVideo` ou `AnexoAudio`), cria o anexo, instancia o `Relatorio` e pendura o anexo lá dentro.
+#### Princípio 3: Camada Anticorrupção
 
+A fábrica não faz validação de negócio; apenas tenta construir as entidades. Se uma entidade rejeitar o dado com `ValueError`, a fábrica registra o erro no log e **descarta aquele cenário**, seguindo com os demais. Anexos de tipo desconhecido são ignorados com aviso.
 
+#### Princípio 4: Sem Comportamento de Jogo
 
-#### Princípio 3: A Camada Anticorrupção 
-
-A fábrica confia que o repositório validou a sintaxe (ex.: dificuldade é um número), mas é durante a montagem na fábrica que as regras de negócio das entidades são postas à prova.
-
-A fábrica **não** deve fazer validações de negócio. As entidades já fazem isso nos seus próprios construtores. A fábrica simplesmente tenta construir a entidade. Se o JSON tiver um risco que não existe nas regras do jogo, quando a fábrica tentar criar a `FolhaDeGabarito`, a própria entidade vai lançar o `ValueError`. 
-
-
-#### Princípio 4: Zero Comportamento de Jogo 
-
-A fábrica só sabe criar as peças do tabuleiro, ela não sabe jogar. Não deve ordenar os relatórios por dificuldade, não deve embaralhar a lista (a menos que seja um requisito estrito de criação) e definitivamente não deve calcular o `v_max` das entidades que acabou de criar. Ela constrói as entidades e sai de cena.
+A fábrica não ordena relatórios, não embaralha a lista e não calcula `v_max`. Ela constrói as entidades e sai de cena.
 
 ---
 
-## 5. Camada de Aplicação (`application/controllers/`)
+## 5. Camada de Aplicação (`application/`)
 
-Orquestra os casos de uso do jogo, conectando a infraestrutura ao domínio.
+Orquestra os casos de uso do jogo, conectando a infraestrutura ao domínio e comandando a view por meio de um contrato.
 
 | Arquivo | Classe | Função |
 |---------|--------|--------|
-| `application/controllers/gerenciador_de_turno.py` | `GerenciadorDeTurno` | Gerencia o ciclo de vida de um turno (expediente): iniciar, obter relatórios, avaliar respostas, verificar vitória |
-| `application/controllers/game_manager.py` | `GameManager` | *Stub*, gerenciamento geral do jogo (futuro) |
+| `application/controllers/game_manager.py` | `GameManager` | Presenter do jogo: máquina de estados (menu, expediente, resultado), campanha, criação do `GerenciadorDeTurno` e ponte com a view |
+| `application/controllers/gerenciador_de_turno.py` | `GerenciadorDeTurno` | Ciclo de vida de um turno (expediente): carregar relatórios, entregar um por vez, avaliar respostas, verificar vitória |
+| `application/interfaces/i_game_view.py` | `IGameView`, `MotivoTutorial` | Contrato que a view implementa e enum do motivo de abertura do tutorial |
 
-### Fluxo de Orquestração do `GerenciadorDeTurno`
+### 5.1. Fluxo do `GameManager`
+
+Os sinais da view são conectados aos métodos do `GameManager` em `main.py`:
+
+| Sinal da view | Método do `GameManager` | Efeito |
+|---------------|-------------------------|--------|
+| `iniciar_solicitado` | `on_iniciar_solicitado()` | Abre o tutorial (`MotivoTutorial.NOVO_JOGO`) |
+| `tutorial_finalizado(motivo)` | `on_tutorial_finalizado()` | Em novo jogo, abre a seleção de perfil |
+| `perfil_confirmado(str)` | `iniciar_expediente()` | Inicia a campanha e o primeiro dia |
+| `submeter_respostas(dict)` | `processar_submissao()` | Avalia o relatório e exibe o diagnóstico |
+| `continuar_solicitado` | `avancar_fila_ou_dia()` | Próximo relatório, próximo dia ou fim da campanha |
+| `jogar_novamente_solicitado` | `reiniciar_expediente()` | Recomeça com o mesmo perfil |
+| `voltar_menu_solicitado` | `carregar_menu_principal()` | Descarta o turno e volta ao menu |
+| `help_solicitado` | `on_help_solicitado()` | Abre o tutorial em modo consulta |
+| `sair_solicitado` | `encerrar_aplicacao()` | Fecha a janela (idempotente) |
+
+A campanha dura `CAMPANHA_DURACAO_DIAS` dias (atualmente 1). Ao fim do último dia, `GameManager` consulta `verificar_vitoria_do_turno()` e chama `view.exibir_resultado(...)`.
+
+### 5.2. Fluxo do `GerenciadorDeTurno`
 
 ```
 iniciar_turno()
   ├── RepositorioJSON.extrair_dados()        → List[DadosCenarioDTO]
   ├── FabricaDeRelatorios.construir_pilha()  → List[Relatorio]
-  └── MotorDePontuacao.calcular_meta_turno() → float (Vmax total)
+  └── MotorDePontuacao.calcular_meta_turno() → float (Vmax do turno)
 
 obter_relatorio_da_pilha()
   └── pop() da pilha interna (LIFO)
 
-avaliar_respostas_jogador(riscos, fatores, decisao, tempo)
-  ├── __processar_submissao_jogador()        → FolhaDeResposta
-  ├── Relatorio.anexar_resposta_jogador()
-  ├── DiagnosticoDeResposta.gerar_diagnostico_pontuacao() → DiagnosticoPontuacaoDTO
-  ├── MotorDePontuacao.calcular_vmax_relatorio()          → float (Vmax individual)
-  ├── MotorDePontuacao.calcular_pontuacao_relatorio()     → float (pontuação final)
-  └── acumula pontuação no turno
+avaliar_respostas_jogador(riscos, fatores, decisao, tempo) → ResultadoDiagnosticoDTO
+  ├── cria a FolhaDeResposta e anexa ao Relatorio
+  ├── DiagnosticoDeResposta.gerar_diagnostico_pontuacao() → DiagnosticoPontuacaoDTO (operandos)
+  ├── DiagnosticoDeResposta.gerar_feedback()              → DiagnosticoFeedbackDTO
+  ├── MotorDePontuacao.calcular_vmax_relatorio()          → float
+  ├── MotorDePontuacao.calcular_scores_por_item()         → scores por risco e por fator
+  ├── MotorDePontuacao.calcular_pontuacao_detalhada()     → DiagnosticoPontuacaoDTO completo
+  └── acumula pontuacao_final no turno
 
 verificar_vitoria_do_turno()
-  └── MotorDePontuacao.conferir_condicao_vitoria() → bool (>= 60%)
+  └── MotorDePontuacao.conferir_condicao_vitoria() → bool (≥ 60% do Vmax do turno)
 ```
 
-### 5.1. Filosofia dos Controladores
+### 5.3. Filosofia dos Controladores
 
-O controlador é o **maestro**. Ele não executa trabalho braçal, mas sim coordena o fluxo do caso de uso.
+#### Princípio 1: Delegação
 
-#### Princípio 1: Delegação Absoluta 
+O controlador não executa regra de negócio nem cálculo. O `GerenciadorDeTurno` pede à fábrica que construa relatórios, ao `DiagnosticoDeResposta` que avalie acertos e ao `MotorDePontuacao` que calcule a nota.
 
-O controlador não faz trabalho braçal. Se encontrar um `if` dentro de um controlador validando regra de negócio ou resolvendo equação matemática, está errado.
+#### Princípio 2: Guardião do Estado
 
-O `GerenciadorDeTurno` delega tudo: Pede à fábrica para construir relatórios, pede ao `DiagnosticoDeResposta` para avaliar acertos, pede ao `MotorDePontuacao` para calcular a nota. O controlador é apenas um fluxograma vivo do caso de uso: "lê dados, monta relatório, avalia resposta, guarda nota".
+Ao contrário dos serviços de domínio, a camada de aplicação mantém estado: `__turno_iniciado`, `__pontuacao_acumulada_turno`, `__pilha_relatorios` e `__relatorio_atual` no turno; `__estado_atual`, `__dias_concluidos` e `__pontuacao_global` no `GameManager`. **Guardas** impedem a execução fora de ordem (iniciar o turno duas vezes, pedir um relatório com outro pendente, verificar vitória com relatórios na pilha).
 
-#### Princípio 2: O Guardião do Estado da Aplicação
+#### Princípio 3: Fronteira com a Interface
 
-Ao contrário dos serviços de domínio, a camada de aplicação existe para **manter o estado**. É aqui que habitam variáveis como `__turno_iniciado`, `__pontuacao_acumulada` e `__pilha_relatorios`.
+A interface entrega apenas dados primitivos (`dict` com listas de strings, decisão e tempo). O controlador traduz para entidades, invoca os serviços e devolve o resultado. Os controladores **não importam PySide6**: o `GameManager` conhece apenas o contrato `IGameView`.
 
-O controlador sabe exatamente em que fase o jogador está, se já terminou o expediente e se pode ou não pedir o próximo relatório. O estado deve estar fortemente protegido por **guardas** que impedem a execução fora de ordem.
+#### Princípio 4: Tratamento de Erros
 
+`GameManager.processar_submissao()` captura `ValueError` (erro de negócio) e repassa a mensagem com `view.exibir_popup_erro()`; qualquer outra exceção é registrada no log e exibida como erro interno genérico. Falhas ao carregar o dia devolvem o jogador ao menu.
 
-#### Princípio 3: A Alfândega da Interface Gráfica 
-A View  é burra. O controlador é o único ponto de contacto entre a interface e o coração do jogo. A interface passa apenas dados primitivos (textos, números, listas de strings). O controlador pega esses dados crus, traduz para entidades ou DTOs, invoca os serviços e devolve o resultado.
+#### Princípio 5: Injeção de Dependências
 
-**Nunca,** sob nenhuma circunstância, um controlador importa elementos da interface. Não podem existir imports aqui dentro, nem referências a botões, janelas ou labels.
-
-#### Princípio 4: O Ponto de Injeção de Dependências
-
-O controlador é o ponto de encontro da Arquitetura Limpa. É aqui que o `core/` e a `infrastructure/` se abraçam. O controlador (ou quem o invoca) instancia o `RepositorioJSON`, o `MotorDePontuacao` e junta todas as peças.
-
-**Testabilidade:** Como o controlador coordena muitos serviços externos, ele deve permitir que suas dependências sejam facilmente mockadas nos testes. Atualmente o `GerenciadorDeTurno` instancia suas dependências internamente, exigindo `unittest.mock.patch` nos testes. O ideal futuro é recebê-las por injeção no construtor.
+O `GameManager` recebe a view por injeção no construtor (`GameManager(view: IGameView)`), o que permite testá-lo com um mock. O `GerenciadorDeTurno` instancia `MotorDePontuacao`, `DiagnosticoDeResposta` e `RepositorioJSON` internamente; nos testes, usa-se `unittest.mock.patch`.
 
 ---
 
 ## 6. Camada de Configuração (`config/`)
 
-Centraliza constantes e configurações do projeto, sem dependências de outras camadas.
-
 | Arquivo | Conteúdo |
 |---------|----------|
-| `config/constants.py` | `DIRETORIO_BASE`, `QUANTIDADE_GERACAO`, `CURSOS` |
-| `config/logging_config.py` | `setup_logging()`: logging para ambientes dev/staging/prod |
+| `config/constants.py` | `DIRETORIO_BASE` (`resources/data`), `QUANTIDADE_GERACAO` (relatórios por turno, atualmente 1), `CURSOS`, `TEMA_PADRAO` (`"dark"` ou `"light"`) |
+| `config/logging_config.py` | `setup_logging()`: nível e destinos de log conforme `APP_ENV` (`development`, `staging`, `production`) ou `LOG_LEVEL` |
 
 ---
 
 ## 7. Camada de Visualização (`view/`)
 
-Diretório reservado para a futura interface PySide6. Atualmente contém apenas as subpastas vazias `components/` e `screens/`. Nenhum código implementado.
-
-A camada visual segue o padrão **Passive View (Humble Object)** do MVP. A interface é burra: não toma decisões, não valida regras, não calcula nada. Ela apenas exibe o que o controlador manda e escuta o que o usuário faz.
+A interface é implementada em PySide6 e segue o padrão **Passive View** do MVP: `JanelaPrincipal` implementa `IGameView`, o `GameManager` atua como presenter. A estrutura de pastas, a hierarquia de widgets e os padrões de sinais e estilos estão detalhados em [Arquitetura da View](view.md).
 
 ### 7.1. Filosofia da View
 
-#### Princípio 1: A View Burra (Passive View)
+#### Princípio 1: View Passiva
 
-A interface gráfica não tem inteligência de negócio. Ela não toma decisões, apenas repete o que lhe disseram e escuta o que o usuário faz.
+A interface não toma decisões de negócio. Quando o jogador submete uma inspeção, a `PaginaInspecao` coleta as marcações e emite `submeter_respostas(dict)`; a pontuação é calculada no domínio e volta pronta em um `ResultadoDiagnosticoDTO`.
 
-Se o jogador precisa escolher entre advertir ou interditar, a view captura o clique do botão e diz ao controlador: `gerenciador.processar_submissao(..., decisao="INTERDITAR")`. Nunca a view deve conter `if decisao == "INTERDITAR"` seguido de cálculo de pontuação.
+#### Princípio 2: Quarentena Tecnológica
 
-#### Princípio 2: A Quarentena Tecnológica 
+`view/` e `main.py` são os únicos locais que importam PySide6. Widgets, sinais, QSS e reprodução de mídia vivem dentro de `view/`.
 
-A camada `view/` é o único local do projeto autorizado a conhecer o framework de interface gráfica. Todos os `import PySide6.QtWidgets`, `QMainWindow`, `QPushButton` e manipulações de CSS/estilos vivem estritamente dentro da pasta `view/`.
+#### Princípio 3: Dados Somente Leitura
 
-#### Princípio 3: Diálogo Protegido 
+A view não recebe entidades. O relatório chega como `dict` gerado por `Relatorio.extrair_apresentacao_relatorio()` (sem o gabarito), e o diagnóstico chega como DTO congelado.
 
-A view é uma consumidora do controlador. Ela pede os dados, mas não os manipula. A view chama `gerenciador.obter_relatorio_da_pilha()` e recebe um `Relatorio`. Tem permissão para **ler** as propriedades (`relatorio.titulo`, `relatorio.texto_descricao`) para preencher labels na tela.
+#### Princípio 4: Erros Exibidos, não Decididos
 
-**Nunca** a view modifica a entidade. Não deve existir código na view que faça `relatorio.texto_descricao = "Novo texto"`.
-
-#### Princípio 4: Gestão de Erros via UI 
-
-A view não previne erros de negócio, ela apenas os exibe de forma elegante. Quando a view chama o `GerenciadorDeTurno` para submeter uma inspeção, deve envolver a chamada em um `try/except ValueError`. Se o domínio rejeitar a ação (ex.: "Falta selecionar uma decisão"), a view captura o `ValueError` e exibe um pop-up/modal vermelho com a mensagem de erro que veio do motor.
-
-**Por quê?** Mantém a interface agradável (evita que o jogo feche na cara do jogador) usando as validações rigorosas que já existem no `core/`.
-
-#### Princípio 5: Separação Interna (Componentes vs. Telas)
-
-Para não criar arquivos de UI com milhares de linhas, a responsabilidade é dividida dentro da própria `view/`:
-
-- **`view/screens/`**: As janelas principais (`TelaPrincipal`, `TelaDeLogin`, `TelaDeInspecao`). Coordenam o layout global.
-- **`view/components/`**: Os blocos de Lego reutilizáveis. Se o jogo tem um botão de decisão verde que brilha, cria-se `BotaoAcao(QPushButton)` dentro de `components/`. As `screens` apenas instanciam estes componentes.
+A view não valida regras: ela exibe o que o presenter manda. `JanelaPrincipal.exibir_popup_erro()` mostra a mensagem em um `QMessageBox`.
 
 ---
 
 ## 8. Convenções de Importação
 
-- **Intra-pacote (mesmo diretório):** imports relativos com `.`
+- **Dentro do mesmo pacote de camada**, usam-se imports relativos em `core/model/` e `infrastructure/repository/`:
   ```python
   from .folha_de_inspecao import FolhaDeInspecao         # core/model/
-  from ..dtos.dados_cenario import DadosCenarioDTO        # infrastructure/
+  from ..dtos.dados_cenario import DadosCenarioDTO        # infrastructure/repository/
   ```
-- **Entre pacotes:** imports absolutos
+- **Entre pacotes**, imports absolutos:
   ```python
-  from core.model.relatorio import Relatorio              # infrastructure/ → core/
-  from infrastructure.factory.fabrica_de_relatorios import FabricaDeRelatorios  # application/ → infrastructure/
+  from core.model.relatorio import Relatorio
+  from infrastructure.factory.fabrica_de_relatorios import FabricaDeRelatorios
   ```
 - **Não há arquivos `__init__.py`**: todos os pacotes são *namespace packages* (PEP 420).
 
@@ -421,63 +393,87 @@ Para não criar arquivos de UI com milhares de linhas, a responsabilidade é div
 ## 9. Fluxo de Dados Completo
 
 ```
-[Arquivos JSON]
+[resources/data/*.json]
        │
        ▼
 RepositorioJSON (infrastructure/repository/)
-  ├── Lê arquivo .json
-  ├── Valida contra JSON_SCHEMA
-  ├── Filtra por curso selecionado
+  ├── Lê e valida contra JSON_SCHEMA
+  ├── Filtra por curso, embaralha e limita a QUANTIDADE_GERACAO
   └── Retorna List[DadosCenarioDTO]
        │
        ▼
 FabricaDeRelatorios (infrastructure/factory/)
-  ├── Cria FolhaDeGabarito (core/model/)
-  ├── Cria Relatorio (core/model/)
-  ├── Cria AnexoImagem/Video/Audio (core/model/)
+  ├── Cria FolhaDeGabarito, Relatorio e Anexos (core/model/)
   └── Retorna List[Relatorio]
        │
        ▼
 GerenciadorDeTurno (application/controllers/)
-  ├── Armazena pilha de relatórios
-  ├── Entrega um relatório por vez ao jogador
+  ├── Guarda a pilha e entrega um relatório por vez
   │       │
-  │       ▼ (Jogador preenche)
-  │   FolhaDeResposta (core/model/)
+  │       ▼  GameManager → view.renderizar_relatorio(dict)
+  │   [Jogador preenche a inspeção]
   │       │
-  │       ▼
-  ├── DiagnosticoDeResposta (core/services/)
-  │   └── Retorna DiagnosticoPontuacaoDTO (core/dtos/)
-  │       │
-  │       ▼
-  ├── MotorDePontuacao (core/services/)
-  │   ├── calcular_vmax_relatorio()
-  │   ├── calcular_pontuacao_relatorio()
-  │   └── Retorna float (pontuação do relatório)
-  │       │
-  │       ▼
-  └── Acumula pontuação no turno
+  │       ▼  view.submeter_respostas(dict) → GameManager.processar_submissao()
+  ├── FolhaDeResposta (core/model/)
+  ├── DiagnosticoDeResposta → DiagnosticoPontuacaoDTO + DiagnosticoFeedbackDTO
+  ├── MotorDePontuacao → Vmax, scores por item, pontuação detalhada
+  └── Retorna ResultadoDiagnosticoDTO e acumula a nota do turno
        │
        ▼
-  verificar_vitoria_do_turno() → bool (aprovado/reprovado)
+GameManager → view.exibir_tela_diagnostico(resultado)
+       │
+       ▼  (pilha vazia, último dia)
+GerenciadorDeTurno.verificar_vitoria_do_turno() → bool
+       │
+       ▼
+GameManager → view.exibir_resultado(pontuacao_global, dias_concluidos, venceu)
+  └── A tela de fim de jogo pede um ParecerCIPA ao repositório de pareceres
 ```
 
 ---
 
-## 10. Diagrama de Dependências (Arquivo por Arquivo)
+## 10. Desvios Conhecidos
+
+Pontos em que o código atual se afasta da regra de dependência ou dos princípios acima. São tolerados, mas não devem ser replicados.
+
+| Onde | Desvio | Caminho de correção |
+|------|--------|---------------------|
+| `core/model/folha_de_inspecao.py` | Importa a biblioteca externa `unidecode` para remover acentos | Normalizar com stdlib (`unicodedata`) ou mover a normalização para a infraestrutura |
+| `view/expediente/tela.py`, `paginas/game_over.py`, `paginas/game_win.py` | Importam as classes concretas de `infrastructure/repository/` para os pareceres da CIPA | Injetar um `IPareceresCIPA` a partir de `main.py` |
+| `application/controllers/game_manager.py` | `__mascarar_perfil()` redireciona todo curso válido para `DEFAULT`, porque só há cenários marcados como `DEFAULT`; para isso importa `RepositorioJSON` dentro do método | Remover a máscara quando houver cenários por curso |
+| `config/constants.py` e `RepositorioJSON.CURSOS_VALIDOS` | A lista de cursos está duplicada (e repetida no `JSON_SCHEMA`) | Usar `config.constants.CURSOS` como fonte única |
+
+---
+
+## 11. Diagrama de Dependências (Arquivo por Arquivo)
 
 ```
 main.py
-  └── config.logging_config
+  ├── application.controllers.game_manager
+  ├── config.constants
+  ├── config.logging_config
+  └── view.main_window
+
+application/controllers/game_manager.py
+  ├── application.controllers.gerenciador_de_turno
+  ├── application.interfaces.i_game_view
+  ├── core.dtos.resultado_diagnostico
+  └── infrastructure.repository.repositorio_json (import local, ver seção 10)
 
 application/controllers/gerenciador_de_turno.py
   ├── config.constants
+  ├── core.dtos.diagnostico_pontuacao
+  ├── core.dtos.diagnostico_feedback
+  ├── core.dtos.resultado_diagnostico
   ├── core.model.relatorio
   ├── core.model.folha_de_resposta
   ├── core.services.motor_de_pontuacao
   ├── core.services.diagnostico_de_resposta
   ├── infrastructure.factory.fabrica_de_relatorios
   └── infrastructure.repository.repositorio_json
+
+application/interfaces/i_game_view.py
+  └── core.dtos.resultado_diagnostico
 
 infrastructure/factory/fabrica_de_relatorios.py
   ├── core.model.relatorio
@@ -486,32 +482,44 @@ infrastructure/factory/fabrica_de_relatorios.py
   └── infrastructure.dtos.dados_cenario
 
 infrastructure/repository/repositorio_json.py
-  └── infrastructure.dtos.dados_cenario
+  ├── infrastructure.dtos.dados_cenario
   └── jsonschema (externa)
+
+infrastructure/repository/repositorio_pareceres_cipa.py
+  ├── core.dtos.parecer_cipa
+  └── core.interfaces.i_pareceres_cipa
+
+infrastructure/repository/repositorio_pareceres_cipavitoria.py
+  └── infrastructure.repository.repositorio_pareceres_cipa
 
 core/services/motor_de_pontuacao.py
   ├── core.dtos.diagnostico_pontuacao
+  ├── core.dtos.diagnostico_feedback
   └── core.model.relatorio
 
 core/services/diagnostico_de_resposta.py
   ├── core.model.folha_de_gabarito
   ├── core.model.folha_de_resposta
   ├── core.dtos.diagnostico_pontuacao
-  └── core.services.diagnostico_feedback
+  └── core.dtos.diagnostico_feedback
+
+core/interfaces/i_pareceres_cipa.py
+  └── core.dtos.parecer_cipa
+
+core/dtos/resultado_diagnostico.py
+  ├── core.dtos.diagnostico_pontuacao
+  └── core.dtos.diagnostico_feedback
 
 core/model/relatorio.py
   ├── core.model.anexo
   ├── core.model.folha_de_gabarito
   └── core.model.folha_de_resposta
 
-core/model/folha_de_gabarito.py
-  └── core.model.folha_de_inspecao
-
-core/model/folha_de_resposta.py
+core/model/folha_de_gabarito.py, core/model/folha_de_resposta.py
   └── core.model.folha_de_inspecao
 
 core/model/folha_de_inspecao.py
-  └── unidecode (externa) ⚠️ violação
+  └── unidecode (externa, ver seção 10)
 
 core/model/anexo.py
   └── (stdlib apenas)
@@ -519,10 +527,11 @@ core/model/anexo.py
 
 ---
 
-## 11. Boas Práticas e Restrições
+## 12. Boas Práticas e Restrições
 
-- **Nunca importar bibliotecas externas em `core/`**, a menos que seja estritamente necessário e devidamente justificado (vide seção 3.4).
-- **Nunca importar `infrastructure/` ou `application/` dentro de `core/`**: a seta de dependência sempre aponta para dentro.
-- **DTOs de fronteira:** Use `infrastructure/dtos/` para transporte de dados brutos (mutáveis) e `core/dtos/` para operandos de negócio (congelados).
-- **Injeção de dependência:** O `GerenciadorDeTurno` instancia suas dependências internamente. Para testes, utilize `unittest.mock.patch` para substituir `RepositorioJSON`, `FabricaDeRelatorios` e `MotorDePontuacao`.
-- **Namespace packages:** Não crie arquivos `__init__.py`. O projeto usa pacotes implícitos (PEP 420).
+- **Não importar bibliotecas externas em `core/`.**
+- **Não importar `infrastructure/`, `application/` ou `view/` dentro de `core/`**: a seta de dependência aponta sempre para dentro.
+- **Não importar PySide6 fora de `view/` e `main.py`.**
+- **DTOs de fronteira:** `infrastructure/dtos/` para dados brutos (mutáveis) e `core/dtos/` para dados de negócio (congelados).
+- **Novas ações da interface:** declarar o método em `IGameView` antes de implementá-lo em `JanelaPrincipal`.
+- **Namespace packages:** não criar arquivos `__init__.py`.

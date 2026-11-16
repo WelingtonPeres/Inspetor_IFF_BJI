@@ -2,11 +2,20 @@
 
 ## Desenvolvimento
 
-[A definir]
+Estudantes do curso de Engenharia de Computação do IFF, Campus Bom Jesus do Itabapoana (em ordem alfabética):
+
+| Autor | Contato |
+|-------|---------|
+| Bernardo Pimentel de Alvarenga Proveti Moreira | [beprovetii20@gmail.com](mailto:beprovetii20@gmail.com) |
+| Letícia de Oliveira Marssola | [leticiamarssola77@gmail.com](mailto:leticiamarssola77@gmail.com) |
+| Luciano da Silva Matos | [lucianodasilvamatos07@gmail.com](mailto:lucianodasilvamatos07@gmail.com) |
+| Mateus Pimentel dos Santos | [mateuspsbji@gmail.com](mailto:mateuspsbji@gmail.com) |
+| Pedro Paulo de Souza Rodrigues | [pedro_rodrigues@id.uff.br](mailto:pedro_rodrigues@id.uff.br) |
+| Welington Peres Léo | [@WelingtonPeres](https://github.com/WelingtonPeres) |
 
 ## Orientação Acadêmica
 
-[Orientador a definir]
+**Prof. Rafael Artur de Paiva Gardoni** — professor orientador
 
 ## Instituição
 
@@ -28,7 +37,7 @@ Agradecimentos especiais a:
 
 - **PySide6** — Interface gráfica (Qt for Python)
 - **Python 3.11+** — Linguagem de programação
-- **pytest** — Framework de testes
+- **pytest** e **pytest-qt** — Testes automatizados
 - **jsonschema** — Validação de dados
 
 ## Licença
@@ -39,4 +48,4 @@ Para mais informações, veja [LICENSE](LICENSE).
 
 ---
 
-**Última atualização:** Agosto de 2026
+**Última atualização:** Novembro de 2026
