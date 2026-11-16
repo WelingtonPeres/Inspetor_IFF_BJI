@@ -252,7 +252,18 @@ Para o texto legal completo, veja [LICENSE](LICENSE).
 
 ## 👥 Contribuidores
 
-Veja [AUTHORS.md](AUTHORS.md) para lista completa de contribuidores, orientadores e instituições envolvidas.
+### Autores
+
+- Bernardo Pimentel de Alvarenga Proveti Moreira
+- Letícia de Oliveira Marssola
+- Luciano da Silva Matos
+- Mateus Pimentel dos Santos
+- Pedro Paulo de Souza Rodrigues
+- Welington Peres Léo
+
+**Orientação:** Prof. Rafael Artur de Paiva Gardoni
+
+Contatos, instituição e demais créditos estão em [AUTHORS.md](AUTHORS.md).
 
 ### Como Contribuir
 
@@ -285,6 +296,7 @@ Inspetor IFF-BJI é desenvolvido no **Instituto Federal Fluminense (IFF)**, Camp
 
 **Curso:** Engenharia de Computação  
 **Disciplina-sede:** Higiene e Segurança do Trabalho  
+**Professor orientador:** Rafael Artur de Paiva Gardoni  
 **Objetivo pedagógico:** Criar ambiente prático, seguro e repetível para que aprendizes internalizem critérios de análise de risco ocupacional — competência essencial para profissionais de segurança do trabalho.
 
 ### Justificativa Educacional
@@ -304,7 +316,8 @@ Legislação sobre prática profissional; este projeto permite prática simulada
 
 ---
 
-**Última atualização:** Agosto de 2026  
+**Última atualização:** Novembro de 2026  
 **Instituição:** Instituto Federal Fluminense, Campus Bom Jesus do Itabapoana  
 **Curso:** Engenharia de Computação  
+**Orientador:** Prof. Rafael Artur de Paiva Gardoni  
 **Créditos:** Veja [AUTHORS.md](AUTHORS.md)
