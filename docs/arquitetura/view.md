@@ -8,32 +8,41 @@
 
 ## 1. Introdução
 
-Este documento estabelece as diretrizes arquiteturais para o desenvolvimento de interfaces gráficas (UI) no projeto **Inspetor IFF-BJI**. A camada view segue o padrão **Model-View-Presenter (MVP)** integrado à **Arquitetura Limpa**.
+Este documento estabelece as diretrizes arquiteturais da interface gráfica do **Inspetor IFF-BJI**. A camada view segue o padrão **Model-View-Presenter (MVP)** integrado à **Arquitetura Limpa**.
 
-O objetivo principal é uma **View Passiva**: a interface não toma decisões de negócio, não calcula pontuações, não conhece as regras do domínio. Ela exibe dados entregues e reporta interações do utilizador (cliques, seleções, submissões) ao `GameManager` via **Signals do Qt** — nunca importando código do core ou application.
+O objetivo é uma **View Passiva**: a interface não toma decisões de negócio, não calcula pontuações e não conhece as regras do domínio. Ela exibe os dados que recebe e reporta as interações do usuário (cliques, seleções, submissões) ao `GameManager` por meio de **Signals do Qt**. A view nunca importa o `GameManager`; quem conecta os dois é o `main.py`.
 
 ---
 
 ## 2. Hierarquia de Componentes
 
-A UI é organizada em **três seções principais**, cada uma uma janela ou overlay independente:
+A interface simula um sistema operacional: um desktop com barra de tarefas, sobre o qual abrem "janelas" flutuantes.
 
 ```
 JanelaPrincipal (QMainWindow, implementa IGameView)
-├── TelaDeExpediente (QStackedWidget)
-│   ├── PaginaSelecaoPerfil
-│   ├── PaginaInspecao (com Sidebar, overlays de anexos/media)
-│   ├── PaginaDiagnostico
-│   └── PaginaGameOver / PaginaGameWin
-└── [z-order overlay layer]
-    ├── TelaTutorial (JanelaFlutuante, z=2)
-    └── TelaGameOver/GameWin (JanelaFlutuante, z=1)
+├── _OverlayArea
+│   ├── TelaMenuPrincipal            (desktop: wallpaper e atalhos)
+│   ├── TelaDeExpediente             (JanelaFlutuante)
+│   │   ├── WindowTitleBar
+│   │   ├── Sidebar                  (visível na inspeção e no diagnóstico)
+│   │   ├── QStackedWidget
+│   │   │   ├── 0 · PaginaSelecaoPerfil
+│   │   │   ├── 1 · PaginaInspecao
+│   │   │   ├── 2 · PaginaDiagnostico
+│   │   │   ├── 3 · GameWin
+│   │   │   └── 4 · GameOver
+│   │   └── AnexoGallery, MediaViewer (overlays de mídia)
+│   └── TelaTutorial                 (JanelaFlutuante, 8 slides)
+└── Taskbar                          (rodapé, sempre visível)
 ```
 
-**Camadas de Z-order (do fundo para o topo):**
-1. **Base (z=0):** `TelaDeExpediente` com as páginas do expediente.
-2. **Overlay overlay (z=1):** `PaginaGameOver`/`PaginaGameWin` — overlays integradas dentro do expediente.
-3. **Flutuante (z=2):** `TelaTutorial` — janela flutuante que flutua acima de tudo, irmã do expediente.
+**Ordem de empilhamento (do fundo para o topo):**
+
+1. **Desktop:** `TelaMenuPrincipal`, sempre visível, ocupa toda a `_OverlayArea`.
+2. **Expediente:** `TelaDeExpediente`, janela flutuante que ocupa 80% da área (token `tela_de_expediente.proporcao_tela`) e pode ser maximizada, minimizada ou fechada.
+3. **Tutorial:** `TelaTutorial`, registrada por último na `_OverlayArea` e por isso desenhada acima do expediente.
+
+A `Taskbar` fica fora da `_OverlayArea`, no rodapé da janela. `AnexoGallery` e `MediaViewer` são filhos da `TelaDeExpediente` e cobrem a área do overlay enquanto estão abertos.
 
 ---
 
@@ -41,193 +50,246 @@ JanelaPrincipal (QMainWindow, implementa IGameView)
 
 ```
 view/
-├── main_window.py                # JanelaPrincipal (orquestrador, implementa IGameView)
+├── main_window.py                # JanelaPrincipal e _OverlayArea
 ├── infrastructure/
 │   └── layout_loader.py          # LayoutLoader singleton — escala responsiva
-├── desktop/                       # Componentes de desktop (fora do expediente)
-│   ├── menu.py                   # Menu de sistema (deprecated/experimental)
-│   ├── taskbar.py                # Barra de tarefas do SO
-│   ├── desktop_shortcut.py       # Atalhos de desktop
-│   └── wallpaper_selector.py     # Seletor de wallpaper
-├── expediente/                    # Fluxo principal do jogo (dentro do QStackedWidget)
-│   ├── tela.py                   # TelaDeExpediente (orquestrador das páginas)
-│   ├── paginas/                  # Páginas do fluxo
-│   │   ├── selecao_perfil.py     # Seleção de personagem (1ª página)
-│   │   ├── inspecao.py           # Formulário de inspeção (2ª página)
-│   │   ├── diagnostico.py        # Resultado + feedback (3ª página)
-│   │   ├── game_over.py          # Game over (derrota)
-│   │   └── game_win.py           # Game win (vitória)
-│   ├── widgets/                  # Componentes reutilizáveis dentro expediente
-│   │   ├── sidebar.py            # Barra lateral de navegação
-│   │   ├── character_carousel.py # Carrossel de personagens
-│   │   ├── stamp_button.py       # Botão carimbo (decisão)
-│   │   ├── window_title_bar.py   # Barra de título customizada
-│   │   └── anexo_preview.py      # Prévia de anexos
-│   ├── overlays/                 # Overlays dentro do expediente
-│   │   ├── anexo_gallery.py      # Galeria de anexos (fotos/videos)
-│   │   └── media_viewer.py       # Reprodutor de mídia
+├── desktop/                      # Desktop e barra de tarefas
+│   ├── menu.py                   # TelaMenuPrincipal (wallpaper e atalhos)
+│   ├── taskbar.py                # Taskbar (botão iniciar, atalhos, relógio)
+│   ├── desktop_shortcut.py       # DesktopShortcut (atalho do desktop)
+│   └── wallpaper_selector.py     # WallpaperSelector
+├── expediente/                   # Fluxo principal do jogo
+│   ├── tela.py                   # TelaDeExpediente (orquestra as páginas)
+│   ├── paginas/
+│   │   ├── selecao_perfil.py     # PaginaSelecaoPerfil
+│   │   ├── inspecao.py           # PaginaInspecao (relatório e formulário)
+│   │   ├── diagnostico.py        # PaginaDiagnostico (resultado e feedback)
+│   │   ├── game_win.py           # GameWin (vitória)
+│   │   └── game_over.py          # GameOver (derrota)
+│   ├── widgets/
+│   │   ├── sidebar.py            # Sidebar
+│   │   ├── character_carousel.py # CharacterCarousel (carrossel de perfis)
+│   │   ├── stamp_button.py       # StampButton (carimbo de decisão)
+│   │   ├── window_title_bar.py   # WindowTitleBar
+│   │   └── anexo_preview.py      # AnexoPreview
+│   ├── overlays/
+│   │   ├── anexo_gallery.py      # AnexoGallery (galeria de anexos)
+│   │   └── media_viewer.py       # MediaViewer (mídia ampliada)
 │   ├── configuracoes/
-│   │   └── perfis.py             # (Deprecated) configuração de perfis
+│   │   └── perfis.py             # IFF_PROFILES e make_profile_roster()
 │   └── modelos/
-│       └── character_data.py     # Dados de personagens
-├── tutorial/                      # Tutorial flutuante (JanelaFlutuante)
-│   ├── tela_tutorial.py          # TelaTutorial (orquestrador dos slides)
-│   ├── slide_tutorial.py         # SlideTutorial base (ABC)
-│   ├── paginas/                  # 8 slides do tutorial
+│       └── character_data.py     # CharacterData
+├── tutorial/
+│   ├── tela_tutorial.py          # TelaTutorial (registro e navegação dos slides)
+│   ├── slide_tutorial.py         # SlideTutorial (classe base)
+│   ├── paginas/                  # Slides, na ordem de exibição
 │   │   ├── slide_boas_vindas.py
-│   │   ├── slide_anatomia.py     # (etc.)
-│   │   └── ... (8 slides total)
-│   └── widgets/                  # Componentes reutilizáveis do tutorial
-│       ├── nota_aviso.py         # Caixa de aviso estilizada
-│       ├── credential_iff.py     # Cartão de credencial
-│       ├── dots_navegacao.py     # Fileira de dots (carrossel)
-│       ├── item_numerado.py      # Item com badge numerado
-│       └── assets_helper.py      # Helpers de carregamento de pixmaps
-├── widgets/                       # Componentes genéricos reutilizáveis
-│   ├── janela_flutuante.py       # JanelaFlutuante (base para overlays flutuantes)
-│   ├── efeitos/                  # Efeitos visuais
-│   │   ├── background_riscos.py  # Fundo decorativo com pictogramas
-│   │   ├── confetti_overlay.py   # Confete (vitória)
-│   │   ├── crt_overlay.py        # Efeito CRT (scanlines)
-│   │   └── trofeu_icon.py        # Troféu (vitória)
-│   └── midia/                    # Reprodução de mídia
-│       ├── media_player_base.py  # Base para players
-│       ├── video_player.py       # Reprodutor de vídeo
-│       ├── audio_player.py       # Reprodutor de áudio
-│       └── image_viewer.py       # Visualizador de imagens
+│   │   ├── slide_anatomia.py
+│   │   ├── slide_anexos.py
+│   │   ├── slide_riscos.py
+│   │   ├── slide_fatores.py
+│   │   ├── slide_decisao.py
+│   │   ├── slide_vitoria.py
+│   │   └── slide_pronto.py
+│   └── widgets/
+│       ├── nota_aviso.py         # NotaAviso
+│       ├── credential_iff.py     # CredencialIFF
+│       ├── dots_navegacao.py     # DotsNavegacao
+│       ├── item_numerado.py      # ItemNumerado
+│       └── assets_helper.py      # Carregamento de pixmaps
+├── widgets/                      # Componentes genéricos
+│   ├── janela_flutuante.py       # JanelaFlutuante (base das janelas)
+│   ├── efeitos/
+│   │   ├── background_riscos.py  # BackgroundRiscos (fundo com pictogramas)
+│   │   ├── confetti_overlay.py   # ConfettiOverlay (vitória)
+│   │   ├── crt_overlay.py        # CrtEffectsOverlay (scanlines)
+│   │   └── trofeu_icon.py        # TrofeuIcon
+│   └── midia/
+│       ├── media_player_base.py  # MediaPlayerBase
+│       ├── video_player.py       # VideoPlayer
+│       ├── audio_player.py       # AudioPlayer
+│       └── image_viewer.py       # ImageViewer
 ├── utils/
-│   └── tint_icon.py              # (Deprecated) utility de tinting
-└── assets/                        # Ficheiros estáticos
-    ├── style.qss                 # Tema escuro (QSS global)
-    ├── style_light.qss           # Tema claro (QSS global)
-    ├── layout.json               # Tokens de layout (dimensões, spacing)
-    └── icons/, images/           # Recursos visuais
+│   └── tint_icon.py              # tint_pixmap() — recoloração de ícones
+└── assets/
+    ├── style.qss                 # Tema escuro
+    ├── style_light.qss           # Tema claro
+    ├── layout.json               # Tokens de layout (dimensões, espaçamentos, fontes)
+    ├── textos/                   # pareceres_gameover.json, pareceres_gamewin.json
+    ├── cursos/                   # Imagem de cada perfil (DEFAULT.png, T_QUIMICA.png, ...)
+    ├── icons/                    # Ícones (desktop, riscos, sidebar, tutorial, fim de jogo)
+    └── images/                   # Logo e wallpapers
 ```
 
 ---
 
-## 4. Padrão MVP: Signals e Slots
+## 4. Padrão MVP: Signals e Contrato
 
-A comunicação entre View e Presenter segue um fluxo determinado:
+### 4.1. De baixo para cima: Página → Tela → JanelaPrincipal → GameManager
 
-### 4.1. Bottom-Up: Página → MainWindow → GameManager
+As páginas emitem sinais; cada nível acima apenas reemite, até a `JanelaPrincipal`. A ligação com o `GameManager` é feita em `main.py`.
 
-**Exemplo:** Utilizador seleciona um risco na inspeção
+**Exemplo:** o jogador submete a inspeção.
 
 ```python
-# PaginaInspecao (página)
+# view/expediente/paginas/inspecao.py
 class PaginaInspecao(QWidget):
-    risco_marcado = Signal(str)  # Sinal limpo: só passa dados
-    
-    def __on_risco_clicado(self, risco_id: str):
-        self.risco_marcado.emit(risco_id)  # Emite para cima
+    submeter_respostas = Signal(dict)
 
-# TelaDeExpediente (orquestrador do expediente)
-self.pagina_inspecao.risco_marcado.connect(self.on_risco_marcado)
+    # ao clicar em "Submeter", a página coleta as marcações e emite:
+    # {"riscos": [...], "fatores": [...], "decisao": "...", "tempo_segundos": int}
 
-# JanelaPrincipal (orquestrador global)
-self.expediente.on_risco_marcado_signal.connect(self.game_manager.processar_risco)
+# view/expediente/tela.py
+self.__pagina_inspecao.submeter_respostas.connect(self.submeter_respostas.emit)
+
+# view/main_window.py
+tela_expediente.submeter_respostas.connect(self.submeter_respostas.emit)
+
+# main.py
+janela.submeter_respostas.connect(gm.processar_submissao)
 ```
 
-### 4.2. Top-Down: GameManager → MainWindow → Página
+Sinais expostos pela `JanelaPrincipal`:
 
-**Exemplo:** GameManager ordena trocar de página
+| Sinal | Origem |
+|-------|--------|
+| `iniciar_solicitado()` | Taskbar ou atalho do desktop |
+| `tutorial_finalizado(MotivoTutorial)` | `TelaTutorial` |
+| `perfil_confirmado(str)` | `PaginaSelecaoPerfil` |
+| `submeter_respostas(dict)` | `PaginaInspecao` |
+| `continuar_solicitado()` | `PaginaDiagnostico` |
+| `voltar_menu_solicitado()`, `jogar_novamente_solicitado()`, `sair_solicitado()` | `GameWin`, `GameOver` (e o fechar da janela do expediente) |
+| `help_solicitado()` | Taskbar |
+
+Os atalhos de arquivos e de wallpapers da Taskbar são tratados dentro da própria view (o segundo abre o `WallpaperSelector`) e não chegam ao `GameManager`.
+
+### 4.2. De cima para baixo: GameManager → JanelaPrincipal → Tela
+
+O `GameManager` comanda a view apenas pelos métodos do contrato `IGameView`.
 
 ```python
-# GameManager (presenter/aplicação)
-self.view.exibir_pagina_diagnostico(resultado_dto)
+# application/controllers/game_manager.py
+self.__view.exibir_tela_diagnostico(resultado)
 
-# JanelaPrincipal (implementa IGameView)
-def exibir_pagina_diagnostico(self, resultado):
-    self.expediente.mostrar_diagnostico(resultado)
-    self.expediente.stack.setCurrentIndex(PAGE_DIAGNOSTICO)
+# view/main_window.py
+def exibir_tela_diagnostico(self, resultado: ResultadoDiagnosticoDTO) -> None:
+    self.__tela_expediente.exibir_tela_diagnostico(resultado)
+
+# view/expediente/tela.py
+def exibir_tela_diagnostico(self, resultado: ResultadoDiagnosticoDTO) -> None:
+    self.__pagina_diagnostico.exibir_diagnostico(resultado)
+    self.__stack.setCurrentIndex(self.IDX_DIAGNOSTICO)
 ```
 
-**Regra de ouro:** Sinais fluem de baixo para cima; métodos do contrato (`IGameView`) fluem de cima para baixo. Nunca importar `GameManager` em widgets.
+**Regra de ouro:** sinais sobem; métodos do contrato descem. Nenhum widget importa o `GameManager`.
 
 ---
 
-## 5. Separação Estrita: Estrutura vs. Estilo
-
-Inspirado em HTML + CSS, a aplicação proíbe misturar lógica e estética:
+## 5. Separação entre Estrutura e Estilo
 
 ### 5.1. Estrutura (Python)
 
-Ficheiros `.py` instanciam widgets, definem hierarquia e emitem sinais. **Proibido:** `.setStyleSheet()` para cores, fontes ou margens (exceção: manipulações dinâmicas de imagens, como recoloring).
+Os arquivos `.py` instanciam widgets, definem a hierarquia e emitem sinais. A identificação para o estilo é feita com `objectName` e com a property `class`:
 
 ```python
-# ✅ CORRETO
-self.btn_risco = QPushButton("Risco Físico")
-self.btn_risco.setObjectName("btn_risco_fisico")
-self.btn_risco.setProperty("class", "risco_tile")
-self.layout.addWidget(self.btn_risco)
+# view/expediente/widgets/sidebar.py
+self.setObjectName("sidebar")
+self.setProperty("class", "sidebar")
 ```
 
 ### 5.2. Estilo (QSS)
 
-Toda a estética vive em `assets/style.qss` (tema escuro) e `assets/style_light.qss` (tema claro), injetados ao arranque.
+A estética estática vive em `assets/style.qss` (tema escuro) e `assets/style_light.qss` (tema claro). Os seletores usam o `objectName` e as properties definidas no Python:
 
 ```css
-/* Em assets/style.qss */
-.risco_tile {
-    background-color: #1a1a2e;
-    border: 2px solid #16213e;
-    border-radius: 8px;
-    padding: 16px;
+/* assets/style.qss */
+QToolButton[objectName="tile_risco_FISICO"] {
+    border: 2px solid #37a547;
+    color: #71dd77;
 }
-
-.risco_tile:hover {
-    border-color: #0f3460;
+QToolButton[objectName="tile_risco_FISICO"]:checked {
+    background-color: #37a547;
+    color: #ffffff;
 }
 ```
+
+### 5.3. Quando `setStyleSheet()` é aceito no Python
+
+O padrão é não usar `setStyleSheet()` nos arquivos `.py`. As exceções existentes são estilos que dependem de um valor conhecido apenas em tempo de execução:
+
+- `paginas/diagnostico.py`: cor de cada tile e de cada score conforme o resultado (acerto, erro, esquecimento) e destaque da decisão escolhida.
+- `paginas/inspecao.py`: cor do texto dos botões de fator conforme o estado marcado.
+- `paginas/game_win.py` e `paginas/game_over.py`: fundo transparente da área de rolagem do parecer.
+- `widgets/sidebar.py`: estilo dos itens de navegação.
+
+Estilos novos que não dependam de estado calculado devem ir para os dois arquivos QSS.
 
 ---
 
 ## 6. Escala Responsiva: LayoutLoader
 
-Todos os tamanhos, espaçamentos e fontes vêm de um único **LayoutLoader singleton**, que carrega `layout.json` (dimensões base para 1920×1080) e escala uniformemente para a resolução atual.
+Tamanhos, espaçamentos e fontes vêm do **`LayoutLoader`**, um singleton que carrega `assets/layout.json` (valores de referência para 1920×1080) e os escala para a resolução atual. O fator de escala é o menor entre a razão de largura e a razão de altura.
+
+| Método | Retorno |
+|--------|---------|
+| `LayoutLoader.instance()` | A instância única |
+| `get(*chaves)` | Valor bruto do token |
+| `scaled(*chaves)` | Valor numérico multiplicado pelo fator de escala (arredondado) |
+| `scaled_margins(*chaves)` | Tupla `(left, top, right, bottom)` escalada |
+| `scale_factor()` | Fator de escala atual |
+| `set_screen(w, h)` | Atualiza a resolução e emite `escala_atualizada` |
 
 ```python
-# Em qualquer widget
+# view/expediente/widgets/sidebar.py
 L = LayoutLoader.instance()
-botao.setFixedSize(L.scaled("inspecao", "botao_tamanho"), 50)
-fonte = QFont("Open Sans", L.scaled("inspecao", "fonte_size"))
-self.layout.setSpacing(L.scaled_margins("inspecao", "spacing"))
+self.setFixedWidth(L.scaled("sidebar", "largura"))
+inner.setContentsMargins(*L.scaled_margins("sidebar", "header_margens"))
 ```
 
-**Vantagem:** Mudar tamanho/espaçamento em uma resolução afeta toda a app uniformemente. Nenhum número mágico em `py`.
+A `JanelaPrincipal` informa a resolução do monitor ao loader na criação e o tamanho da janela a cada redimensionamento; quando o valor muda, o loader emite `escala_atualizada`.
 
 ---
 
 ## 7. Contrato de Interface: IGameView
 
-Para garantir **Inversão de Dependência**, o presenter (`GameManager`) nunca importa `PySide6`. A comunicação é via contrato abstrato `IGameView` (em `application/interfaces/`):
+Para garantir a **Inversão de Dependência**, o presenter (`GameManager`) nunca importa PySide6. A comunicação passa pelo contrato abstrato `IGameView`, em `application/interfaces/i_game_view.py`:
 
-```python
-# application/interfaces/i_game_view.py
-class IGameView(ABC):
-    @abstractmethod
-    def exibir_selecao_perfil(self) -> None: pass
-    
-    @abstractmethod
-    def exibir_inspecao(self, relatorio: Relatorio) -> None: pass
-    
-    @abstractmethod
-    def exibir_diagnostico(self, resultado: ResultadoDiagnosticoDTO) -> None: pass
-```
+| Método | Função |
+|--------|--------|
+| `inicializar()` | Exibe a janela |
+| `fechar()` | Fecha a janela |
+| `exibir_menu()` | Oculta expediente e tutorial, deixando o desktop |
+| `exibir_tutorial(motivo)` | Abre o tutorial (`MotivoTutorial.NOVO_JOGO` ou `CONSULTA`) |
+| `exibir_selecao_perfil()` | Abre o expediente na seleção de perfil |
+| `trocar_para_tela_inspecao()` | Mostra a janela do expediente |
+| `renderizar_relatorio(dados)` | Preenche a inspeção com o `dict` do relatório |
+| `exibir_tela_diagnostico(resultado)` | Mostra o diagnóstico (`ResultadoDiagnosticoDTO`) |
+| `exibir_resultado(pontuacao_global, dias_concluidos, venceu)` | Mostra `GameWin` ou `GameOver` |
+| `exibir_popup_erro(mensagem)` | Exibe a mensagem em um `QMessageBox` |
 
-**Regra:** Toda nova navegação deve ser declarada no `IGameView` antes de ser implementada em `JanelaPrincipal`.
+**Regra:** toda nova navegação é declarada no `IGameView` antes de ser implementada em `JanelaPrincipal`.
+
+### Dependências da view sobre outras camadas
+
+Além do contrato `IGameView` e do enum `MotivoTutorial`, a view lê DTOs de `core/dtos/` (`ResultadoDiagnosticoDTO`, `ParecerCIPA`). As telas de fim de jogo recebem um `IPareceresCIPA` no construtor, mas hoje `tela.py`, `game_win.py` e `game_over.py` importam as classes concretas de `infrastructure/repository/`. Esse desvio está registrado em [Clean Architecture, seção 10](clean-architecture.md#10-desvios-conhecidos).
 
 ---
 
 ## 8. Tema Claro e Escuro
 
-A aplicação suporta dois temas via dois ficheiros QSS separados:
+Os dois arquivos QSS definem os mesmos seletores, com cores diferentes. O tema é escolhido **na inicialização**, em `main.py`:
 
-- **Dark (escuro):** `assets/style.qss` — tema padrão
-- **Light (claro):** `assets/style_light.qss` — variante clara
+1. variável de ambiente `APP_THEME` (`dark` ou `light`), se definida;
+2. caso contrário, `TEMA_PADRAO` de `config/constants.py` (atualmente `"dark"`).
 
-Ambos definem os mesmos seletores (mesmo ObjectName/class), apenas com cores diferentes. A mudança de tema injeta o QSS apropriado via `qApp.setStyleSheet()`.
+```bash
+# Linux/macOS
+APP_THEME=light python main.py
+# Windows (PowerShell)
+$env:APP_THEME="light"; python main.py
+```
+
+Não há troca de tema com o jogo em execução. As URLs relativas dentro do QSS são convertidas em caminhos absolutos a partir de `view/assets/` antes de o estilo ser aplicado.
 
 ---
 
@@ -235,77 +297,76 @@ Ambos definem os mesmos seletores (mesmo ObjectName/class), apenas com cores dif
 
 ### 9.1. Widget Responsivo
 
-```python
-class MeuWidget(QWidget):
-    def __init__(self):
-        L = LayoutLoader.instance()
-        # ...
-        L.escala_atualizada.connect(self.__reaplicar_dimensoes)
-    
-    def __reaplicar_dimensoes(self):
-        L = LayoutLoader.instance()
-        self.setMinimumSize(
-            L.scaled("secao", "widget_largura"),
-            L.scaled("secao", "widget_altura")
-        )
-```
-
-### 9.2. Sinal Sem Parâmetros Desnecessários
+Widgets que fixam dimensões no construtor assinam `escala_atualizada` e reaplicam os valores:
 
 ```python
-class Pagina(QWidget):
-    # ❌ Evitar: Signal(str, int, bool) — acoplamento
-    # ✅ Bom: Signal() — deixa a página ler o estado
-    pronto_clicado = Signal()
-    
-    def __on_pronto(self):
-        self.pronto_clicado.emit()
-        # Quem receber o sinal chamará getter()'s desta página
+# view/desktop/menu.py
+self.__layout = LayoutLoader.instance()
+self.__layout.escala_atualizada.connect(self.__reaplicar_dimensoes)
+
+def __reaplicar_dimensoes(self) -> None:
+    L = self.__layout
+    self.__desktop_layout.setContentsMargins(*L.scaled_margins("tela", "margens", "desktop"))
 ```
 
-### 9.3. Overlay Flutuante
+### 9.2. Sinais Carregam Apenas Dados Simples
+
+Os sinais transportam tipos primitivos, `dict` ou enums do contrato, nunca widgets nem entidades de domínio:
 
 ```python
-class TelaTutorial(JanelaFlutuante):
-    finalizado_solicitado = Signal(MotivoTutorial)
-    
-    def exibir_com_tamanho_inicial(self, parent_rect):
-        super().exibir_com_tamanho_inicial(parent_rect)
-        self.raise_()  # Garantir z-order acima do expediente
+perfil_confirmado = Signal(str)                    # identificador do curso
+submeter_respostas = Signal(dict)                  # marcações do jogador
+finalizado_solicitado = Signal(MotivoTutorial)     # enum do contrato
+continuar_solicitado = Signal()                    # sem dados
 ```
+
+### 9.3. Janela Flutuante
+
+`TelaDeExpediente` e `TelaTutorial` herdam de `JanelaFlutuante`, que fornece moldura, barra de título, geometria proporcional centralizada e os comportamentos de maximizar, minimizar e fechar. A subclasse monta apenas o conteúdo:
+
+```python
+class TelaDeExpediente(JanelaFlutuante):
+    def __init__(self, parent=None):
+        super().__init__(proporcao_keys=("tela_de_expediente", "proporcao_tela"), parent=parent)
+
+    def __setup_ui(self):
+        layout = self._montar_chrome("Expediente")   # moldura + WindowTitleBar
+        layout.addLayout(self.__build_body(), stretch=1)
+```
+
+Os ganchos `_ao_fechar()` e `_ao_minimizar()` podem ser sobrescritos para emitir sinais próprios. A janela é registrada com `_OverlayArea.add_overlay()` e exibida com `exibir_com_tamanho_inicial(rect)`.
 
 ---
 
-## 10. Estrutura do Layout
+## 10. Estrutura do `layout.json`
 
-Tokens em `assets/layout.json` definem a hierarquia de dimensões:
+O arquivo é organizado por componente. A chave `meta` define a resolução de referência:
 
 ```json
 {
-  "inspecao": {
-    "margens": [16, 16, 16, 16],
-    "spacing_items": 12,
-    "fonte_size": 14,
-    "botao_tamanho": 48
+  "meta": { "resolucao_base": "1920x1080", "proporcao": "16:9" },
+  "sidebar": {
+    "largura": 200,
+    "item_altura": 48,
+    "header_margens": { "top": 20, "right": 0, "bottom": 16, "left": 0 }
+  },
+  "tela_de_expediente": {
+    "proporcao_tela": 0.8,
+    "title_bar": { "altura": 32 }
   }
 }
 ```
 
-Uma mudança num token rebate por toda a aplicação via `L.scaled()`.
+Alterar um token muda a dimensão em todos os pontos que o leem com `scaled()`.
 
 ---
 
-## Resumo: Fluxo de uma Ação do Utilizador
+## Resumo: Fluxo de uma Ação do Usuário
 
-1. Utilizador clica num botão em `PaginaInspecao`.
-2. Página lê dados locais e emite `Signal(dado)`.
-3. `TelaDeExpediente` captura, valida e reemite para `JanelaPrincipal`.
-4. `JanelaPrincipal` chama `GameManager.processar_acao(dado)`.
-5. `GameManager` processa regras de negócio (sem saber de Qt).
-6. `GameManager` chama `view.exibir_nova_pagina()` (contrato `IGameView`).
-7. `JanelaPrincipal` implementa: `stack.setCurrentIndex(...)`.
-8. Ciclo fecha. A página anterior pode ter sinais conectados que desfazem/limpam.
-
----
-
-*Documento atualizado para refletir a arquitetura real implementada em `view/` a partir de 2024.*
+1. O jogador clica em "Submeter" na `PaginaInspecao`.
+2. A página coleta riscos, fatores, decisão e tempo e emite `submeter_respostas(dict)`.
+3. `TelaDeExpediente` e `JanelaPrincipal` reemitem o sinal.
+4. O `GameManager` (conectado em `main.py`) executa `processar_submissao()`, sem conhecer o Qt.
+5. O `GameManager` chama `view.exibir_tela_diagnostico(resultado)`.
+6. `JanelaPrincipal` repassa à `TelaDeExpediente`, que preenche a `PaginaDiagnostico` e troca a página do `QStackedWidget`.
+7. O clique em "Continuar" emite `continuar_solicitado()`, e o ciclo recomeça com o próximo relatório ou com a tela de fim de jogo.
